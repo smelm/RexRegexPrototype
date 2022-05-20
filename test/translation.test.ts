@@ -7,7 +7,11 @@ describe("tokenization", () => {
 })
 
 describe("translate DSL into Regex", () => {
-    test("any matches any character", () => {
+    test("any translates to .", () => {
         expect(translate("any")).toEqual(".")
+    })
+
+    test("many of translates to +", () => {
+        expect(translate("many of any")).toEqual(".+")
     })
 })
