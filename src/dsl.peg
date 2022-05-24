@@ -1,12 +1,17 @@
 
 grammar DSL
-    expression <- many _ of _ expression %many_of
-                    / maybe  _ expression  %maybe
-                    / number _ of _ expression              %count_of
-                    / number _ to _ number _ of _ expression %count_range_of
-                    / any
+    expr <- @many @_ @of expr_or_block                      %many_of
+               / @maybe  expr_or_block                      %maybe
+               / number @_ @of @_ expr                      %count_of
+               / number @_ @to @_ number @_ @of @_ expr     %count_range_of
+               / any
 
-    any <- "any"       %any
+    expr_or_block <- line_expr / block 
+    line_expr <- @_ expr       %single_value
+    block <- @nl expr @nl @end %single_value
+
+    end <- "end"
+    any <- "any"   %any
     
     many <- "many"
     of <- "of"
@@ -15,4 +20,5 @@ grammar DSL
 
     number <- [0-9]+
 
+    nl <- [\r\n]+
     _ <- [ \t]+
