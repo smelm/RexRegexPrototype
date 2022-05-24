@@ -1,16 +1,17 @@
 
 grammar DSL
-    expression <- any                                       
-                    / many_of
-                    / maybe _ expression 
+    expression <- many _ of _ expression %many_of
+                    / maybe  _ expression  %maybe
                     / number _ of _ expression              %count_of
-                    / number _ to _ number _ of _ expression
+                    / number _ to _ number _ of _ expression %count_range_of
+                    / any
 
     any <- "any"       %any
-    many_of <- many _ of _ expression %many_of
-    many <- "many"    
+    
+    many <- "many"
     of <- "of"
-    maybe <-  "maybe"
+    to <- "to"
+    maybe <- "maybe"
 
     number <- [0-9]+
 
