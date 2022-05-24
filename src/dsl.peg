@@ -1,9 +1,9 @@
 
 grammar DSL
-    expr <- @many @_ @of expr_or_block                      %many_of
-               / @maybe  expr_or_block                      %maybe
-               / number @_ @of @_ expr                      %count_of
-               / number @_ @to @_ number @_ @of @_ expr     %count_range_of
+    expr <- @many @_ @of expr_or_block                         %many_of
+               / @maybe  expr_or_block                         %maybe
+               / number @_ @of expr_or_block                   %count_of
+               / number @_ @to @_ number @_ @of expr_or_block  %count_range_of
                / any
 
     expr_or_block <- line_expr / block 

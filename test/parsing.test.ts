@@ -19,7 +19,8 @@ describe("multi line line expressions", () => {
     test.each([
         ["maybe with block with one line", "maybe\nany\nend", Maybe(Any())],
         ["many of with block with one line", "many of\nany\nend", ManyOf(Any())],
-        //["3 of with block with one line", "3 of\nany\nend", CountOf(3, Any())],
+        ["count with block with one line", "3 of\nany\nend", CountOf(3, Any())],
+        ["count range with block with one line", "3 to 5 of\nany\nend", CountRangeOf(3, 5, Any())],
     ])("%s", (_testName, input, expected) => {
         expect(parse(input)).toEqual(expected)
     })
