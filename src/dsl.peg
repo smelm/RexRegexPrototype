@@ -1,0 +1,4 @@
+
+grammar DSL
+    value <- "(" value ")" / number
+    number <- [0-9]+
