@@ -8,7 +8,7 @@ grammar DSL
 
     expr_or_block <- line_expr / block 
     line_expr <- @_ expr       %single_value
-    block <- @nl expr @nl @end %single_value
+    block <- @nl expr @nl @end %sequence
 
     end <- "end"
     any <- "any"   %any

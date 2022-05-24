@@ -22,6 +22,10 @@ export function Maybe(value: any) {
     return { type: "maybe", value }
 }
 
+export function Sequence(value: any) {
+    return { type: "sequence", value }
+}
+
 const actions = {
     single_value(_input: any, _start: any, _end: any, elements: any) {
         return elements[0]
@@ -40,6 +44,9 @@ const actions = {
     },
     maybe(_input: any, _start: any, _end: any, elements: any) {
         return Maybe(elements[0])
+    },
+    sequence(_input: any, _start: any, _end: any, elements: any) {
+        return Sequence(elements[0])
     },
 }
 
