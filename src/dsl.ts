@@ -1,1 +1,1 @@
-export function parse(input: string) {}
+export function parse(input: string, options: object) {}
