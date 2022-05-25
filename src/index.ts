@@ -50,6 +50,13 @@ export function parse(input: string) {
 }
 
 export function compile(ast: Expression): string {
+    if (
+        ast.type === ExpressionType.MAYBE &&
+        (ast as NestedExpression).value.type === ExpressionType.MANY
+    ) {
+        return `${compile(((ast as NestedExpression).value as NestedExpression).value)}*`
+    }
+
     const result = {
         [ExpressionType.ANY]: (ast: Expression) => ".",
         [ExpressionType.COUNT_OF]: (ast: CountOf) => `${compile(ast.value)}{${ast.count}}`,

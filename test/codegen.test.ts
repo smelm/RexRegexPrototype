@@ -8,7 +8,7 @@ const TEST_CASES = [
     [countRangeOf(1, 5, any()), ".{1,5}"],
     [maybe(countOf(5, any())), ".{5}?"],
     [maybe(manyOf(any())), ".*"],
-    // sequence of one should be simplified, I guess?
+    // TODO sequence of one should be simplified
     [maybe(sequence([any()])), "(?:.)?"],
     [manyOf(sequence([any()])), "(?:.)+"],
     [countOf(3, sequence([any()])), "(?:.){3}"],
