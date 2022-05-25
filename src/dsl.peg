@@ -8,8 +8,8 @@ grammar DSL
 
     expr_or_block <- block / line_expr 
     line_expr <- @_ expr       %single_value
-    block <- @nl sequence @nl @end %sequence
-    sequence <- head:expr @nl tail:sequence / expr
+    block <- @nl_ws sequence @nl_ws @end %sequence
+    sequence <- head:expr @nl_ws tail:sequence / expr
 
     end <- "end"
     any <- "any"   %any
@@ -21,5 +21,6 @@ grammar DSL
 
     number <- [0-9]+
 
+    nl_ws <- _* nl _* 
     nl <- [\r\n]+
     _ <- [ \t]+
