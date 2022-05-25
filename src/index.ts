@@ -1,5 +1,18 @@
 import * as dsl from "./dsl"
-import { any, countOf, countRangeOf, maybe, manyOf, sequence } from "./expression"
+import {
+    any,
+    countOf,
+    countRangeOf,
+    maybe,
+    manyOf,
+    sequence,
+    Expression,
+    ExpressionType,
+    CountOf,
+    CountRangeOf,
+    NestedExpression,
+    Sequence,
+} from "./expression"
 
 export * from "./expression"
 
@@ -34,4 +47,17 @@ const actions = {
 
 export function parse(input: string) {
     return dsl.parse(input, { actions })
+}
+
+export function compile(ast: Expression): string {
+    const result = {
+        [ExpressionType.ANY]: (ast: Expression) => ".",
+        [ExpressionType.COUNT_OF]: (ast: CountOf) => `${compile(ast.value)}{${ast.count}}`,
+        [ExpressionType.COUNT_RANGE]: (ast: CountRangeOf) =>
+            `${compile(ast.value)}{${ast.from},${ast.to}}`,
+        [ExpressionType.MAYBE]: (ast: NestedExpression) => `${compile(ast.value)}?`,
+        [ExpressionType.MANY]: (ast: NestedExpression) => `${compile(ast.value)}+`,
+        [ExpressionType.SEQUENCE]: (ast: Sequence) => `(?:${ast.value.map(compile).join("")})`,
+    }[ast.type](ast as any)
+    return result
 }

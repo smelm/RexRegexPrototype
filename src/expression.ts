@@ -15,7 +15,7 @@ export class Expression {
     }
 }
 
-class NestedExpression extends Expression {
+export class NestedExpression extends Expression {
     constructor(type: ExpressionType, public value: Expression) {
         super(type)
     }
