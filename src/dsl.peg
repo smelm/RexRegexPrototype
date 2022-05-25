@@ -6,9 +6,10 @@ grammar DSL
                / number @_ @to @_ number @_ @of expr_or_block  %count_range_of
                / any
 
-    expr_or_block <- line_expr / block 
+    expr_or_block <- block / line_expr 
     line_expr <- @_ expr       %single_value
-    block <- @nl expr @nl @end %sequence
+    block <- @nl sequence @nl @end %sequence
+    sequence <- head:expr @nl tail:sequence / expr
 
     end <- "end"
     any <- "any"   %any

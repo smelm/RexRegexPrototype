@@ -45,8 +45,14 @@ const actions = {
     maybe(_input: any, _start: any, _end: any, elements: any) {
         return Maybe(elements[0])
     },
-    sequence(_input: any, _start: any, _end: any, elements: any) {
-        return Sequence(elements[0])
+    sequence(_input: any, _start: any, _end: any, [element]: any): any {
+        console.log(element)
+        if ("head" in element && "tail" in element) {
+            const tail = this.sequence(undefined, undefined, undefined, [element.tail])
+            return Sequence([element.head, ...tail.value])
+        } else {
+            return Sequence([element])
+        }
     },
 }
 
