@@ -1,76 +1,7 @@
 import * as dsl from "./dsl"
+import { any, countOf, countRangeOf, maybe, manyOf, sequence } from "./expression"
 
-class Expression {
-    constructor(public type: string) {}
-
-    toString(): string {
-        return this.type
-    }
-}
-
-class NestedExpression extends Expression {
-    constructor(type: string, public value: Expression) {
-        super(type)
-    }
-
-    toString(): string {
-        return `${this.type}(${this.value.toString()})`
-    }
-}
-
-class CountOf extends NestedExpression {
-    constructor(public count: number, value: Expression) {
-        super("count_of", value)
-    }
-
-    toString(): string {
-        return `${this.type}(${this.count}, ${this.value.toString()})`
-    }
-}
-
-class CountRangeOf extends Expression {
-    constructor(public from: number, public to: number, public value: Expression) {
-        super("count_range_of")
-    }
-
-    toString(): string {
-        return `${this.type}(${this.from}, ${this.to}, ${this.value.toString()})`
-    }
-}
-
-class Sequence extends Expression {
-    constructor(public value: Expression[]) {
-        super("sequence")
-    }
-
-    toString(): string {
-        return `${this.type}(${this.value.map(v => v.toString()).join(", ")})`
-    }
-}
-
-export function any() {
-    return new Expression("any")
-}
-
-export function countOf(count: number, value: any) {
-    return new CountOf(count, value)
-}
-
-export function countRangeOf(from: number, to: number, value: any) {
-    return new CountRangeOf(from, to, value)
-}
-
-export function manyOf(value: Expression) {
-    return new NestedExpression("many_of", value)
-}
-
-export function maybe(value: any) {
-    return new NestedExpression("maybe", value)
-}
-
-export function sequence(value: Expression[]) {
-    return new Sequence(value)
-}
+export * from "./expression"
 
 const actions = {
     single_value(_input: any, _start: any, _end: any, elements: any) {
