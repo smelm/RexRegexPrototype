@@ -1,14 +1,14 @@
-import { parse, Any, CountOf, ManyOf, Maybe, CountRangeOf, Sequence } from "../dist"
+import { parse, any, countOf, manyOf, maybe, countRangeOf, sequence } from "../dist"
 
 describe("single line expressions", () => {
     test.each([
-        ["any", Any()],
-        ["5 of any", CountOf(5, Any())],
-        ["many of any", ManyOf(Any())],
-        ["maybe any", Maybe(Any())],
-        ["1 to 5 of any", CountRangeOf(1, 5, Any())],
-        ["maybe 5 of any", Maybe(CountOf(5, Any()))],
-        ["maybe many of any", Maybe(ManyOf(Any()))],
+        ["any", any()],
+        ["5 of any", countOf(5, any())],
+        ["many of any", manyOf(any())],
+        ["maybe any", maybe(any())],
+        ["1 to 5 of any", countRangeOf(1, 5, any())],
+        ["maybe 5 of any", maybe(countOf(5, any()))],
+        ["maybe many of any", maybe(manyOf(any()))],
     ])("%s", (input, expected) => {
         expect(parse(input)).toEqual(expected)
     })
@@ -16,23 +16,23 @@ describe("single line expressions", () => {
 
 describe("multi line line expressions", () => {
     test.each([
-        ["maybe with block with one line", "maybe\nany\nend", Maybe(Sequence([Any()]))],
-        ["many of with block with one line", "many of\nany\nend", ManyOf(Sequence([Any()]))],
-        ["count with block with one line", "3 of\nany\nend", CountOf(3, Sequence([Any()]))],
+        ["maybe with block with one line", "maybe\nany\nend", maybe(sequence([any()]))],
+        ["many of with block with one line", "many of\nany\nend", manyOf(sequence([any()]))],
+        ["count with block with one line", "3 of\nany\nend", countOf(3, sequence([any()]))],
         [
             "count range with block with one line",
             "3 to 5 of\nany\nend",
-            CountRangeOf(3, 5, Sequence([Any()])),
+            countRangeOf(3, 5, sequence([any()])),
         ],
         [
             "maybe with block with multiple line",
             "maybe\nany\nmaybe any\nend",
-            Maybe(Sequence([Any(), Maybe(Any())])),
+            maybe(sequence([any(), maybe(any())])),
         ],
         [
             "maybe with block with multiple line",
             "maybe\nany\nmaybe any\nmany of any\nend",
-            Maybe(Sequence([Any(), Maybe(Any()), ManyOf(Any())])),
+            maybe(sequence([any(), maybe(any()), manyOf(any())])),
         ],
     ])("%s", (_testName, input, expected) => {
         expect(parse(input)).toEqual(expected)

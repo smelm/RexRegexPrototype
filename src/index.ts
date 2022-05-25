@@ -1,29 +1,75 @@
 import * as dsl from "./dsl"
 
-export function Any() {
-    return {
-        type: "any",
+class Expression {
+    constructor(public type: string) {}
+
+    toString(): string {
+        return this.type
     }
 }
 
-export function CountOf(count: number, value: any) {
-    return { type: "count_of", count, value }
+class NestedExpression extends Expression {
+    constructor(type: string, public value: Expression) {
+        super(type)
+    }
+
+    toString(): string {
+        return `${this.type}(${this.value.toString()})`
+    }
 }
 
-export function CountRangeOf(from: number, to: number, value: any) {
-    return { type: "count_of", from, to, value }
+class CountOf extends NestedExpression {
+    constructor(public count: number, value: Expression) {
+        super("count_of", value)
+    }
+
+    toString(): string {
+        return `${this.type}(${this.count}, ${this.value.toString()})`
+    }
 }
 
-export function ManyOf(value: any) {
-    return { type: "many_of", value }
+class CountRangeOf extends Expression {
+    constructor(public from: number, public to: number, public value: Expression) {
+        super("count_range_of")
+    }
+
+    toString(): string {
+        return `${this.type}(${this.from}, ${this.to}, ${this.value.toString()})`
+    }
 }
 
-export function Maybe(value: any) {
-    return { type: "maybe", value }
+class Sequence extends Expression {
+    constructor(public value: Expression[]) {
+        super("sequence")
+    }
+
+    toString(): string {
+        return `${this.type}(${this.value.map(v => v.toString()).join(", ")})`
+    }
 }
 
-export function Sequence(value: any) {
-    return { type: "sequence", value }
+export function any() {
+    return new Expression("any")
+}
+
+export function countOf(count: number, value: any) {
+    return new CountOf(count, value)
+}
+
+export function countRangeOf(from: number, to: number, value: any) {
+    return new CountRangeOf(from, to, value)
+}
+
+export function manyOf(value: Expression) {
+    return new NestedExpression("many_of", value)
+}
+
+export function maybe(value: any) {
+    return new NestedExpression("maybe", value)
+}
+
+export function sequence(value: Expression[]) {
+    return new Sequence(value)
 }
 
 const actions = {
@@ -31,27 +77,26 @@ const actions = {
         return elements[0]
     },
     any(_input: any, _start: any, _end: any, _elements: any) {
-        return Any()
+        return any()
     },
     count_of(_input: any, _start: any, _end: any, elements: any) {
-        return CountOf(parseInt(elements[0].text), elements[1])
+        return countOf(parseInt(elements[0].text), elements[1])
     },
     count_range_of(_input: any, _start: any, _end: any, elements: any) {
-        return CountRangeOf(parseInt(elements[0].text), parseInt(elements[1].text), elements[2])
+        return countRangeOf(parseInt(elements[0].text), parseInt(elements[1].text), elements[2])
     },
     many_of(_input: any, _start: any, _end: any, elements: any) {
-        return ManyOf(elements[0])
+        return manyOf(elements[0])
     },
     maybe(_input: any, _start: any, _end: any, elements: any) {
-        return Maybe(elements[0])
+        return maybe(elements[0])
     },
     sequence(_input: any, _start: any, _end: any, [element]: any): any {
-        console.log(element)
         if ("head" in element && "tail" in element) {
             const tail = this.sequence(undefined, undefined, undefined, [element.tail])
-            return Sequence([element.head, ...tail.value])
+            return sequence([element.head, ...tail.value])
         } else {
-            return Sequence([element])
+            return sequence([element])
         }
     },
 }
