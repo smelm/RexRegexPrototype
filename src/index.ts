@@ -36,22 +36,11 @@ const actions = {
         return maybe(elements[0])
     },
     sequence(_input: any, _start: any, _end: any, [head, tail]: any): any {
-        console.log("SEQ")
-
-        let result = null
         if (tail.type === ExpressionType.SEQUENCE) {
-            result = sequence([head, ...tail.value])
+            return sequence([head, ...tail.value])
         } else {
-            result = sequence([head, tail])
+            return sequence([head, tail])
         }
-
-        console.log(result)
-
-        if (result.value.length === 1) {
-            return result.value[0]
-        }
-
-        return result
     },
 }
 

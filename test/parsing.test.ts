@@ -23,10 +23,10 @@ describe("single line expressions", () => {
 
 const MULTI_LINE_CASES = [
     ["any\nmaybe any\nmany of any", sequence([any(), maybe(any()), manyOf(any())])],
-    ["maybe\nany\nend", maybe(sequence([any()]))],
-    ["many of\nany\nend", manyOf(sequence([any()]))],
-    ["3 of\nany\nend", countOf(3, sequence([any()]))],
-    ["3 to 5 of\nany\nend", countRangeOf(3, 5, sequence([any()]))],
+    ["maybe\nany\nend", maybe(any())],
+    ["many of\nany\nend", manyOf(any())],
+    ["3 of\nany\nend", countOf(3, any())],
+    ["3 to 5 of\nany\nend", countRangeOf(3, 5, any())],
     ["maybe\nany\nmaybe any\nend", maybe(sequence([any(), maybe(any())]))],
     [
         "maybe\nany\nmaybe any\nmany of any\nend",
@@ -36,9 +36,7 @@ const MULTI_LINE_CASES = [
 
 describe("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        const actual = parse(input)
-        console.log("actual", actual.toString(), "expected", expected.toString())
-        expect(actual).toEqual(expected)
+        expect(parse(input)).toEqual(expected)
     })
 })
 
