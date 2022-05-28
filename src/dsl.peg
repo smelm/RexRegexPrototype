@@ -1,5 +1,8 @@
 
 grammar DSL
+    sequence <- head:expr @nl_ws tail:sequence %sequence
+                / expr 
+
     expr <- @many @_ @of expr_or_block                         %many_of
                / @maybe  expr_or_block                         %maybe
                / number @_ @of expr_or_block                   %count_of
@@ -8,8 +11,7 @@ grammar DSL
 
     expr_or_block <- block / line_expr 
     line_expr <- @_ expr       %single_value
-    block <- @nl_ws sequence @nl_ws @end %sequence
-    sequence <- head:expr @nl_ws tail:sequence / expr
+    block <- @nl_ws sequence @nl_ws @end %single_value
 
     end <- "end"
     any <- "any"   %any

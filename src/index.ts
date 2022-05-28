@@ -35,13 +35,23 @@ const actions = {
     maybe(_input: any, _start: any, _end: any, elements: any) {
         return maybe(elements[0])
     },
-    sequence(_input: any, _start: any, _end: any, [element]: any): any {
-        if ("head" in element && "tail" in element) {
-            const tail = this.sequence(undefined, undefined, undefined, [element.tail])
-            return sequence([element.head, ...tail.value])
+    sequence(_input: any, _start: any, _end: any, [head, tail]: any): any {
+        console.log("SEQ")
+
+        let result = null
+        if (tail.type === ExpressionType.SEQUENCE) {
+            result = sequence([head, ...tail.value])
         } else {
-            return sequence([element])
+            result = sequence([head, tail])
         }
+
+        console.log(result)
+
+        if (result.value.length === 1) {
+            return result.value[0]
+        }
+
+        return result
     },
 }
 
@@ -58,7 +68,7 @@ export function compile(ast: Expression): string {
     }
 
     const result = {
-        [ExpressionType.ANY]: (ast: Expression) => ".",
+        [ExpressionType.ANY]: (_ast: Expression) => ".",
         [ExpressionType.COUNT_OF]: (ast: CountOf) => `${compile(ast.value)}{${ast.count}}`,
         [ExpressionType.COUNT_RANGE]: (ast: CountRangeOf) =>
             `${compile(ast.value)}{${ast.from},${ast.to}}`,
