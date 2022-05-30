@@ -1,4 +1,4 @@
-import { any as anyExp } from "./expression"
+import * as EXP from "./expression"
 
 interface ParseResult {
     isSuccess: boolean
@@ -86,18 +86,32 @@ function repeat(parser: Parser, optional: boolean = false): Parser {
     }
 }
 
+function withValue(parser: Parser, f: Function): Parser {
+    return function (input: string): ParseResult {
+        const result = parser(input)
+
+        if (!result.isSuccess) {
+            return result
+        }
+
+        return ok(f(result), result.matched, result.remaining)
+    }
+}
+
 function expression(input: string): ParseResult {
     const spc = repeat(alternative(str(" "), str("\t")))
     const newline = alternative(...["\n", "\r", "\r\n"].map(str))
     const kw = {
-        any: str("any", anyExp()),
+        any: str("any", EXP.any()),
         maybe: str("maybe"),
         many: str("many"),
         of: str("of"),
     }
 
     const any = kw.any
-    const maybe = sequence(kw.maybe, spc, expression)
+    const maybe = withValue(sequence(kw.maybe, spc, expression), ({ value }: ParseResult) =>
+        EXP.maybe(value[2])
+    )
 
     const expressions = [any, maybe]
 
