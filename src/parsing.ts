@@ -122,8 +122,9 @@ export function parse(input: string) {
     const parseDSL = repeat(expression)
     const result = parseDSL(input)
 
-    console.log(result)
-    return result.value
+    if (result.value.length === 1) {
+        return result.value[0]
+    } else {
+        return result.value
+    }
 }
-
-console.log(parse("maybe any"))
