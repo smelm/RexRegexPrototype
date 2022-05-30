@@ -17,6 +17,8 @@ function err(input: string, message: string): ParseResult {
     return { isSuccess: false, value: message, matched: "", remaining: input }
 }
 
+const spc = repeat(alternative([str(" "), str("\t")]))
+
 function str(str: string, value?: any): Parser {
     if (!value) {
         value = str
@@ -32,26 +34,36 @@ function str(str: string, value?: any): Parser {
 }
 
 // TODO format value
-function sequence(...parsers: Parser[]): Parser {
+function sequenceWithIgnore(parsers: { parser: Parser; ignored: boolean }[]): Parser {
     return function (input: string): ParseResult {
         let values: any[] = []
         let remaining = input
-        for (const p of parsers) {
-            const result = p(remaining)
+        for (const { parser, ignored } of parsers) {
+            const result = parser(remaining)
 
             if (!result.isSuccess) {
                 return result // is the error
             }
 
             remaining = result.remaining
-            values.push(result.value)
+
+            if (!ignored) {
+                values.push(result.value)
+            }
         }
 
         return ok(values, input, remaining)
     }
 }
 
-function alternative(...parsers: Parser[]): Parser {
+function tokenSequence(...tokens: Parser[]): Parser {
+    let parsers = tokens.map(parser => ({ parser, ignored: false }))
+    parsers = intersperse(parsers, { parser: spc, ignored: true })
+
+    return sequenceWithIgnore(parsers)
+}
+
+function alternative(parsers: Parser[]): Parser {
     return function (input: string): ParseResult {
         const errors: string[] = []
         for (const p of parsers) {
@@ -94,7 +106,7 @@ function withValue(parser: Parser, f: Function): Parser {
             return result
         }
 
-        return ok(f(result), result.matched, result.remaining)
+        return ok(f(result.value), result.matched, result.remaining)
     }
 }
 
@@ -103,13 +115,13 @@ function intersperse(list: any[], sep: any): any[] {
 }
 
 function expression(input: string): ParseResult {
-    const spc = repeat(alternative(str(" "), str("\t")))
-    const tokenSequence = (...tokens: Parser[]) => sequence(...intersperse(tokens, spc))
-    const newline = alternative(...["\n", "\r", "\r\n"].map(str))
+    //const newline = alternative(["\n", "\r", "\r\n"].map(str))
+
     const number = withValue(
-        repeat(alternative(..."0123456789".split("").map(str))),
-        ({ value }: ParseResult) => parseInt(value)
+        repeat(alternative("0123456789".split("").map(str))),
+        (value: string) => parseInt(value)
     )
+
     const kw = {
         any: str("any", EXP.any()),
         maybe: str("maybe"),
@@ -119,26 +131,27 @@ function expression(input: string): ParseResult {
     }
 
     const any = kw.any
-    const maybe = withValue(tokenSequence(kw.maybe, expression), ({ value }: ParseResult) =>
-        EXP.maybe(value[2])
+    const maybe = withValue(tokenSequence(kw.maybe, expression), (value: EXP.Expression[]) =>
+        EXP.maybe(value[1])
     )
+
     const manyOf = withValue(
         tokenSequence(kw.many, kw.of, expression),
-        ({ value }: ParseResult) => {
-            return EXP.manyOf(value[4])
+        (value: EXP.Expression[]) => {
+            return EXP.manyOf(value[2])
         }
     )
-    const countOf = withValue(tokenSequence(number, kw.of, expression), ({ value }: ParseResult) =>
-        EXP.countOf(value[0], value[4])
+    const countOf = withValue(tokenSequence(number, kw.of, expression), (value: any[]) =>
+        EXP.countOf(value[0], value[2])
     )
     const countRangeOf = withValue(
         tokenSequence(number, kw.to, number, kw.of, expression),
-        ({ value }: ParseResult) => EXP.countRangeOf(value[0], value[4], value[8])
+        (value: any[]) => EXP.countRangeOf(value[0], value[2], value[4])
     )
 
     const expressions = [any, maybe, manyOf, countOf, countRangeOf]
 
-    return alternative(...expressions)(input)
+    return alternative(expressions)(input)
 }
 
 export function parse(input: string) {
