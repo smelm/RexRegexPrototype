@@ -101,6 +101,10 @@ function withValue(parser: Parser, f: Function): Parser {
 function expression(input: string): ParseResult {
     const spc = repeat(alternative(str(" "), str("\t")))
     const newline = alternative(...["\n", "\r", "\r\n"].map(str))
+    const number = withValue(
+        repeat(alternative(..."0123456789".split("").map(str))),
+        ({ value }: ParseResult) => parseInt(value)
+    )
     const kw = {
         any: str("any", EXP.any()),
         maybe: str("maybe"),
@@ -118,8 +122,12 @@ function expression(input: string): ParseResult {
             return EXP.manyOf(value[4])
         }
     )
+    const countOf = withValue(
+        sequence(number, spc, kw.of, spc, expression),
+        ({ value }: ParseResult) => EXP.countOf(value[0], value[4])
+    )
 
-    const expressions = [any, maybe, manyOf]
+    const expressions = [any, maybe, manyOf, countOf]
 
     return alternative(...expressions)(input)
 }
