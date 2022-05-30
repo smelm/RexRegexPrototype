@@ -4,8 +4,8 @@
   "description": "DSL for expressive regex",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && node node_modules/canopy/bin/canopy --output dist/dsl --lang javascript src/dsl.peg",
-    "test": "npm run build && jest"
+    "build": "tsc",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,6 @@
   },
   "homepage": "https://github.com/smelm/ExRegEx#readme",
   "dependencies": {
-    "canopy": "^0.4.0",
     "jest": "^28.1.0",
     "typescript": "^4.6.4"
   },
