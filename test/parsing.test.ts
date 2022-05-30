@@ -8,7 +8,7 @@ function generateTestNames([input, ast]) {
 const SINGLE_LINE_CASES = [
     ["any", any()],
     //["5 of any", countOf(5, any())],
-    //["many of any", manyOf(any())],
+    ["many of any", manyOf(any())],
     ["maybe any", maybe(any())],
     //["1 to 5 of any", countRangeOf(1, 5, any())],
     //["maybe 5 of any", maybe(countOf(5, any()))],

@@ -112,8 +112,14 @@ function expression(input: string): ParseResult {
     const maybe = withValue(sequence(kw.maybe, spc, expression), ({ value }: ParseResult) =>
         EXP.maybe(value[2])
     )
+    const manyOf = withValue(
+        sequence(kw.many, spc, kw.of, spc, expression),
+        ({ value }: ParseResult) => {
+            return EXP.manyOf(value[4])
+        }
+    )
 
-    const expressions = [any, maybe]
+    const expressions = [any, maybe, manyOf]
 
     return alternative(...expressions)(input)
 }
