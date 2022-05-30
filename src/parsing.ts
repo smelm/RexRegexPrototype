@@ -98,8 +98,13 @@ function withValue(parser: Parser, f: Function): Parser {
     }
 }
 
+function intersperse(list: any[], sep: any): any[] {
+    return list.flatMap(item => [sep, item]).slice(1)
+}
+
 function expression(input: string): ParseResult {
     const spc = repeat(alternative(str(" "), str("\t")))
+    const tokenSequence = (...tokens: Parser[]) => sequence(...intersperse(tokens, spc))
     const newline = alternative(...["\n", "\r", "\r\n"].map(str))
     const number = withValue(
         repeat(alternative(..."0123456789".split("").map(str))),
@@ -110,24 +115,28 @@ function expression(input: string): ParseResult {
         maybe: str("maybe"),
         many: str("many"),
         of: str("of"),
+        to: str("to"),
     }
 
     const any = kw.any
-    const maybe = withValue(sequence(kw.maybe, spc, expression), ({ value }: ParseResult) =>
+    const maybe = withValue(tokenSequence(kw.maybe, expression), ({ value }: ParseResult) =>
         EXP.maybe(value[2])
     )
     const manyOf = withValue(
-        sequence(kw.many, spc, kw.of, spc, expression),
+        tokenSequence(kw.many, kw.of, expression),
         ({ value }: ParseResult) => {
             return EXP.manyOf(value[4])
         }
     )
-    const countOf = withValue(
-        sequence(number, spc, kw.of, spc, expression),
-        ({ value }: ParseResult) => EXP.countOf(value[0], value[4])
+    const countOf = withValue(tokenSequence(number, kw.of, expression), ({ value }: ParseResult) =>
+        EXP.countOf(value[0], value[4])
+    )
+    const countRangeOf = withValue(
+        tokenSequence(number, kw.to, number, kw.of, expression),
+        ({ value }: ParseResult) => EXP.countRangeOf(value[0], value[4], value[8])
     )
 
-    const expressions = [any, maybe, manyOf, countOf]
+    const expressions = [any, maybe, manyOf, countOf, countRangeOf]
 
     return alternative(...expressions)(input)
 }
