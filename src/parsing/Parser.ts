@@ -8,6 +8,11 @@ export abstract class Parser {
     public builder(builder: Function): Parser {
         return new ParserWithBuilder(this, builder)
     }
+
+    public ignore(): Parser {
+        this.ignored = true
+        return this
+    }
 }
 
 class ParserWithBuilder extends Parser {

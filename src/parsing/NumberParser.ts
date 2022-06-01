@@ -18,3 +18,5 @@ export class NumberParser extends Parser {
         return result
     }
 }
+
+export const number = new NumberParser()
