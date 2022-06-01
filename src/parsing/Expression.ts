@@ -10,7 +10,14 @@ import { NumberParser } from "./NumberParser"
 import { Repeat } from "./Repeat"
 
 export class Expression extends Parser {
-    parse(input: string): ParseResult {
+    private parser: Parser
+
+    constructor() {
+        super()
+        this.parser = this.makeParser()
+    }
+
+    private makeParser(): Parser {
         const expression = this
         const _ = spaces
 
@@ -71,6 +78,10 @@ export class Expression extends Parser {
 
         const expressions = [any, maybe, manyOf, countOf, countRangeOf]
 
-        return new Alternative(expressions).parse(input)
+        return new Alternative(expressions)
+    }
+
+    parse(input: string): ParseResult {
+        return this.parser.parse(input)
     }
 }

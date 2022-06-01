@@ -34,15 +34,15 @@ const MULTI_LINE_CASES = [
     ],
 ].map(generateTestNames)
 
-describe.only("multi line expressions", () => {
+describe("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const result = parse(input)
-        console.log(result.toString(), expected.toString())
+        // console.log(result.toString(), expected.toString())
         expect(result).toEqual(expected)
     })
 })
 
-describe("multi line expressions with random white spaces", () => {
+describe.skip("multi line expressions with random white spaces", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const randomWhitespace = () => " ".repeat(Math.random() * 4)
         input = input.replace("\n", `${randomWhitespace()}\n${randomWhitespace()}`)
