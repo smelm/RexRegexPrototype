@@ -7,10 +7,12 @@ import { Sequence } from "./Sequence"
 import * as EXP from "../expression"
 import { newlines, spaces } from "./commonParsers"
 import { NumberParser } from "./NumberParser"
+import { Repeat } from "./Repeat"
 
 export class Expression extends Parser {
     parse(input: string): ParseResult {
         const expression = this
+        const _ = spaces
 
         const number = new NumberParser()
 
@@ -25,35 +27,47 @@ export class Expression extends Parser {
 
         const any = kw.any
 
-        const block = new Sequence([newlines, expression, newlines, kw.end]).builder(
-            (seq: EXP.Expression[]) => {
-                // drop last since it is end keyword
-                seq = seq.slice(0, seq.length - 1)
-                if (seq.length === 1) {
-                    return seq[0]
-                } else {
-                    return EXP.sequence(seq)
-                }
+        const block = new Sequence([
+            newlines,
+            new Repeat(
+                new Sequence([expression, newlines]).builder(([val]: EXP.Expression[]) => val)
+            ),
+            kw.end,
+        ]).builder(([seq, _end]: EXP.Expression[][]) => {
+            if (seq.length === 1) {
+                return seq[0]
+            } else {
+                return EXP.sequence(seq)
             }
-        )
+        })
 
-        const expressionOrBlock = new Alternative([new Sequence([spaces, expression]), block])
+        const expressionOrBlock = new Alternative([
+            new Sequence([spaces, expression]).builder(([exp]: EXP.Expression[]) => exp),
+            block,
+        ])
 
         const maybe = new Sequence([kw.maybe, expressionOrBlock]).builder(
-            (value: EXP.Expression[]) => EXP.maybe(value[1])
+            ([_maybe, expr]: EXP.Expression[]) => EXP.maybe(expr)
         )
 
-        const manyOf = Sequence.tokens(kw.many, kw.of, expressionOrBlock).builder(
+        const manyOf = new Sequence([kw.many, _, kw.of, expressionOrBlock]).builder(
             (value: EXP.Expression[]) => EXP.manyOf(value[2])
         )
 
-        const countOf = Sequence.tokens(number, kw.of, expression).builder((value: any[]) =>
-            EXP.countOf(value[0], value[2])
+        const countOf = new Sequence([number, _, kw.of, expressionOrBlock]).builder(
+            (value: any[]) => EXP.countOf(value[0], value[2])
         )
 
-        const countRangeOf = Sequence.tokens(number, kw.to, number, kw.of, expression).builder(
-            (value: any[]) => EXP.countRangeOf(value[0], value[2], value[4])
-        )
+        const countRangeOf = new Sequence([
+            number,
+            _,
+            kw.to,
+            _,
+            number,
+            _,
+            kw.of,
+            expressionOrBlock,
+        ]).builder((value: any[]) => EXP.countRangeOf(value[0], value[2], value[4]))
 
         const expressions = [any, maybe, manyOf, countOf, countRangeOf]
 
