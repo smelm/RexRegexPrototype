@@ -1,5 +1,6 @@
 import { Parser } from "./Parser"
 import { ParseResult, ok, err } from "./ParseResult"
+import { escapeNewlines } from "./utils"
 
 export class StringParser extends Parser {
     constructor(private str: string, private value?: any, ignored: boolean = false) {
@@ -14,7 +15,7 @@ export class StringParser extends Parser {
         if (input.startsWith(this.str)) {
             return ok(this.value, this.str, input.slice(this.str.length))
         } else {
-            return err(input, `expected '${this.str}' but got '${input}'`)
+            return err(input, `expected '${this.str}' but got '${escapeNewlines(input)}'`)
         }
     }
 }

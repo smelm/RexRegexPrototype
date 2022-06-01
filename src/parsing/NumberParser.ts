@@ -3,6 +3,7 @@ import { ParseResult } from "./ParseResult"
 import { Repeat } from "./Repeat"
 import { Alternative } from "./Alternative"
 import { StringParser } from "./StringParser"
+import { escapeNewlines } from "./utils"
 
 export class NumberParser extends Parser {
     private parser = new Repeat(
@@ -12,7 +13,7 @@ export class NumberParser extends Parser {
     parse(input: string): ParseResult {
         const result = this.parser.parse(input)
         if (!result.isSuccess) {
-            result.value = `expected a number but got ${input}`
+            result.value = `expected a number but got ${escapeNewlines(input)}`
         }
         return result
     }
