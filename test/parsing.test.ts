@@ -15,7 +15,7 @@ const SINGLE_LINE_CASES = [
     ["maybe many of any", maybe(manyOf(any()))],
 ].map(generateTestNames)
 
-describe.only("single line expressions", () => {
+describe("single line expressions", () => {
     test.each(SINGLE_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         expect(parse(input)).toEqual(expected)
     })
@@ -34,9 +34,10 @@ const MULTI_LINE_CASES = [
     //],
 ].map(generateTestNames)
 
-describe("multi line expressions", () => {
+describe.only("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        expect(parse(input)).toEqual(expected)
+        const result = parse(input)
+        expect(result).toEqual(expected)
     })
 })
 

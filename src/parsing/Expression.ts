@@ -6,6 +6,8 @@ import { StringParser } from "./StringParser"
 import { Sequence } from "./Sequence"
 
 import * as EXP from "../expression"
+import { newline, newlines, spaces } from "./commonParsers"
+import { ExportKeyword } from "typescript"
 
 export class Expression extends Parser {
     parse(input: string): ParseResult {
@@ -26,9 +28,23 @@ export class Expression extends Parser {
         }
 
         const any = kw.any
-        const maybe = Sequence.tokens(kw.maybe, expression).builder((value: EXP.Expression[]) =>
-            EXP.maybe(value[1])
+
+        const block = new Sequence([newlines, expression, newlines, kw.end]).builder(
+            (seq: EXP.Expression[]) => {
+                // drop last since it is end keyword
+                seq = seq.slice(0, seq.length - 1)
+                if (seq.length === 1) {
+                    return seq[0]
+                } else {
+                    return EXP.sequence(seq)
+                }
+            }
         )
+
+        const maybe = new Sequence([
+            kw.maybe,
+            new Alternative([new Sequence([spaces, expression]), block]),
+        ]).builder((value: EXP.Expression[]) => EXP.maybe(value[1]))
 
         const manyOf = Sequence.tokens(kw.many, kw.of, expression).builder(
             (value: EXP.Expression[]) => EXP.manyOf(value[2])
