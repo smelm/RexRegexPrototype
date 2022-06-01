@@ -1,22 +1,18 @@
 import { Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
-import { Repeat } from "./Repeat"
 import { Alternative } from "./Alternative"
 import { StringParser } from "./StringParser"
 import { Sequence } from "./Sequence"
 
 import * as EXP from "../expression"
-import { newline, newlines, spaces } from "./commonParsers"
-import { ExportKeyword } from "typescript"
+import { newlines, spaces } from "./commonParsers"
+import { NumberParser } from "./NumberParser"
 
 export class Expression extends Parser {
     parse(input: string): ParseResult {
         const expression = this
-        //const newline = alternative(["\n", "\r", "\r\n"].map(str))
 
-        const number = new Repeat(
-            new Alternative("0123456789".split("").map(n => new StringParser(n)))
-        ).builder(parseInt)
+        const number = new NumberParser()
 
         const kw = {
             any: new StringParser("any", EXP.any()),
@@ -41,12 +37,13 @@ export class Expression extends Parser {
             }
         )
 
-        const maybe = new Sequence([
-            kw.maybe,
-            new Alternative([new Sequence([spaces, expression]), block]),
-        ]).builder((value: EXP.Expression[]) => EXP.maybe(value[1]))
+        const expressionOrBlock = new Alternative([new Sequence([spaces, expression]), block])
 
-        const manyOf = Sequence.tokens(kw.many, kw.of, expression).builder(
+        const maybe = new Sequence([kw.maybe, expressionOrBlock]).builder(
+            (value: EXP.Expression[]) => EXP.maybe(value[1])
+        )
+
+        const manyOf = Sequence.tokens(kw.many, kw.of, expressionOrBlock).builder(
             (value: EXP.Expression[]) => EXP.manyOf(value[2])
         )
 
