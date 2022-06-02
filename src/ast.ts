@@ -1,3 +1,5 @@
+import { ANY } from "./keywords"
+
 export enum ExpressionType {
     ANY = "any",
     COUNT_OF = "count_of",
@@ -60,7 +62,9 @@ export function literal(value: string): Literal {
     return new Literal(value)
 }
 
-class Any extends Expression {
+export class Any extends Expression {
+    public static parser = ANY.builder(() => new Any())
+
     constructor() {
         super(ExpressionType.ANY, "any")
     }
@@ -70,7 +74,7 @@ class Any extends Expression {
     }
 }
 
-export function any(): Expression {
+export function any(): Any {
     return new Any()
 }
 

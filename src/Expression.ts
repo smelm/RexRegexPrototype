@@ -79,7 +79,7 @@ export class ExpressionParser extends Parser {
 
         const literal = new Literal()
 
-        const any = ANY.builder(() => EXP.any())
+        const any = EXP.Any.parser
 
         const maybe = new Sequence([MAYBE, expressionOrBlock]).builder(([expr]: EXP.Expression[]) =>
             EXP.maybe(expr)
