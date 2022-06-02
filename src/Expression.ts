@@ -1,7 +1,7 @@
 import { Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { Alternative } from "./Alternative"
-import { Sequence } from "./Sequence"
+import { SequenceParser } from "./Sequence"
 
 import * as AST from "./ast"
 import { newlines, optionalSpaces, spaces } from "./commonParsers"
@@ -29,11 +29,11 @@ export class ExpressionParser extends Parser {
         const expression = this
         const _ = spaces
 
-        const block = new Sequence([
+        const block = new SequenceParser([
             optionalSpaces,
             newlines,
             new Repeat(
-                new Sequence([optionalSpaces, expression, optionalSpaces, newlines]).builder(
+                new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
                     ([val]: AST.Expression[]) => val
                 )
             ),
@@ -47,7 +47,7 @@ export class ExpressionParser extends Parser {
         })
 
         const expressionOrBlock = new Alternative([
-            new Sequence([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
+            new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
             block,
         ])
 
@@ -55,19 +55,19 @@ export class ExpressionParser extends Parser {
 
         const any = AST.Any.parser
 
-        const maybe = new Sequence([MAYBE, expressionOrBlock]).builder(([expr]: AST.Expression[]) =>
-            AST.maybe(expr)
+        const maybe = new SequenceParser([MAYBE, expressionOrBlock]).builder(
+            ([expr]: AST.Expression[]) => AST.maybe(expr)
         )
 
-        const manyOf = new Sequence([MANY, _, OF, expressionOrBlock]).builder(
+        const manyOf = new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
             (value: AST.Expression[]) => AST.manyOf(value[0])
         )
 
-        const countOf = new Sequence([number, _, OF, expressionOrBlock]).builder((value: any[]) =>
-            AST.countOf(value[0], value[1])
+        const countOf = new SequenceParser([number, _, OF, expressionOrBlock]).builder(
+            (value: any[]) => AST.countOf(value[0], value[1])
         )
 
-        const countRangeOf = new Sequence([
+        const countRangeOf = new SequenceParser([
             number,
             _,
             TO,

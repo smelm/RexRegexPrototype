@@ -3,7 +3,7 @@ import { ok, ParseResult } from "./ParseResult"
 import { intersperse } from "./utils"
 import { spaces } from "./commonParsers"
 
-export class Sequence extends Parser {
+export class SequenceParser extends Parser {
     constructor(private parsers: Parser[], ignored: boolean = false) {
         super(ignored)
     }
@@ -29,6 +29,6 @@ export class Sequence extends Parser {
     }
 
     public static tokens(...parsers: Parser[]): Parser {
-        return new Sequence(intersperse(parsers, spaces))
+        return new SequenceParser(intersperse(parsers, spaces))
     }
 }

@@ -1,18 +1,18 @@
 import { Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
-import { Sequence } from "./Sequence"
+import { SequenceParser } from "./Sequence"
 import * as AST from "./ast"
 import { newlines, optionalSpaces } from "./commonParsers"
 import { Repeat } from "./Repeat"
 import { ExpressionParser } from "./Expression"
 
 export class ExpressionSequence extends Parser {
-    private parser = new Sequence([
+    private parser = new SequenceParser([
         optionalSpaces,
         new ExpressionParser(),
         optionalSpaces,
         new Repeat(
-            new Sequence([
+            new SequenceParser([
                 newlines,
                 optionalSpaces,
                 new ExpressionParser(),
