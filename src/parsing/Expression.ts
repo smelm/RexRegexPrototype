@@ -4,7 +4,7 @@ import { Alternative } from "./Alternative"
 import { Sequence } from "./Sequence"
 
 import * as EXP from "../expression"
-import { newlines, spaces } from "./commonParsers"
+import { newlines, optionalSpaces, spaces } from "./commonParsers"
 import { number } from "./NumberParser"
 import { Repeat } from "./Repeat"
 import { ANY, END, MANY, MAYBE, OF, TO } from "./keywords"
@@ -22,9 +22,12 @@ export class Expression extends Parser {
         const _ = spaces
 
         const block = new Sequence([
+            optionalSpaces,
             newlines,
             new Repeat(
-                new Sequence([expression, newlines]).builder(([val]: EXP.Expression[]) => val)
+                new Sequence([optionalSpaces, expression, optionalSpaces, newlines]).builder(
+                    ([val]: EXP.Expression[]) => val
+                )
             ),
             END,
         ]).builder(([seq, _end]: EXP.Expression[][]) => {

@@ -42,7 +42,7 @@ describe("multi line expressions", () => {
     })
 })
 
-describe.skip("multi line expressions with random white spaces", () => {
+describe("multi line expressions with random white spaces", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const randomWhitespace = () => " ".repeat(Math.random() * 4)
         input = input.replace("\n", `${randomWhitespace()}\n${randomWhitespace()}`)
