@@ -1,6 +1,14 @@
-import { Expression } from "typescript"
-import { any, countOf, manyOf, maybe, countRangeOf, sequence, literal } from "../src/expression"
-import { parse } from "../src/parsing"
+import {
+    any,
+    countOf,
+    manyOf,
+    maybe,
+    countRangeOf,
+    sequence,
+    literal,
+    Expression,
+} from "../src/expression"
+import { parse } from "../src"
 
 function generateTestNames([input, ast]) {
     return [ast.toString(), input, ast]

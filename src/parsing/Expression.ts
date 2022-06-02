@@ -43,7 +43,7 @@ export class Literal extends Parser {
     }
 }
 
-export class Expression extends Parser {
+export class ExpressionParser extends Parser {
     private parser: Parser
 
     constructor() {

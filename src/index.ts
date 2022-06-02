@@ -7,6 +7,7 @@ import {
     Sequence,
     Literal,
 } from "./expression"
+import { ExpressionSequence } from "./parsing/ExpressionSequence"
 
 export * from "./expression"
 export * from "./parsing"
@@ -30,4 +31,18 @@ export function compile(ast: Expression): string {
         [ExpressionType.SEQUENCE]: (ast: Sequence) => `(?:${ast.value.map(compile).join("")})`,
         [ExpressionType.LITERAL]: (ast: Literal) => ast.value,
     }[ast.type](ast as any)
+}
+
+export function parse(input: string) {
+    const { value, remaining, isSuccess } = new ExpressionSequence().parse(input)
+
+    if (isSuccess && remaining !== "") {
+        return `input could not be parsed completely, "${remaining} could not be parsed"`
+    }
+
+    if (value.length === 1) {
+        return value[0]
+    } else {
+        return value
+    }
 }
