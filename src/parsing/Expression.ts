@@ -33,11 +33,13 @@ export class Literal extends Parser {
         }
 
         const content = input.slice(1, closingQuote)
-        const remaining = input.slice(closingQuote + 2)
+        const remaining = input.slice(closingQuote + 1)
 
         // include both quotes
         const matched = input.slice(0, closingQuote + 1)
-        return ok(EXP.literal(content), matched, remaining)
+
+        const result = ok(EXP.literal(content), matched, remaining)
+        return result
     }
 }
 

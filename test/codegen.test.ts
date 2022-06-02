@@ -1,5 +1,6 @@
 import { any, countOf, countRangeOf, manyOf, maybe, sequence, compile } from "../dist"
 
+// TODO: string literals
 const TEST_CASES = [
     [any(), "."],
     [countOf(5, any()), ".{5}"],
