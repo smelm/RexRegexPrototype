@@ -1,7 +1,7 @@
 import { Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { Sequence } from "./Sequence"
-import * as EXP from "./ast"
+import * as AST from "./ast"
 import { newlines, optionalSpaces } from "./commonParsers"
 import { Repeat } from "./Repeat"
 import { ExpressionParser } from "./Expression"
@@ -17,16 +17,16 @@ export class ExpressionSequence extends Parser {
                 optionalSpaces,
                 new ExpressionParser(),
                 optionalSpaces,
-            ]).builder((exp: EXP.Expression[]) => exp[0]),
+            ]).builder((exp: AST.Expression[]) => exp[0]),
             true
         ),
-    ]).builder(([head, tail]: [EXP.Expression, EXP.Expression[]]) => {
+    ]).builder(([head, tail]: [AST.Expression, AST.Expression[]]) => {
         const seq = [head, ...tail]
 
         if (seq.length === 1) {
             return seq[0]
         } else {
-            return EXP.sequence(seq)
+            return AST.sequence(seq)
         }
     })
 
