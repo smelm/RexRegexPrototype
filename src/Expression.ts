@@ -8,7 +8,7 @@ import { newlines, optionalSpaces, spaces } from "./commonParsers"
 import { number } from "./NumberParser"
 import { Repeat } from "./Repeat"
 import { END, MANY, MAYBE, OF, TO } from "./keywords"
-import { Literal } from "./Literal"
+import { LiteralParser } from "./Literal"
 
 // TODO: does the dsl need quote escaping?
 /* ab"c can also be done via
@@ -51,7 +51,7 @@ export class ExpressionParser extends Parser {
             block,
         ])
 
-        const literal = new Literal()
+        const literal = new LiteralParser()
 
         const any = AST.Any.parser
 

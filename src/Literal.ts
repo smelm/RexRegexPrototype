@@ -3,7 +3,7 @@ import { err, ok, ParseResult } from "./ParseResult"
 import { escapeNewlines } from "./utils"
 import * as AST from "./ast"
 
-export class Literal extends Parser {
+export class LiteralParser extends Parser {
     parse(input: string): ParseResult {
         if (input[0] !== '"') {
             return err(
