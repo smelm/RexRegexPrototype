@@ -1,11 +1,15 @@
 import { ExpressionSequence } from "./ExpressionSequence"
 
 export function parse(input: string) {
-    const result = new ExpressionSequence().parse(input)
+    const { value, remaining, isSuccess } = new ExpressionSequence().parse(input)
 
-    if (result.value.length === 1) {
-        return result.value[0]
+    if (isSuccess && remaining !== "") {
+        return `input could not be parsed completely, "${remaining} could not be parsed"`
+    }
+
+    if (value.length === 1) {
+        return value[0]
     } else {
-        return result.value
+        return value
     }
 }
