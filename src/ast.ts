@@ -1,14 +1,7 @@
+import { ExpressionType } from "./ExpressionType"
 import { ANY } from "./keywords"
 
-export enum ExpressionType {
-    ANY = "any",
-    COUNT_OF = "count_of",
-    COUNT_RANGE = "count_range",
-    MAYBE = "maybe",
-    MANY = "many",
-    SEQUENCE = "sequence",
-    LITERAL = "literal",
-}
+export { ExpressionType } from "./ExpressionType"
 
 export class Expression {
     constructor(public type: ExpressionType, public value: any) {}
