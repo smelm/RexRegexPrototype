@@ -1,5 +1,4 @@
 import { StringParser } from "./StringParser"
-import * as EXP from "../expression"
 
 export const ANY = new StringParser("any").ignore()
 export const MAYBE = new StringParser("maybe").ignore()
