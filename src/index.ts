@@ -7,10 +7,9 @@ import {
     Sequence,
     Literal,
 } from "./ast"
-import { ExpressionSequence } from "./parsing/ExpressionSequence"
+import { ExpressionSequence } from "./ExpressionSequence"
 
 export * from "./ast"
-export * from "./parsing"
 
 // TODO: account for literal escaping
 export function compile(ast: Expression): string {
