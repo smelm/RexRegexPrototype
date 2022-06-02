@@ -7,7 +7,7 @@ import {
     sequence,
     literal,
     Expression,
-} from "../src/expression"
+} from "../src/ast"
 import { parse } from "../src"
 
 function generateTestNames([input, ast]) {

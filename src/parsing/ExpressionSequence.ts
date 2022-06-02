@@ -1,7 +1,7 @@
 import { Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { Sequence } from "./Sequence"
-import * as EXP from "../expression"
+import * as EXP from "../ast"
 import { newlines, optionalSpaces } from "./commonParsers"
 import { Repeat } from "./Repeat"
 import { ExpressionParser } from "./Expression"

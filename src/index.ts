@@ -6,10 +6,10 @@ import {
     NestedExpression,
     Sequence,
     Literal,
-} from "./expression"
+} from "./ast"
 import { ExpressionSequence } from "./parsing/ExpressionSequence"
 
-export * from "./expression"
+export * from "./ast"
 export * from "./parsing"
 
 // TODO: account for literal escaping

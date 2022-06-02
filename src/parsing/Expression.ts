@@ -3,7 +3,7 @@ import { err, ok, ParseResult } from "./ParseResult"
 import { Alternative } from "./Alternative"
 import { Sequence } from "./Sequence"
 
-import * as EXP from "../expression"
+import * as EXP from "../ast"
 import { newlines, optionalSpaces, spaces } from "./commonParsers"
 import { number } from "./NumberParser"
 import { Repeat } from "./Repeat"
