@@ -9,24 +9,14 @@ export enum ExpressionType {
 }
 
 export class Expression {
-    constructor(public type: ExpressionType) {}
-
-    toString(): string {
-        return this.type.toString()
-    }
-}
-
-export class NestedExpression extends Expression {
-    constructor(type: ExpressionType, public value: Expression) {
-        super(type)
-    }
+    constructor(public type: ExpressionType, public value: any) {}
 
     toString(): string {
         return `${this.type}(${this.value.toString()})`
     }
 }
 
-export class CountOf extends NestedExpression {
+export class CountOf extends Expression {
     constructor(public count: number, value: Expression) {
         super(ExpressionType.COUNT_OF, value)
     }
@@ -37,8 +27,8 @@ export class CountOf extends NestedExpression {
 }
 
 export class CountRangeOf extends Expression {
-    constructor(public from: number, public to: number, public value: Expression) {
-        super(ExpressionType.COUNT_RANGE)
+    constructor(public from: number, public to: number, value: Expression) {
+        super(ExpressionType.COUNT_RANGE, value)
     }
 
     toString(): string {
@@ -47,18 +37,18 @@ export class CountRangeOf extends Expression {
 }
 
 export class Sequence extends Expression {
-    constructor(public value: Expression[]) {
-        super(ExpressionType.SEQUENCE)
+    constructor(value: Expression[]) {
+        super(ExpressionType.SEQUENCE, value)
     }
 
     toString(): string {
-        return `${this.type}(${this.value.map(v => v.toString()).join(", ")})`
+        return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
 }
 
 export class Literal extends Expression {
-    constructor(public value: string) {
-        super(ExpressionType.LITERAL)
+    constructor(value: string) {
+        super(ExpressionType.LITERAL, value)
     }
 
     toString(): string {
@@ -70,8 +60,18 @@ export function literal(value: string): Literal {
     return new Literal(value)
 }
 
+class Any extends Expression {
+    constructor() {
+        super(ExpressionType.ANY, "any")
+    }
+
+    toString(): string {
+        return this.type.toString()
+    }
+}
+
 export function any(): Expression {
-    return new Expression(ExpressionType.ANY)
+    return new Any()
 }
 
 export function countOf(count: number, value: any): CountOf {
@@ -82,12 +82,12 @@ export function countRangeOf(from: number, to: number, value: any): CountRangeOf
     return new CountRangeOf(from, to, value)
 }
 
-export function manyOf(value: Expression): NestedExpression {
-    return new NestedExpression(ExpressionType.MANY, value)
+export function manyOf(value: Expression): Expression {
+    return new Expression(ExpressionType.MANY, value)
 }
 
-export function maybe(value: any): NestedExpression {
-    return new NestedExpression(ExpressionType.MAYBE, value)
+export function maybe(value: any): Expression {
+    return new Expression(ExpressionType.MAYBE, value)
 }
 
 export function sequence(value: Expression[]): Sequence {
