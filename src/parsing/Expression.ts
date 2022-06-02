@@ -1,5 +1,5 @@
 import { Parser } from "./Parser"
-import { ParseResult } from "./ParseResult"
+import { err, ok, ParseResult } from "./ParseResult"
 import { Alternative } from "./Alternative"
 import { Sequence } from "./Sequence"
 
@@ -8,6 +8,38 @@ import { newlines, optionalSpaces, spaces } from "./commonParsers"
 import { number } from "./NumberParser"
 import { Repeat } from "./Repeat"
 import { ANY, END, MANY, MAYBE, OF, TO } from "./keywords"
+import { escapeNewlines } from "./utils"
+
+// TODO: does the dsl need quote escaping?
+/* ab"c can also be done via
+ *  "ab"
+ *  QUOTE
+ *  c
+ */
+
+export class Literal extends Parser {
+    parse(input: string): ParseResult {
+        if (input[0] !== '"') {
+            return err(
+                input,
+                `expected string literal to start with " but got ${escapeNewlines(input)}`
+            )
+        }
+
+        const closingQuote = input.indexOf('"', 1)
+
+        if (closingQuote === -1) {
+            return err(input, `not closed string literal, ${escapeNewlines(input)}`)
+        }
+
+        const content = input.slice(1, closingQuote)
+        const remaining = input.slice(closingQuote + 2)
+
+        // include both quotes
+        const matched = input.slice(0, closingQuote + 1)
+        return ok(EXP.literal(content), matched, remaining)
+    }
+}
 
 export class Expression extends Parser {
     private parser: Parser
@@ -43,6 +75,8 @@ export class Expression extends Parser {
             block,
         ])
 
+        const literal = new Literal()
+
         const any = ANY.builder(() => EXP.any())
 
         const maybe = new Sequence([MAYBE, expressionOrBlock]).builder(([expr]: EXP.Expression[]) =>
@@ -68,7 +102,7 @@ export class Expression extends Parser {
             expressionOrBlock,
         ]).builder((value: any[]) => EXP.countRangeOf(value[0], value[1], value[2]))
 
-        const expressions = [any, maybe, manyOf, countOf, countRangeOf]
+        const expressions = [literal, any, maybe, manyOf, countOf, countRangeOf]
 
         return new Alternative(expressions)
     }

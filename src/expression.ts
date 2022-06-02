@@ -5,6 +5,7 @@ export enum ExpressionType {
     MAYBE = "maybe",
     MANY = "many",
     SEQUENCE = "sequence",
+    LITERAL = "literal",
 }
 
 export class Expression {
@@ -55,26 +56,40 @@ export class Sequence extends Expression {
     }
 }
 
-export function any() {
+export class Literal extends Expression {
+    constructor(public value: string) {
+        super(ExpressionType.LITERAL)
+    }
+
+    toString(): string {
+        return `${this.type}(${this.value})`
+    }
+}
+
+export function literal(value: string): Literal {
+    return new Literal(value)
+}
+
+export function any(): Expression {
     return new Expression(ExpressionType.ANY)
 }
 
-export function countOf(count: number, value: any) {
+export function countOf(count: number, value: any): CountOf {
     return new CountOf(count, value)
 }
 
-export function countRangeOf(from: number, to: number, value: any) {
+export function countRangeOf(from: number, to: number, value: any): CountRangeOf {
     return new CountRangeOf(from, to, value)
 }
 
-export function manyOf(value: Expression) {
+export function manyOf(value: Expression): NestedExpression {
     return new NestedExpression(ExpressionType.MANY, value)
 }
 
-export function maybe(value: any) {
+export function maybe(value: any): NestedExpression {
     return new NestedExpression(ExpressionType.MAYBE, value)
 }
 
-export function sequence(value: Expression[]) {
+export function sequence(value: Expression[]): Sequence {
     return new Sequence(value)
 }

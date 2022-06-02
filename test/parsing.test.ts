@@ -1,5 +1,6 @@
 import { Expression } from "typescript"
-import { parse, any, countOf, manyOf, maybe, countRangeOf, sequence } from "../dist"
+import { any, countOf, manyOf, maybe, countRangeOf, sequence, literal } from "../src/expression"
+import { parse } from "../src/parsing"
 
 function generateTestNames([input, ast]) {
     return [ast.toString(), input, ast]
@@ -7,6 +8,7 @@ function generateTestNames([input, ast]) {
 
 const SINGLE_LINE_CASES = [
     ["any", any()],
+    ['"abc"', literal("abc")],
     ["5 of any", countOf(5, any())],
     ["many of any", manyOf(any())],
     ["maybe any", maybe(any())],
