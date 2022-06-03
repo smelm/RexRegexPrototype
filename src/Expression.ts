@@ -1,11 +1,15 @@
 import { CustomParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
-import { Alternative } from "./Alternative"
-import { SequenceParser } from "./Sequence"
 
 import * as AST from "./ast"
-import { newlines, optionalSpaces, spaces } from "./commonParsers"
-import { Repeat } from "./Repeat"
+import {
+    SequenceParser,
+    AlternativeParser,
+    Repeat,
+    newlines,
+    optionalSpaces,
+    spaces,
+} from "./commonParsers"
 import { END } from "./keywords"
 
 // TODO: does the dsl need quote escaping?
@@ -34,7 +38,7 @@ const block = new SequenceParser([
     }
 })
 
-export const expressionOrBlock = new Alternative([
+export const expressionOrBlock = new AlternativeParser([
     new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
     block,
 ])
@@ -49,5 +53,5 @@ function parseExpression(input: string): ParseResult {
 
     const expressions = [literal, any, maybe, manyOf, countOf, countRangeOf]
 
-    return new Alternative(expressions).parse(input)
+    return new AlternativeParser(expressions).parse(input)
 }
