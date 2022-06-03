@@ -17,12 +17,13 @@ import { LiteralParser } from "./Literal"
  *  c
  */
 
-export class ExpressionParser extends Parser {
+class ExpressionParser extends Parser {
     public parse = parseExpression
 }
 
+export const expression = new ExpressionParser()
+
 function parseExpression(input: string): ParseResult {
-    const expression = new ExpressionParser()
     const _ = spaces
 
     const block = new SequenceParser([

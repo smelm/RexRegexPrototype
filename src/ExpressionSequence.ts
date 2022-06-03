@@ -4,20 +4,17 @@ import { SequenceParser } from "./Sequence"
 import * as AST from "./ast"
 import { newlines, optionalSpaces } from "./commonParsers"
 import { Repeat } from "./Repeat"
-import { ExpressionParser } from "./Expression"
+import { expression } from "./Expression"
 
 export class ExpressionSequence extends Parser {
     private parser = new SequenceParser([
         optionalSpaces,
-        new ExpressionParser(),
+        expression,
         optionalSpaces,
         new Repeat(
-            new SequenceParser([
-                newlines,
-                optionalSpaces,
-                new ExpressionParser(),
-                optionalSpaces,
-            ]).builder((exp: AST.Expression[]) => exp[0]),
+            new SequenceParser([newlines, optionalSpaces, expression, optionalSpaces]).builder(
+                (exp: AST.Expression[]) => exp[0]
+            ),
             true
         ),
     ]).builder(([head, tail]: [AST.Expression, AST.Expression[]]) => {
