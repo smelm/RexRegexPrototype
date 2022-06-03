@@ -27,14 +27,16 @@ const TEST_CASES: [string, TestCase][] = [
 })
 
 describe.each(ENGINES)("compiles correctly to %s regex", (_engineName, engine) => {
-    test.each(TEST_CASES)("%s", async (_name, { pattern }) => {
+    test.each(TEST_CASES)("%s", async (_name, { pattern, input }) => {
         const regex = compile(pattern)
 
-        const child = spawnSync(engine.command, [`run.${engine.extension}`], {
+        const { status, stdout } = spawnSync(engine.command, [`run.${engine.extension}`], {
             cwd: `test/engines/${engine.name}`,
-            input: regex,
+            input: `${regex}SEP${input}`,
         })
-        console.log(child)
-        console.log(child.stdout.toString())
+
+        expect(status).toEqual(0)
+
+        console.log(stdout.toString())
     })
 })
