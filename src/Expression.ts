@@ -12,12 +12,13 @@ import {
 } from "./commonParsers"
 import { END } from "./keywords"
 
-// TODO: does the dsl need quote escaping?
-/* ab"c can also be done via
- *  "ab"
- *  QUOTE
- *  c
- */
+export class Expression {
+    constructor(public type: AST.ExpressionType, public value: any) {}
+
+    toString(): string {
+        return `${this.type}(${this.value.toString()})`
+    }
+}
 
 export const expression = new CustomParser(parseExpression)
 
@@ -26,11 +27,11 @@ const block = new SequenceParser([
     newlines,
     new Repeat(
         new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
-            ([val]: AST.Expression[]) => val
+            ([val]: Expression[]) => val
         )
     ),
     END,
-]).builder(([seq, _end]: AST.Expression[][]) => {
+]).builder(([seq, _end]: Expression[][]) => {
     if (seq.length === 1) {
         return seq[0]
     } else {
@@ -39,7 +40,7 @@ const block = new SequenceParser([
 })
 
 export const expressionOrBlock = new AlternativeParser([
-    new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
+    new SequenceParser([spaces, expression]).builder(([exp]: Expression[]) => exp),
     block,
 ])
 

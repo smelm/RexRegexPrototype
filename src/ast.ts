@@ -1,5 +1,5 @@
 import { SequenceParser, spaces as _ } from "./commonParsers"
-import { expressionOrBlock } from "./Expression"
+import { Expression, expressionOrBlock } from "./Expression"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
 import { ExpressionType } from "./ExpressionType"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
@@ -7,14 +7,6 @@ import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
 
 export { ExpressionType } from "./ExpressionType"
-
-export class Expression {
-    constructor(public type: ExpressionType, public value: any) {}
-
-    toString(): string {
-        return `${this.type}(${this.value.toString()})`
-    }
-}
 
 export class CountOf extends Expression {
     public static parser = new SequenceParser([number, _, OF, expressionOrBlock]).builder(

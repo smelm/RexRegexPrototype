@@ -2,7 +2,7 @@ import { BaseParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import * as AST from "./ast"
 import { SequenceParser, Repeat, newlines, optionalSpaces } from "./commonParsers"
-import { expression } from "./Expression"
+import { Expression, expression } from "./Expression"
 
 export class ExpressionSequenceParser extends BaseParser {
     private parser = new SequenceParser([
@@ -11,11 +11,11 @@ export class ExpressionSequenceParser extends BaseParser {
         optionalSpaces,
         new Repeat(
             new SequenceParser([newlines, optionalSpaces, expression, optionalSpaces]).builder(
-                (exp: AST.Expression[]) => exp[0]
+                (exp: Expression[]) => exp[0]
             ),
             true
         ),
-    ]).builder(([head, tail]: [AST.Expression, AST.Expression[]]) => {
+    ]).builder(([head, tail]: [Expression, Expression[]]) => {
         const seq = [head, ...tail]
 
         if (seq.length === 1) {
