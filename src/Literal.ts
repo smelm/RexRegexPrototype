@@ -3,6 +3,12 @@ import { err, ok, ParseResult } from "./ParseResult"
 import { escapeNewlines } from "./utils"
 import * as AST from "./ast"
 
+// TODO: does the dsl need quote escaping?
+/* ab"c can also be done via
+ *  "ab"
+ *  QUOTE
+ *  c
+ */
 export class LiteralParser extends Parser {
     parse(input: string): ParseResult {
         if (input[0] !== '"') {

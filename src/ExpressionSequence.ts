@@ -28,8 +28,6 @@ export class ExpressionSequenceParser extends Parser {
     })
 
     parse(input: string): ParseResult {
-        const result = this.parser.parse(input)
-        // console.log(result)
-        return result
+        return this.parser.parse(input)
     }
 }
