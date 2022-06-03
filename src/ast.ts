@@ -1,7 +1,7 @@
-import { spaces } from "./commonParsers"
+import { spaces as _ } from "./commonParsers"
 import { expressionOrBlock } from "./Expression"
 import { ExpressionType } from "./ExpressionType"
-import { ANY, OF } from "./keywords"
+import { ANY, OF, TO } from "./keywords"
 import { number } from "./NumberParser"
 import { SequenceParser } from "./Sequence"
 
@@ -16,7 +16,7 @@ export class Expression {
 }
 
 export class CountOf extends Expression {
-    public static parser = new SequenceParser([number, spaces, OF, expressionOrBlock]).builder(
+    public static parser = new SequenceParser([number, _, OF, expressionOrBlock]).builder(
         (value: any[]) => countOf(value[0], value[1])
     )
 
@@ -30,6 +30,17 @@ export class CountOf extends Expression {
 }
 
 export class CountRangeOf extends Expression {
+    public static parser = new SequenceParser([
+        number,
+        _,
+        TO,
+        _,
+        number,
+        _,
+        OF,
+        expressionOrBlock,
+    ]).builder((value: any[]) => countRangeOf(value[0], value[1], value[2]))
+
     constructor(public from: number, public to: number, value: Expression) {
         super(ExpressionType.COUNT_RANGE, value)
     }

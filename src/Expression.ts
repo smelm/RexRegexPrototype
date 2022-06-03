@@ -58,16 +58,7 @@ function parseExpression(input: string): ParseResult {
 
     const countOf = AST.CountOf.parser
 
-    const countRangeOf = new SequenceParser([
-        number,
-        _,
-        TO,
-        _,
-        number,
-        _,
-        OF,
-        expressionOrBlock,
-    ]).builder((value: any[]) => AST.countRangeOf(value[0], value[1], value[2]))
+    const countRangeOf = AST.CountRangeOf.parser
 
     const expressions = [literal, any, maybe, manyOf, countOf, countRangeOf]
 
