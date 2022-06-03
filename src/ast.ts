@@ -120,7 +120,7 @@ export class Maybe extends Expression {
     )
 
     constructor(value: Expression) {
-        super(ExpressionType.MANY, value)
+        super(ExpressionType.MAYBE, value)
     }
 }
 
