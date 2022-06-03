@@ -42,22 +42,11 @@ export const expressionOrBlock = new Alternative([
 ])
 
 function parseExpression(input: string): ParseResult {
-    const _ = spaces
-
-    const literal = new LiteralParser()
-
+    const literal = AST.Literal.parser
     const any = AST.Any.parser
-
-    const maybe = new SequenceParser([MAYBE, expressionOrBlock]).builder(
-        ([expr]: AST.Expression[]) => AST.maybe(expr)
-    )
-
-    const manyOf = new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
-        (value: AST.Expression[]) => AST.manyOf(value[0])
-    )
-
+    const maybe = AST.Maybe.parser
+    const manyOf = AST.ManyOf.parser
     const countOf = AST.CountOf.parser
-
     const countRangeOf = AST.CountRangeOf.parser
 
     const expressions = [literal, any, maybe, manyOf, countOf, countRangeOf]

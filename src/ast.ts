@@ -1,7 +1,8 @@
 import { spaces as _ } from "./commonParsers"
 import { expressionOrBlock } from "./Expression"
 import { ExpressionType } from "./ExpressionType"
-import { ANY, OF, TO } from "./keywords"
+import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
+import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
 import { SequenceParser } from "./Sequence"
 
@@ -61,6 +62,8 @@ export class Sequence extends Expression {
 }
 
 export class Literal extends Expression {
+    public static parser = new LiteralParser()
+
     constructor(value: string) {
         super(ExpressionType.LITERAL, value)
     }
@@ -98,12 +101,32 @@ export function countRangeOf(from: number, to: number, value: any): CountRangeOf
     return new CountRangeOf(from, to, value)
 }
 
-export function manyOf(value: Expression): Expression {
-    return new Expression(ExpressionType.MANY, value)
+export class ManyOf extends Expression {
+    public static parser = new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
+        (value: Expression[]) => manyOf(value[0])
+    )
+
+    constructor(value: Expression) {
+        super(ExpressionType.MANY, value)
+    }
 }
 
-export function maybe(value: any): Expression {
-    return new Expression(ExpressionType.MAYBE, value)
+export class Maybe extends Expression {
+    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(
+        ([expr]: Expression[]) => maybe(expr)
+    )
+
+    constructor(value: Expression) {
+        super(ExpressionType.MANY, value)
+    }
+}
+
+export function manyOf(value: Expression): ManyOf {
+    return new ManyOf(value)
+}
+
+export function maybe(value: any): Maybe {
+    return new Maybe(value)
 }
 
 export function sequence(value: Expression[]): Sequence {
