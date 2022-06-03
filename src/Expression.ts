@@ -18,72 +18,63 @@ import { LiteralParser } from "./Literal"
  */
 
 export class ExpressionParser extends Parser {
-    private parser: Parser
+    public parse = parseExpression
+}
 
-    constructor() {
-        super()
-        this.parser = this.makeParser()
-    }
+function parseExpression(input: string): ParseResult {
+    const expression = new ExpressionParser()
+    const _ = spaces
 
-    private makeParser(): Parser {
-        const expression = this
-        const _ = spaces
+    const block = new SequenceParser([
+        optionalSpaces,
+        newlines,
+        new Repeat(
+            new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
+                ([val]: AST.Expression[]) => val
+            )
+        ),
+        END,
+    ]).builder(([seq, _end]: AST.Expression[][]) => {
+        if (seq.length === 1) {
+            return seq[0]
+        } else {
+            return AST.sequence(seq)
+        }
+    })
 
-        const block = new SequenceParser([
-            optionalSpaces,
-            newlines,
-            new Repeat(
-                new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
-                    ([val]: AST.Expression[]) => val
-                )
-            ),
-            END,
-        ]).builder(([seq, _end]: AST.Expression[][]) => {
-            if (seq.length === 1) {
-                return seq[0]
-            } else {
-                return AST.sequence(seq)
-            }
-        })
+    const expressionOrBlock = new Alternative([
+        new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
+        block,
+    ])
 
-        const expressionOrBlock = new Alternative([
-            new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
-            block,
-        ])
+    const literal = new LiteralParser()
 
-        const literal = new LiteralParser()
+    const any = AST.Any.parser
 
-        const any = AST.Any.parser
+    const maybe = new SequenceParser([MAYBE, expressionOrBlock]).builder(
+        ([expr]: AST.Expression[]) => AST.maybe(expr)
+    )
 
-        const maybe = new SequenceParser([MAYBE, expressionOrBlock]).builder(
-            ([expr]: AST.Expression[]) => AST.maybe(expr)
-        )
+    const manyOf = new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
+        (value: AST.Expression[]) => AST.manyOf(value[0])
+    )
 
-        const manyOf = new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
-            (value: AST.Expression[]) => AST.manyOf(value[0])
-        )
+    const countOf = new SequenceParser([number, _, OF, expressionOrBlock]).builder((value: any[]) =>
+        AST.countOf(value[0], value[1])
+    )
 
-        const countOf = new SequenceParser([number, _, OF, expressionOrBlock]).builder(
-            (value: any[]) => AST.countOf(value[0], value[1])
-        )
+    const countRangeOf = new SequenceParser([
+        number,
+        _,
+        TO,
+        _,
+        number,
+        _,
+        OF,
+        expressionOrBlock,
+    ]).builder((value: any[]) => AST.countRangeOf(value[0], value[1], value[2]))
 
-        const countRangeOf = new SequenceParser([
-            number,
-            _,
-            TO,
-            _,
-            number,
-            _,
-            OF,
-            expressionOrBlock,
-        ]).builder((value: any[]) => AST.countRangeOf(value[0], value[1], value[2]))
+    const expressions = [literal, any, maybe, manyOf, countOf, countRangeOf]
 
-        const expressions = [literal, any, maybe, manyOf, countOf, countRangeOf]
-
-        return new Alternative(expressions)
-    }
-
-    parse(input: string): ParseResult {
-        return this.parser.parse(input)
-    }
+    return new Alternative(expressions).parse(input)
 }
