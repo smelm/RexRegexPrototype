@@ -1,10 +1,10 @@
-import { Parser } from "./Parser"
+import { BaseParser } from "./Parser"
 import { ParseResult, ok, err } from "./ParseResult"
 import { escapeNewlines } from "./utils"
 
-export class StringParser extends Parser {
-    constructor(private str: string, private value?: any, ignored: boolean = false) {
-        super(ignored)
+export class StringParser extends BaseParser {
+    constructor(private str: string, private value?: any) {
+        super()
 
         if (!this.value) {
             this.value = str

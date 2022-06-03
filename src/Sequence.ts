@@ -1,11 +1,11 @@
-import { Parser } from "./Parser"
+import { BaseParser, Parser } from "./Parser"
 import { ok, ParseResult } from "./ParseResult"
 import { intersperse } from "./utils"
 import { spaces } from "./commonParsers"
 
-export class SequenceParser extends Parser {
-    constructor(private parsers: Parser[], ignored: boolean = false) {
-        super(ignored)
+export class SequenceParser extends BaseParser {
+    constructor(private parsers: Parser[]) {
+        super()
     }
 
     parse(input: string): ParseResult {

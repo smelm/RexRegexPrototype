@@ -1,11 +1,11 @@
-import { Parser } from "./Parser"
+import { BaseParser, Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { Repeat } from "./Repeat"
 import { Alternative } from "./Alternative"
 import { StringParser } from "./StringParser"
 import { escapeNewlines } from "./utils"
 
-export class NumberParser extends Parser {
+export class NumberParser extends BaseParser {
     private parser = new Repeat(
         new Alternative("0123456789".split("").map(n => new StringParser(n)))
     ).builder(parseInt)

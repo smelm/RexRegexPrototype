@@ -1,4 +1,4 @@
-import { Parser } from "./Parser"
+import { BaseParser, Parser } from "./Parser"
 import { err, ok, ParseResult } from "./ParseResult"
 import { escapeNewlines } from "./utils"
 import * as AST from "./ast"
@@ -9,7 +9,7 @@ import * as AST from "./ast"
  *  QUOTE
  *  c
  */
-export class LiteralParser extends Parser {
+export class LiteralParser extends BaseParser {
     parse(input: string): ParseResult {
         if (input[0] !== '"') {
             return err(
@@ -30,7 +30,6 @@ export class LiteralParser extends Parser {
         // include both quotes
         const matched = input.slice(0, closingQuote + 1)
 
-        const result = ok(AST.literal(content), matched, remaining)
-        return result
+        return ok(AST.literal(content), matched, remaining)
     }
 }

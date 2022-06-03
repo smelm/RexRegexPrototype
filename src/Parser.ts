@@ -1,21 +1,36 @@
 import { ParseResult, ok } from "./ParseResult"
 
-export abstract class Parser {
-    constructor(public ignored: boolean = false) {}
+export interface Parser {
+    ignored: boolean
+    parse: (input: string) => ParseResult
+    /**
+     * ignore parser result in building the ast
+     */
+    ignore: () => Parser
+    /**
+     * add an ast builder to parser
+     */
+    builder: (builderFunc: Function) => Parser
+}
 
-    abstract parse(input: string): ParseResult
+export class BaseParser implements Parser {
+    public ignored: boolean = false
 
-    public builder(builder: Function): Parser {
-        return new ParserWithBuilder(this, builder)
+    public parse(_input: string): ParseResult {
+        throw new Error("parser not implemented")
     }
 
     public ignore(): Parser {
         this.ignored = true
         return this
     }
+
+    public builder(builder: Function): Parser {
+        return new ParserWithBuilder(this, builder)
+    }
 }
 
-export class CustomParser extends Parser {
+export class CustomParser extends BaseParser {
     constructor(private parseFunc: (input: string) => ParseResult) {
         super()
     }
@@ -25,7 +40,7 @@ export class CustomParser extends Parser {
     }
 }
 
-class ParserWithBuilder extends Parser {
+class ParserWithBuilder extends BaseParser {
     constructor(private parser: Parser, private builderFunc: Function) {
         super()
     }

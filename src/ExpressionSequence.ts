@@ -1,4 +1,4 @@
-import { Parser } from "./Parser"
+import { BaseParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { SequenceParser } from "./Sequence"
 import * as AST from "./ast"
@@ -6,7 +6,7 @@ import { newlines, optionalSpaces } from "./commonParsers"
 import { Repeat } from "./Repeat"
 import { expression } from "./Expression"
 
-export class ExpressionSequenceParser extends Parser {
+export class ExpressionSequenceParser extends BaseParser {
     private parser = new SequenceParser([
         optionalSpaces,
         expression,

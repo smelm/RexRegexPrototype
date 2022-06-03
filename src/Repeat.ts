@@ -1,13 +1,9 @@
-import { Parser } from "./Parser"
+import { BaseParser, Parser } from "./Parser"
 import { err, ok, ParseResult } from "./ParseResult"
 
-export class Repeat extends Parser {
-    constructor(
-        private parser: Parser,
-        private optional: boolean = false,
-        ignored: boolean = false
-    ) {
-        super(ignored)
+export class Repeat extends BaseParser {
+    constructor(private parser: Parser, private optional: boolean = false) {
+        super()
     }
 
     parse(input: string): ParseResult {

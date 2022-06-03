@@ -1,9 +1,9 @@
-import { Parser } from "./Parser"
+import { BaseParser, Parser } from "./Parser"
 import { err, ParseResult } from "./ParseResult"
 
-export class Alternative extends Parser {
-    constructor(private parsers: Parser[], ignored: boolean = false) {
-        super(ignored)
+export class Alternative extends BaseParser {
+    constructor(private parsers: Parser[]) {
+        super()
     }
 
     parse(input: string): ParseResult {
