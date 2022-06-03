@@ -5,10 +5,8 @@ import { SequenceParser } from "./Sequence"
 
 import * as AST from "./ast"
 import { newlines, optionalSpaces, spaces } from "./commonParsers"
-import { number } from "./NumberParser"
 import { Repeat } from "./Repeat"
-import { END, MANY, MAYBE, OF, TO } from "./keywords"
-import { LiteralParser } from "./Literal"
+import { END } from "./keywords"
 
 // TODO: does the dsl need quote escaping?
 /* ab"c can also be done via

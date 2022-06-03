@@ -1,5 +1,6 @@
 import { spaces as _ } from "./commonParsers"
 import { expressionOrBlock } from "./Expression"
+import { ExpressionSequenceParser } from "./ExpressionSequence"
 import { ExpressionType } from "./ExpressionType"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
@@ -52,6 +53,8 @@ export class CountRangeOf extends Expression {
 }
 
 export class Sequence extends Expression {
+    public static parser = new ExpressionSequenceParser()
+
     constructor(value: Expression[]) {
         super(ExpressionType.SEQUENCE, value)
     }

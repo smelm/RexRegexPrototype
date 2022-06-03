@@ -1,5 +1,5 @@
 import { Expression, ExpressionType, CountOf, CountRangeOf, Sequence, Literal } from "./ast"
-import { ExpressionSequence } from "./ExpressionSequence"
+import { ExpressionSequenceParser } from "./ExpressionSequence"
 
 export * from "./ast"
 
@@ -25,7 +25,7 @@ export function compile(ast: Expression): string {
 }
 
 export function parse(input: string) {
-    const { value, remaining, isSuccess } = new ExpressionSequence().parse(input)
+    const { value, remaining, isSuccess } = new ExpressionSequenceParser().parse(input)
 
     if (isSuccess && remaining !== "") {
         return `input could not be parsed completely, "${remaining} could not be parsed"`

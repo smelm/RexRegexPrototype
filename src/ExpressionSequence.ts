@@ -6,7 +6,7 @@ import { newlines, optionalSpaces } from "./commonParsers"
 import { Repeat } from "./Repeat"
 import { expression } from "./Expression"
 
-export class ExpressionSequence extends Parser {
+export class ExpressionSequenceParser extends Parser {
     private parser = new SequenceParser([
         optionalSpaces,
         expression,
