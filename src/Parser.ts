@@ -15,6 +15,16 @@ export abstract class Parser {
     }
 }
 
+export class CustomParser extends Parser {
+    constructor(private parseFunc: (input: string) => ParseResult) {
+        super()
+    }
+
+    parse(input: string): ParseResult {
+        return this.parseFunc(input)
+    }
+}
+
 class ParserWithBuilder extends Parser {
     constructor(private parser: Parser, private builderFunc: Function) {
         super()

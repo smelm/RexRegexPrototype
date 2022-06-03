@@ -1,4 +1,4 @@
-import { Parser } from "./Parser"
+import { CustomParser, Parser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { Alternative } from "./Alternative"
 import { SequenceParser } from "./Sequence"
@@ -17,11 +17,7 @@ import { LiteralParser } from "./Literal"
  *  c
  */
 
-class ExpressionParser extends Parser {
-    public parse = parseExpression
-}
-
-export const expression = new ExpressionParser()
+export const expression = new CustomParser(parseExpression)
 
 function parseExpression(input: string): ParseResult {
     const _ = spaces
