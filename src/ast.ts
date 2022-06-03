@@ -1,11 +1,11 @@
+import { spaces } from "./commonParsers"
+import { expressionOrBlock } from "./Expression"
 import { ExpressionType } from "./ExpressionType"
-import { ANY } from "./keywords"
+import { ANY, OF } from "./keywords"
+import { number } from "./NumberParser"
+import { SequenceParser } from "./Sequence"
 
 export { ExpressionType } from "./ExpressionType"
-
-//==========================================================================================
-
-//==========================================================================================
 
 export class Expression {
     constructor(public type: ExpressionType, public value: any) {}
@@ -16,6 +16,10 @@ export class Expression {
 }
 
 export class CountOf extends Expression {
+    public static parser = new SequenceParser([number, spaces, OF, expressionOrBlock]).builder(
+        (value: any[]) => countOf(value[0], value[1])
+    )
+
     constructor(public count: number, value: Expression) {
         super(ExpressionType.COUNT_OF, value)
     }

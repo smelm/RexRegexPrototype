@@ -1,4 +1,4 @@
-import { CustomParser, Parser } from "./Parser"
+import { CustomParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 import { Alternative } from "./Alternative"
 import { SequenceParser } from "./Sequence"
@@ -19,30 +19,30 @@ import { LiteralParser } from "./Literal"
 
 export const expression = new CustomParser(parseExpression)
 
+const block = new SequenceParser([
+    optionalSpaces,
+    newlines,
+    new Repeat(
+        new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
+            ([val]: AST.Expression[]) => val
+        )
+    ),
+    END,
+]).builder(([seq, _end]: AST.Expression[][]) => {
+    if (seq.length === 1) {
+        return seq[0]
+    } else {
+        return AST.sequence(seq)
+    }
+})
+
+export const expressionOrBlock = new Alternative([
+    new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
+    block,
+])
+
 function parseExpression(input: string): ParseResult {
     const _ = spaces
-
-    const block = new SequenceParser([
-        optionalSpaces,
-        newlines,
-        new Repeat(
-            new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
-                ([val]: AST.Expression[]) => val
-            )
-        ),
-        END,
-    ]).builder(([seq, _end]: AST.Expression[][]) => {
-        if (seq.length === 1) {
-            return seq[0]
-        } else {
-            return AST.sequence(seq)
-        }
-    })
-
-    const expressionOrBlock = new Alternative([
-        new SequenceParser([spaces, expression]).builder(([exp]: AST.Expression[]) => exp),
-        block,
-    ])
 
     const literal = new LiteralParser()
 
@@ -56,9 +56,7 @@ function parseExpression(input: string): ParseResult {
         (value: AST.Expression[]) => AST.manyOf(value[0])
     )
 
-    const countOf = new SequenceParser([number, _, OF, expressionOrBlock]).builder((value: any[]) =>
-        AST.countOf(value[0], value[1])
-    )
+    const countOf = AST.CountOf.parser
 
     const countRangeOf = new SequenceParser([
         number,
