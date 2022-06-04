@@ -8,7 +8,11 @@ assert len(inp) == 1
 
 regex, input = inp[0].split("SEP")
 
-result = re.match(regex, input)
+match = re.search(regex, input)
 
-print(result.span())
-print(bool(result))
+if match:
+    print(1)
+    print(match.start())
+    print(match.end())
+else:
+    print(0)
