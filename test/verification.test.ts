@@ -22,6 +22,7 @@ interface TestCase {
 
 const TEST_CASES: [string, TestCase][] = [
     { pattern: literal("hello"), input: "hello", matches: true, matchStart: 0, matchEnd: 5 },
+    { pattern: literal("bye"), input: "hello", matches: false },
 ].map(c => {
     return [c.pattern.toString(), c]
 })
