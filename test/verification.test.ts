@@ -4,12 +4,19 @@ import { Expression } from "../src/Expression"
 
 interface RegexEngine {
     name: string
-    command: string
-    extension: string
+    match: (regex: string, input: string) => boolean
 }
 
-const PYTHON: RegexEngine = { name: "python", command: "python3", extension: "py" }
-const PERL: RegexEngine = { name: "perl", command: "perl", extension: "pl" }
+const PYTHON: RegexEngine = {
+    name: "python",
+    match: (regex: string, input: string) =>
+        runProcess("python3", ["test/engines/python/run.py"], regex, input),
+}
+const PERL: RegexEngine = {
+    name: "perl",
+    match: (regex: string, input: string) =>
+        runProcess("perl", ["test/engines/perl/run.pl"], regex, input),
+}
 
 const ENGINES: [string, RegexEngine][] = [PYTHON, PERL].map(e => [e.name, e])
 
@@ -31,12 +38,7 @@ describe.each(ENGINES)("compiles correctly to %s regex", (_engineName, engine) =
     test.each(TEST_CASES)("%s", async (_name, { pattern, input, ...expected }) => {
         const regex = compile(pattern)
 
-        const matches = runProcess(
-            engine.command,
-            [`test/engines/${engine.name}/run.${engine.extension}`],
-            regex,
-            input
-        )
+        const matches = engine.match(regex, input)
 
         expect(matches).toEqual(expected.matches)
     })
