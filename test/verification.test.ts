@@ -31,15 +31,25 @@ describe.each(ENGINES)("compiles correctly to %s regex", (_engineName, engine) =
     test.each(TEST_CASES)("%s", async (_name, { pattern, input, ...expected }) => {
         const regex = compile(pattern)
 
-        const { status, stdout } = spawnSync(engine.command, [`run.${engine.extension}`], {
-            cwd: `test/engines/${engine.name}`,
-            input: `${regex}SEP${input}`,
-        })
+        const matches = runProcess(
+            engine.command,
+            [`test/engines/${engine.name}/run.${engine.extension}`],
+            regex,
+            input
+        )
 
-        expect(status).toEqual(0)
-
-        const matches = parseInt(stdout.toString().trim())
-
-        expect(matches === 1).toEqual(expected.matches)
+        expect(matches).toEqual(expected.matches)
     })
 })
+
+function runProcess(command: string, args: string[], regex: string, input: string): boolean {
+    const { status, stdout } = spawnSync(command, args, {
+        input: `${regex}SEP${input}`,
+    })
+
+    if (status !== 0) {
+        throw new Error("process crashed")
+    }
+
+    return parseInt(stdout.toString().trim()) === 1
+}
