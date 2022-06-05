@@ -12,7 +12,5 @@ match = re.search(regex, input)
 
 if match:
     print(1)
-    print(match.start())
-    print(match.end())
 else:
     print(0)
