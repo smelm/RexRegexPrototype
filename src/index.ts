@@ -34,19 +34,11 @@ function compileRepeatOperator({ from: lowerBound, to: upperBound }: Repeat) {
 
 // TODO: account for literal escaping
 export function compile(ast: Expression): string {
-    if (
-        ast.type === ExpressionType.MAYBE &&
-        (ast.value as Expression).type === ExpressionType.MANY
-    ) {
-        return `${compile(((ast as Expression).value as Expression).value)}*`
-    }
-
     return {
         [ExpressionType.ANY]: (_ast: Expression) => ".",
         [ExpressionType.REPEAT]: (ast: Repeat) =>
             `${compile(ast.value)}${compileRepeatOperator(ast)}`,
         [ExpressionType.MAYBE]: (ast: Expression) => `${compile(ast.value)}?`,
-        [ExpressionType.MANY]: (ast: Expression) => `${compile(ast.value)}+`,
         [ExpressionType.SEQUENCE]: (ast: Sequence) => `(?:${ast.value.map(compile).join("")})`,
         [ExpressionType.LITERAL]: (ast: Literal) => ast.value,
     }[ast.type](ast as any)

@@ -9,17 +9,19 @@ export enum ExpressionType {
     ANY = "any",
     REPEAT = "repeat",
     MAYBE = "maybe",
-    MANY = "many",
     SEQUENCE = "sequence",
     LITERAL = "literal",
 }
 
 export class Repeat extends Expression {
     public static parser = new AlternativeParser([
+        new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
+            ([expr]: Expression[]) => new Repeat(expr, 1)
+        ),
+
         new SequenceParser([number, _, OF, expressionOrBlock]).builder(
             ([number, expr]: any[]) => new Repeat(expr, number, number)
         ),
-
         new SequenceParser([number, _, TO, _, number, _, OF, expressionOrBlock]).builder(
             ([from, to, expr]: any[]) => new Repeat(expr, from, to)
         ),
@@ -86,16 +88,6 @@ export function countRangeOf(from: number, to: number, value: any): Repeat {
     return new Repeat(value, from, to)
 }
 
-export class ManyOf extends Expression {
-    public static parser = new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
-        (value: Expression[]) => manyOf(value[0])
-    )
-
-    constructor(value: Expression) {
-        super(ExpressionType.MANY, value)
-    }
-}
-
 export class Maybe extends Expression {
     public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(
         ([expr]: Expression[]) => maybe(expr)
@@ -106,14 +98,14 @@ export class Maybe extends Expression {
     }
 }
 
-export function manyOf(value: Expression): ManyOf {
-    return new ManyOf(value)
-}
-
 export function maybe(value: any): Maybe {
     return new Maybe(value)
 }
 
 export function sequence(value: Expression[]): Sequence {
     return new Sequence(value)
+}
+
+export function manyOf(value: Expression): Repeat {
+    return new Repeat(value, 1, undefined)
 }

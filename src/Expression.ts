@@ -48,10 +48,9 @@ function parseExpression(input: string): ParseResult {
     const literal = AST.Literal.parser
     const any = AST.Any.parser
     const maybe = AST.Maybe.parser
-    const manyOf = AST.ManyOf.parser
     const countRangeOf = AST.Repeat.parser
 
-    const expressions = [literal, any, maybe, manyOf, countRangeOf]
+    const expressions = [literal, any, maybe, countRangeOf]
 
     return new AlternativeParser(expressions).parse(input)
 }
