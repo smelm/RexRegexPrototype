@@ -1,41 +1,32 @@
-import { SequenceParser, spaces as _ } from "./commonParsers"
+import { AlternativeParser, SequenceParser, spaces as _ } from "./commonParsers"
 import { Expression, expressionOrBlock } from "./Expression"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
-import { ExpressionType } from "./ExpressionType"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
 
-export { ExpressionType } from "./ExpressionType"
-
-export class CountOf extends Expression {
-    public static parser = new SequenceParser([number, _, OF, expressionOrBlock]).builder(
-        (value: any[]) => countOf(value[0], value[1])
-    )
-
-    constructor(public count: number, value: Expression) {
-        super(ExpressionType.COUNT_OF, value)
-    }
-
-    toString(): string {
-        return `${this.type}(${this.count}, ${this.value.toString()})`
-    }
+export enum ExpressionType {
+    ANY = "any",
+    REPEAT = "repeat",
+    MAYBE = "maybe",
+    MANY = "many",
+    SEQUENCE = "sequence",
+    LITERAL = "literal",
 }
 
-export class CountRangeOf extends Expression {
-    public static parser = new SequenceParser([
-        number,
-        _,
-        TO,
-        _,
-        number,
-        _,
-        OF,
-        expressionOrBlock,
-    ]).builder((value: any[]) => countRangeOf(value[0], value[1], value[2]))
+export class Repeat extends Expression {
+    public static parser = new AlternativeParser([
+        new SequenceParser([number, _, OF, expressionOrBlock]).builder(
+            ([number, expr]: any[]) => new Repeat(expr, number, number)
+        ),
 
-    constructor(public from: number, public to: number, value: Expression) {
-        super(ExpressionType.COUNT_RANGE, value)
+        new SequenceParser([number, _, TO, _, number, _, OF, expressionOrBlock]).builder(
+            ([from, to, expr]: any[]) => new Repeat(expr, from, to)
+        ),
+    ])
+
+    constructor(value: Expression, public from: number, public to?: number) {
+        super(ExpressionType.REPEAT, value)
     }
 
     toString(): string {
@@ -87,12 +78,12 @@ export function any(): Any {
     return new Any()
 }
 
-export function countOf(count: number, value: any): CountOf {
-    return new CountOf(count, value)
+export function countOf(count: number, value: any): Repeat {
+    return new Repeat(value, count, count)
 }
 
-export function countRangeOf(from: number, to: number, value: any): CountRangeOf {
-    return new CountRangeOf(from, to, value)
+export function countRangeOf(from: number, to: number, value: any): Repeat {
+    return new Repeat(value, from, to)
 }
 
 export class ManyOf extends Expression {

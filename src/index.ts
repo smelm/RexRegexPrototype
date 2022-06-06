@@ -1,8 +1,36 @@
-import { ExpressionType, CountOf, CountRangeOf, Sequence, Literal } from "./ast"
+import { ExpressionType, Repeat, Sequence, Literal } from "./ast"
 import { Expression } from "./Expression"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
 
 export * from "./ast"
+
+//TODO make sure that each branch is tested
+function compileRepeatOperator({ from: lowerBound, to: upperBound }: Repeat) {
+    if (!lowerBound) {
+        throw new Error(
+            "to avoid ambiguity between 0 or 1 repetitions, the lower bound of the repeat operator may not be undefined"
+        )
+    }
+
+    const noUpperBound = !upperBound
+
+    if (noUpperBound) {
+        switch (lowerBound) {
+            case 0:
+                return `*`
+            case 1:
+                return "+"
+            default:
+                return `{${lowerBound},}`
+        }
+    } else {
+        if (lowerBound === upperBound) {
+            return `{${lowerBound}}`
+        } else {
+            return `{${lowerBound},${upperBound}}`
+        }
+    }
+}
 
 // TODO: account for literal escaping
 export function compile(ast: Expression): string {
@@ -15,9 +43,8 @@ export function compile(ast: Expression): string {
 
     return {
         [ExpressionType.ANY]: (_ast: Expression) => ".",
-        [ExpressionType.COUNT_OF]: (ast: CountOf) => `${compile(ast.value)}{${ast.count}}`,
-        [ExpressionType.COUNT_RANGE]: (ast: CountRangeOf) =>
-            `${compile(ast.value)}{${ast.from},${ast.to}}`,
+        [ExpressionType.REPEAT]: (ast: Repeat) =>
+            `${compile(ast.value)}${compileRepeatOperator(ast)}`,
         [ExpressionType.MAYBE]: (ast: Expression) => `${compile(ast.value)}?`,
         [ExpressionType.MANY]: (ast: Expression) => `${compile(ast.value)}+`,
         [ExpressionType.SEQUENCE]: (ast: Sequence) => `(?:${ast.value.map(compile).join("")})`,
