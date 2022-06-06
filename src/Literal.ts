@@ -30,6 +30,6 @@ export class LiteralParser extends BaseParser {
         // include both quotes
         const matched = input.slice(0, closingQuote + 1)
 
-        return ok(AST.literal(content), matched, remaining)
+        return ok(content, matched, remaining)
     }
 }

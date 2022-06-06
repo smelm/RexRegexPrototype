@@ -40,7 +40,7 @@ export function compile(ast: Expression): string {
             `${compile(ast.value)}${compileRepeatOperator(ast)}`,
         [ExpressionType.MAYBE]: (ast: Expression) => `${compile(ast.value)}?`,
         [ExpressionType.SEQUENCE]: (ast: Sequence) => `(?:${ast.value.map(compile).join("")})`,
-        [ExpressionType.LITERAL]: (ast: Literal) => ast.value,
+        [ExpressionType.CHARACTER]: (ast: Literal) => ast.value,
     }[ast.type](ast as any)
 }
 

@@ -10,9 +10,11 @@ export enum ExpressionType {
     REPEAT = "repeat",
     MAYBE = "maybe",
     SEQUENCE = "sequence",
-    LITERAL = "literal",
+    CHARACTER = "character",
 }
 
+// TODO support "0 to many"
+// TODO support "maybe many of", or not?
 export class Repeat extends Expression {
     public static parser = new AlternativeParser([
         new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
@@ -56,11 +58,9 @@ export class Sequence extends Expression {
     }
 }
 
-export class Literal extends Expression {
-    public static parser = new LiteralParser()
-
+export class Character extends Expression {
     constructor(value: string) {
-        super(ExpressionType.LITERAL, value)
+        super(ExpressionType.CHARACTER, value)
     }
 
     toString(): string {
@@ -68,8 +68,17 @@ export class Literal extends Expression {
     }
 }
 
-export function literal(value: string): Literal {
-    return new Literal(value)
+function charSeqFromLiteral(s: string): Sequence {
+    const result = []
+    for (let i = 0; i < s.length; i++) {
+        const c = s.charAt(i)
+        result.push(new Character(c))
+    }
+    return sequence(result)
+}
+
+export class Literal extends Expression {
+    public static parser = new LiteralParser().builder(charSeqFromLiteral)
 }
 
 export class Any extends Expression {
@@ -116,4 +125,8 @@ export function sequence(value: Expression[]): Sequence {
 
 export function manyOf(value: Expression): Repeat {
     return new Repeat(value, 1, undefined)
+}
+
+export function literal(value: string): Sequence {
+    return charSeqFromLiteral(value)
 }
