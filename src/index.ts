@@ -6,13 +6,13 @@ export * from "./ast"
 
 //TODO make sure that each branch is tested
 function compileRepeatOperator({ from: lowerBound, to: upperBound }: Repeat) {
-    if (!lowerBound) {
+    if (lowerBound == null) {
         throw new Error(
             "to avoid ambiguity between 0 or 1 repetitions, the lower bound of the repeat operator may not be undefined"
         )
     }
 
-    const noUpperBound = !upperBound
+    const noUpperBound = upperBound == null
 
     if (noUpperBound) {
         switch (lowerBound) {

@@ -18,12 +18,20 @@ export class Repeat extends Expression {
         new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
             ([expr]: Expression[]) => new Repeat(expr, 1)
         ),
-
         new SequenceParser([number, _, OF, expressionOrBlock]).builder(
             ([number, expr]: any[]) => new Repeat(expr, number, number)
         ),
-        new SequenceParser([number, _, TO, _, number, _, OF, expressionOrBlock]).builder(
-            ([from, to, expr]: any[]) => new Repeat(expr, from, to)
+        new SequenceParser([
+            number,
+            _,
+            TO,
+            _,
+            new AlternativeParser([number, MANY]),
+            _,
+            OF,
+            expressionOrBlock,
+        ]).builder(
+            ([from, to, expr]: any[]) => new Repeat(expr, from, to === "many" ? undefined : to)
         ),
     ])
 
