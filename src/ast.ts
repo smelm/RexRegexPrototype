@@ -1,6 +1,7 @@
 import { AlternativeParser, SequenceParser, spaces as _ } from "./commonParsers"
 import { Expression, expressionOrBlock } from "./Expression"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
+import { InputExample } from "./Generator"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
@@ -56,6 +57,13 @@ export class Sequence extends Expression {
     toString(): string {
         return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
+
+    generate(valid: boolean, randomSeed: number): InputExample {
+        return {
+            str: this.value.map((v: Expression) => v.generate(valid, randomSeed).str).join(""),
+            description: "",
+        }
+    }
 }
 
 export class Character extends Expression {
@@ -65,6 +73,10 @@ export class Character extends Expression {
 
     toString(): string {
         return `${this.type}(${this.value})`
+    }
+
+    generate(valid: boolean, randomSeed: number): InputExample {
+        return { str: this.value, description: "" }
     }
 }
 

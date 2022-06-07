@@ -32,6 +32,9 @@ interface TestCase {
     //groups?: any[]
 }
 
+let cases = literal("hello").generate(true, 42)
+console.log(cases)
+
 const TEST_CASES: [string, TestCase][] = [
     { pattern: literal("hello"), input: "hello", matches: true, matchStart: 0, matchEnd: 5 },
     { pattern: literal("hello"), input: "bye", matches: false },
