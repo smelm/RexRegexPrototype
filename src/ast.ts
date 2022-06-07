@@ -47,6 +47,11 @@ export class Repeat extends Expression {
     }
 }
 
+function randomListElemement<T>(arr: T[]): T {
+    const index = Math.floor(Math.random() * arr.length)
+    return arr[index]
+}
+
 export class Sequence extends Expression {
     public static parser = new ExpressionSequenceParser()
 
@@ -59,14 +64,30 @@ export class Sequence extends Expression {
     }
 
     generate(valid: boolean, randomSeed: number): InputExample[] {
-        return [
-            {
-                str: this.value
-                    .map((v: Expression) => v.generate(valid, randomSeed)[0].str)
-                    .join(""),
-                description: "",
-            },
-        ]
+        const result: InputExample[] = []
+        //TODO shuffleing these lists first would simplify the proccess a bit
+        const examplesPerElement: InputExample[][] = this.value.map((v: Expression) =>
+            v.generate(valid, randomSeed)
+        )
+
+        const NUMBER_OF_SAMPLES = Math.max(...examplesPerElement.map(arr => arr.length))
+        for (
+            let currentSampleIndex = 0;
+            currentSampleIndex < NUMBER_OF_SAMPLES;
+            currentSampleIndex++
+        ) {
+            let currentSample: InputExample[] = []
+            for (let examples of examplesPerElement) {
+                if (examples.length > currentSampleIndex) {
+                    currentSample.push(examples[currentSampleIndex])
+                } else {
+                    currentSample.push(randomListElemement(examples))
+                }
+            }
+            result.push({ str: currentSample.map(ex => ex.str).join(""), description: "" })
+        }
+
+        return result
     }
 }
 
@@ -108,19 +129,14 @@ export class Any extends Expression {
         return this.type.toString()
     }
 
+    //TODO: this is terrible
+    //TODO: use random seed
     generate(valid: boolean, randomSeed: number): InputExample[] {
-        const choice = Math.floor(Math.random() * 3)
-
-        switch (choice) {
-            case 0:
-                return [{ str: "x", description: "" }]
-            case 1:
-                return [{ str: "y", description: "" }]
-            case 2:
-                return [{ str: "z", description: "" }]
-            default:
-                return [{ str: "X", description: "" }]
-        }
+        return [
+            { str: "x", description: "" },
+            { str: "y", description: "" },
+            { str: "z", description: "" },
+        ]
     }
 }
 
