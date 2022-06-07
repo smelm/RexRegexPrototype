@@ -107,6 +107,21 @@ export class Any extends Expression {
     toString(): string {
         return this.type.toString()
     }
+
+    generate(valid: boolean, randomSeed: number): InputExample[] {
+        const choice = Math.floor(Math.random() * 3)
+
+        switch (choice) {
+            case 0:
+                return [{ str: "x", description: "" }]
+            case 1:
+                return [{ str: "y", description: "" }]
+            case 2:
+                return [{ str: "z", description: "" }]
+            default:
+                return [{ str: "X", description: "" }]
+        }
+    }
 }
 
 export function any(): Any {

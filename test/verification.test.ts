@@ -1,4 +1,4 @@
-import { compile, literal } from "../src"
+import { any, compile, literal, sequence } from "../src"
 import { spawnSync } from "child_process"
 import { Expression } from "../src/Expression"
 
@@ -32,8 +32,8 @@ interface TestCase {
     //groups?: any[]
 }
 
-let cases = literal("hello").generate(true, 42)
-console.log(cases)
+console.log(literal("hello").generate(true, 42))
+console.log(sequence([literal("abc"), any(), literal("def")]).generate(true, 42))
 
 const TEST_CASES: [string, TestCase][] = [
     { pattern: literal("hello"), input: "hello", matches: true, matchStart: 0, matchEnd: 5 },
