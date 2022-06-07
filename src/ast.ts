@@ -58,11 +58,15 @@ export class Sequence extends Expression {
         return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
 
-    generate(valid: boolean, randomSeed: number): InputExample {
-        return {
-            str: this.value.map((v: Expression) => v.generate(valid, randomSeed).str).join(""),
-            description: "",
-        }
+    generate(valid: boolean, randomSeed: number): InputExample[] {
+        return [
+            {
+                str: this.value
+                    .map((v: Expression) => v.generate(valid, randomSeed)[0].str)
+                    .join(""),
+                description: "",
+            },
+        ]
     }
 }
 
@@ -75,8 +79,8 @@ export class Character extends Expression {
         return `${this.type}(${this.value})`
     }
 
-    generate(valid: boolean, randomSeed: number): InputExample {
-        return { str: this.value, description: "" }
+    generate(valid: boolean, randomSeed: number): InputExample[] {
+        return [{ str: this.value, description: "" }]
     }
 }
 

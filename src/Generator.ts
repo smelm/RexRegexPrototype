@@ -11,5 +11,5 @@ export interface InputGenerator {
      *  @param randomSeed the random seed used for sampling
      *  @returns str: the generated string and message: something like "repeated once too many"
      */
-    generate: (valid: boolean, randomSeed: number) => InputExample
+    generate: (valid: boolean, randomSeed: number) => InputExample[]
 }

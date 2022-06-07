@@ -16,7 +16,7 @@ import { InputExample, InputGenerator } from "./Generator"
 export class Expression implements InputGenerator {
     constructor(public type: AST.ExpressionType, public value: any) {}
 
-    generate(valid: boolean, randomSeed: number): InputExample {
+    generate(valid: boolean, randomSeed: number): InputExample[] {
         throw new Error("not implemented")
     }
 
