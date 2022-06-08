@@ -69,25 +69,16 @@ export class Repeat extends Expression {
         return this.upper || rng.intBetween(this.lower, this.lower + 5)
     }
 
-    private repeatLower(str: string): string {
-        return str.repeat(this.lower)
-    }
-
-    private repeatUpper(str: string, rng: RandomGenerator): string {
-        return str.repeat(this.generateUpper(rng))
-    }
-
-    private repeat(str: string, rng: RandomGenerator): string[] {
-        if (this.lower === this.upper) {
-            return [this.repeatLower(str)]
-        } else {
-            return [this.repeatLower(str), this.repeatUpper(str, rng)]
-        }
-    }
-
     private generateValid(rng: RandomGenerator): string[] {
         const childStrings: string[] = this.value.generate(true, rng)
-        return childStrings.map(s => this.repeat(s, rng)).flat()
+
+        if (this.lower === this.upper) {
+            return childStrings.map(s => s.repeat(this.lower))
+        } else {
+            return childStrings
+                .map(s => [s.repeat(this.lower), s.repeat(this.generateUpper(rng))])
+                .flat()
+        }
     }
 
     private generateInvalid(rng: RandomGenerator): string[] {
@@ -101,26 +92,18 @@ export class Repeat extends Expression {
             const invalidStringRepeatedCorrectlyLower = invalidChildStr.map(s =>
                 s.repeat(this.lower)
             )
-            result = [
-                ...result,
-                ...invalidStringRepeatedCorrectlyLower,
-                ...validStringRepeatedTooFew,
-            ]
+
+            result.push(...invalidStringRepeatedCorrectlyLower)
+            result.push(...validStringRepeatedTooFew)
         }
 
         if (this.upper != null) {
             const validStringRepeatedTooMany = validChildStr.map(s => s.repeat(this.upper! + 1))
-            const invalidStringRepeatedCorrectlyUpper = invalidChildStr.map(s =>
-                s.repeat(this.upper!)
-            )
-            result = [
-                ...result,
-                ...validStringRepeatedTooMany,
-                ...invalidStringRepeatedCorrectlyUpper,
-            ]
+            result.push(...validStringRepeatedTooMany)
         }
 
-        console.log(result)
+        const invalidStringRepeatedCorrectlyUpper = invalidChildStr.map(s => s.repeat(this.upper!))
+        result.push(...invalidStringRepeatedCorrectlyUpper)
 
         return result
     }
@@ -129,7 +112,6 @@ export class Repeat extends Expression {
         if (valid) {
             return this.generateValid(rng)
         } else {
-            //TODO
             return this.generateInvalid(rng)
         }
     }
