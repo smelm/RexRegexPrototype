@@ -94,22 +94,33 @@ export class Repeat extends Expression {
         const validChildStr: string[] = this.value.generate(true, rng)
         const invalidChildStr: string[] = this.value.generate(false, rng)
 
-        const invalidStringRepeatedCorrectly = invalidChildStr
-            .map(s => [
-                ...(this.lower === 0 ? [] : [this.repeatLower(s)]),
-                this.repeatUpper(s, rng),
-            ])
-            .flat()
-        const validStringRepeatedTooFew =
-            this.lower === 0 ? [] : validChildStr.map(s => s.repeat(this.lower - 1))
-        const validStringRepeatedTooMany =
-            this.upper == null ? [] : validChildStr.map(s => s.repeat(this.upper! + 1))
+        let result: string[] = []
 
-        const result = [
-            ...invalidStringRepeatedCorrectly,
-            ...validStringRepeatedTooFew,
-            ...validStringRepeatedTooMany,
-        ]
+        if (this.lower !== 0) {
+            const validStringRepeatedTooFew = validChildStr.map(s => s.repeat(this.lower - 1))
+            const invalidStringRepeatedCorrectlyLower = invalidChildStr.map(s =>
+                s.repeat(this.lower)
+            )
+            result = [
+                ...result,
+                ...invalidStringRepeatedCorrectlyLower,
+                ...validStringRepeatedTooFew,
+            ]
+        }
+
+        if (this.upper != null) {
+            const validStringRepeatedTooMany = validChildStr.map(s => s.repeat(this.upper! + 1))
+            const invalidStringRepeatedCorrectlyUpper = invalidChildStr.map(s =>
+                s.repeat(this.upper!)
+            )
+            result = [
+                ...result,
+                ...validStringRepeatedTooMany,
+                ...invalidStringRepeatedCorrectlyUpper,
+            ]
+        }
+
+        console.log(result)
 
         return result
     }

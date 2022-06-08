@@ -49,14 +49,14 @@ const generator = newRandomGenerator(randomSeed)
 
 function makeTestCases(): TestCase[] {
     const asts = [
-        //any(),
-        //literal("abc"),
-        //sequence([character("a"), any(), character("c")]),
-        //sequence([character("a"), maybe(character("b")), character("c")]),
-        //sequence([character("a"), countOf(3, character("b")), character("c")]),
-        //sequence([character("a"), countRangeOf(3, 5, character("b")), character("c")]),
+        any(),
+        literal("abc"),
+        sequence([character("a"), any(), character("c")]),
+        sequence([character("a"), maybe(character("b")), character("c")]),
+        sequence([character("a"), countOf(3, character("b")), character("c")]),
+        sequence([character("a"), countRangeOf(3, 5, character("b")), character("c")]),
         sequence([character("a"), countRangeOf(0, 3, character("b")), character("c")]),
-        //sequence([character("a"), manyOf(character("b")), character("c")]),
+        sequence([character("a"), manyOf(character("b")), character("c")]),
     ]
     const cases = []
 
