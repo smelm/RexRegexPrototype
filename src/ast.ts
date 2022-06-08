@@ -102,7 +102,19 @@ export class Character extends Expression {
     }
 
     generate(valid: boolean, generator: RandomGenerator): InputExample[] {
-        return [{ str: this.value, description: "" }]
+        if (valid) {
+            return [{ str: this.value, description: "" }]
+        } else {
+            //TODO: this is not good
+            //TODO: make this work with unicode
+            //TODO: this could cause problems with greedy repetition before
+            let char
+            do {
+                let charCode = generator.intBetween(40, 122)
+                char = String.fromCharCode(charCode)
+            } while (char == this.value)
+            return [{ str: char, description: "" }]
+        }
     }
 }
 

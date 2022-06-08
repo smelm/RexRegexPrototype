@@ -36,15 +36,13 @@ interface TestCase {
 
 const randomSeed = generateRandomSeed()
 const generator = newRandomGenerator(randomSeed)
-console.log(literal("hello").generate(true, generator))
-console.log(sequence([literal("abc"), any(), literal("def")]).generate(true, generator))
 
 function makeTestCases(): TestCase[] {
     const asts = [literal("abc"), sequence([character("a"), any(), character("c")])]
     const cases = []
 
     for (let ast of asts) {
-        for (let valid of [true]) {
+        for (let valid of [true, false]) {
             for (let { str } of ast.generate(valid, generator)) {
                 cases.push({ input: str, pattern: compile(ast), matches: valid, ast })
             }
@@ -53,8 +51,6 @@ function makeTestCases(): TestCase[] {
 
     return cases
 }
-
-console.log(makeTestCases())
 
 const TEST_CASES: [string, TestCase][] = makeTestCases().map(c => {
     return [`${c.pattern.toString()} ${c.matches ? "positive" : "negative"}`, c]
