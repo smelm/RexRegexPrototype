@@ -1,7 +1,7 @@
 import { AlternativeParser, SequenceParser, spaces as _ } from "./commonParsers"
-import { Expression, expressionOrBlock } from "./Expression"
+import { expressionOrBlock } from "./Expression"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
-import { InputExample } from "./Generator"
+import { InputExample, InputGenerator } from "./Generator"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
@@ -15,6 +15,18 @@ export enum ExpressionType {
     MAYBE = "maybe",
     SEQUENCE = "sequence",
     CHARACTER = "character",
+}
+
+export class Expression implements InputGenerator {
+    constructor(public type: ExpressionType, public value: any) {}
+
+    generate(valid: boolean, rng: RandomGenerator): InputExample[] {
+        throw new Error("not implemented")
+    }
+
+    toString(): string {
+        return `${this.type}(${this.value.toString()})`
+    }
 }
 
 // TODO support "0 to many"

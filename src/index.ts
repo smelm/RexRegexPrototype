@@ -1,5 +1,4 @@
-import { ExpressionType, Repeat, Sequence, Literal } from "./ast"
-import { Expression } from "./Expression"
+import { ExpressionType, Repeat, Sequence, Literal, Expression } from "./ast"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
 
 export * from "./ast"

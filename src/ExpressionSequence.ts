@@ -1,8 +1,8 @@
 import { BaseParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
-import * as AST from "./ast"
 import { SequenceParser, Repeat, newlines, optionalSpaces } from "./commonParsers"
-import { Expression, expression } from "./Expression"
+import { expression } from "./Expression"
+import { Expression, sequence } from "./ast"
 
 export class ExpressionSequenceParser extends BaseParser {
     private parser = new SequenceParser([
@@ -21,7 +21,7 @@ export class ExpressionSequenceParser extends BaseParser {
         if (seq.length === 1) {
             return seq[0]
         } else {
-            return AST.sequence(seq)
+            return sequence(seq)
         }
     })
 

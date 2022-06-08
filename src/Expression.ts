@@ -1,30 +1,23 @@
 import { CustomParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 
-import * as AST from "./ast"
-import { SequenceParser, AlternativeParser, Repeat, newlines, optionalSpaces, spaces } from "./commonParsers"
+import {
+    SequenceParser,
+    AlternativeParser,
+    Repeat as RepeatParser,
+    newlines,
+    optionalSpaces,
+    spaces,
+} from "./commonParsers"
 import { END } from "./keywords"
-import { InputExample, InputGenerator } from "./Generator"
-import { RandomGenerator } from "./RandomGenerator"
-
-export class Expression implements InputGenerator {
-    constructor(public type: AST.ExpressionType, public value: any) {}
-
-    generate(valid: boolean, rng: RandomGenerator): InputExample[] {
-        throw new Error("not implemented")
-    }
-
-    toString(): string {
-        return `${this.type}(${this.value.toString()})`
-    }
-}
+import { Any, Expression, Literal, Maybe, Repeat, sequence } from "./ast"
 
 export const expression = new CustomParser(parseExpression)
 
 const block = new SequenceParser([
     optionalSpaces,
     newlines,
-    new Repeat(
+    new RepeatParser(
         new SequenceParser([optionalSpaces, expression, optionalSpaces, newlines]).builder(
             ([val]: Expression[]) => val
         )
@@ -34,7 +27,7 @@ const block = new SequenceParser([
     if (seq.length === 1) {
         return seq[0]
     } else {
-        return AST.sequence(seq)
+        return sequence(seq)
     }
 })
 
@@ -44,10 +37,10 @@ export const expressionOrBlock = new AlternativeParser([
 ])
 
 function parseExpression(input: string): ParseResult {
-    const literal = AST.Literal.parser
-    const any = AST.Any.parser
-    const maybe = AST.Maybe.parser
-    const countRangeOf = AST.Repeat.parser
+    const literal = Literal.parser
+    const any = Any.parser
+    const maybe = Maybe.parser
+    const countRangeOf = Repeat.parser
 
     const expressions = [literal, any, maybe, countRangeOf]
 
