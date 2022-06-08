@@ -106,6 +106,10 @@ export class Character extends Expression {
     }
 }
 
+export function character(char: string): Character {
+    return new Character(char)
+}
+
 function charSeqFromLiteral(s: string): Sequence {
     const result = []
     for (let i = 0; i < s.length; i++) {

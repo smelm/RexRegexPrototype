@@ -1,4 +1,4 @@
-import { any, compile, literal, sequence } from "../src"
+import { any, character, compile, literal, sequence } from "../src"
 import { spawnSync } from "child_process"
 import { Expression } from "../src/Expression"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
@@ -27,7 +27,8 @@ const NODEJS: RegexEngine = {
 const ENGINES: [string, RegexEngine][] = [PYTHON, PERL, NODEJS].map(e => [e.name, e])
 
 interface TestCase {
-    pattern: Expression
+    ast: Expression
+    pattern: string
     input: string
     matches: boolean
     //groups?: any[]
@@ -38,10 +39,24 @@ const generator = newRandomGenerator(randomSeed)
 console.log(literal("hello").generate(true, generator))
 console.log(sequence([literal("abc"), any(), literal("def")]).generate(true, generator))
 
-const TEST_CASES: [string, TestCase][] = [
-    { pattern: literal("hello"), input: "hello", matches: true, matchStart: 0, matchEnd: 5 },
-    { pattern: literal("hello"), input: "bye", matches: false },
-].map(c => {
+function makeTestCases(): TestCase[] {
+    const asts = [literal("abc"), sequence([character("a"), any(), character("c")])]
+    const cases = []
+
+    for (let ast of asts) {
+        for (let valid of [true]) {
+            for (let { str } of ast.generate(valid, generator)) {
+                cases.push({ input: str, pattern: compile(ast), matches: valid, ast })
+            }
+        }
+    }
+
+    return cases
+}
+
+console.log(makeTestCases())
+
+const TEST_CASES: [string, TestCase][] = makeTestCases().map(c => {
     return [`${c.pattern.toString()} ${c.matches ? "positive" : "negative"}`, c]
 })
 
@@ -49,9 +64,7 @@ beforeAll(() => console.log("random seed", randomSeed))
 
 describe.each(ENGINES)("%s regex", (_engineName, engine) => {
     test.each(TEST_CASES)("%s", async (_name, { pattern, input, ...expected }) => {
-        const regex = compile(pattern)
-
-        const matches = engine.match(regex, input)
+        const matches = engine.match(pattern, input)
 
         expect(matches).toEqual(expected.matches)
     })
