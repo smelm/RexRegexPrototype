@@ -12,11 +12,12 @@ import {
 } from "./commonParsers"
 import { END } from "./keywords"
 import { InputExample, InputGenerator } from "./Generator"
+import { RandomGenerator } from "./RandomGenerator"
 
 export class Expression implements InputGenerator {
     constructor(public type: AST.ExpressionType, public value: any) {}
 
-    generate(valid: boolean, randomSeed: number): InputExample[] {
+    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
         throw new Error("not implemented")
     }
 

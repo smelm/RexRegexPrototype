@@ -5,6 +5,7 @@ import { InputExample } from "./Generator"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
+import { RandomGenerator } from "./RandomGenerator"
 
 export enum ExpressionType {
     ANY = "any",
@@ -47,8 +48,8 @@ export class Repeat extends Expression {
     }
 }
 
-function randomListElemement<T>(arr: T[]): T {
-    const index = Math.floor(Math.random() * arr.length)
+function randomListElemement<T>(arr: T[], generator: RandomGenerator): T {
+    const index = generator.range(arr.length)
     return arr[index]
 }
 
@@ -63,11 +64,11 @@ export class Sequence extends Expression {
         return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
 
-    generate(valid: boolean, randomSeed: number): InputExample[] {
+    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
         const result: InputExample[] = []
         //TODO shuffleing these lists first would simplify the proccess a bit
         const examplesPerElement: InputExample[][] = this.value.map((v: Expression) =>
-            v.generate(valid, randomSeed)
+            v.generate(valid, generator)
         )
 
         const NUMBER_OF_SAMPLES = Math.max(...examplesPerElement.map(arr => arr.length))
@@ -81,7 +82,7 @@ export class Sequence extends Expression {
                 if (examples.length > currentSampleIndex) {
                     currentSample.push(examples[currentSampleIndex])
                 } else {
-                    currentSample.push(randomListElemement(examples))
+                    currentSample.push(randomListElemement(examples, generator))
                 }
             }
             result.push({ str: currentSample.map(ex => ex.str).join(""), description: "" })
@@ -100,7 +101,7 @@ export class Character extends Expression {
         return `${this.type}(${this.value})`
     }
 
-    generate(valid: boolean, randomSeed: number): InputExample[] {
+    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
         return [{ str: this.value, description: "" }]
     }
 }
@@ -131,7 +132,7 @@ export class Any extends Expression {
 
     //TODO: this is terrible
     //TODO: use random seed
-    generate(valid: boolean, randomSeed: number): InputExample[] {
+    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
         return [
             { str: "x", description: "" },
             { str: "y", description: "" },

@@ -1,6 +1,7 @@
 import { any, compile, literal, sequence } from "../src"
 import { spawnSync } from "child_process"
 import { Expression } from "../src/Expression"
+import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
 
 interface RegexEngine {
     name: string
@@ -32,8 +33,10 @@ interface TestCase {
     //groups?: any[]
 }
 
-console.log(literal("hello").generate(true, 42))
-console.log(sequence([literal("abc"), any(), literal("def")]).generate(true, 42))
+const randomSeed = generateRandomSeed()
+const generator = newRandomGenerator(randomSeed)
+console.log(literal("hello").generate(true, generator))
+console.log(sequence([literal("abc"), any(), literal("def")]).generate(true, generator))
 
 const TEST_CASES: [string, TestCase][] = [
     { pattern: literal("hello"), input: "hello", matches: true, matchStart: 0, matchEnd: 5 },
@@ -41,6 +44,8 @@ const TEST_CASES: [string, TestCase][] = [
 ].map(c => {
     return [`${c.pattern.toString()} ${c.matches ? "positive" : "negative"}`, c]
 })
+
+beforeAll(() => console.log("random seed", randomSeed))
 
 describe.each(ENGINES)("%s regex", (_engineName, engine) => {
     test.each(TEST_CASES)("%s", async (_name, { pattern, input, ...expected }) => {
