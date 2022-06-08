@@ -7,6 +7,7 @@ import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
 import { RandomGenerator } from "./RandomGenerator"
 import shuffle from "shuffle-array"
+import { RandomSeed } from "random-seed"
 
 export enum ExpressionType {
     ANY = "any",
@@ -35,7 +36,9 @@ export class Repeat extends Expression {
             _,
             OF,
             expressionOrBlock,
-        ]).builder(([from, to, expr]: any[]) => new Repeat(expr, from, to === "many" ? undefined : to)),
+        ]).builder(
+            ([from, to, expr]: any[]) => new Repeat(expr, from, to === "many" ? undefined : to)
+        ),
     ])
 
     constructor(value: Expression, public from: number, public to?: number) {
@@ -195,12 +198,21 @@ export function countRangeOf(from: number, to: number, value: any): Repeat {
 }
 
 export class Maybe extends Expression {
-    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(([expr]: Expression[]) =>
-        maybe(expr)
+    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(
+        ([expr]: Expression[]) => maybe(expr)
     )
 
     constructor(value: Expression) {
         super(ExpressionType.MAYBE, value)
+    }
+
+    generate(valid: boolean, rng: RandomSeed): InputExample[] {
+        const childExamples = this.value.generate(valid, rng)
+        if (valid) {
+            return [...childExamples, { str: "", description: "" }]
+        } else {
+            return childExamples
+        }
     }
 }
 

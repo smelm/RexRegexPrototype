@@ -1,4 +1,4 @@
-import { any, character, compile, literal, sequence } from "../src"
+import { any, character, compile, literal, maybe, sequence } from "../src"
 import { spawnSync } from "child_process"
 import { Expression } from "../src/Expression"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
@@ -15,7 +15,8 @@ const PYTHON: RegexEngine = {
 }
 const PERL: RegexEngine = {
     name: "perl",
-    match: (regex: string, input: string) => runProcess("perl", ["test/engines/perl/run.pl"], regex, input),
+    match: (regex: string, input: string) =>
+        runProcess("perl", ["test/engines/perl/run.pl"], regex, input),
 }
 
 const NODEJS: RegexEngine = {
@@ -37,7 +38,12 @@ const randomSeed = generateRandomSeed()
 const generator = newRandomGenerator(randomSeed)
 
 function makeTestCases(): TestCase[] {
-    const asts = [any(), literal("abc"), sequence([character("a"), any(), character("c")])]
+    const asts = [
+        any(),
+        literal("abc"),
+        sequence([character("a"), any(), character("c")]),
+        sequence([character("a"), maybe(character("b")), character("c")]),
+    ]
     const cases = []
 
     for (let ast of asts) {
@@ -52,7 +58,7 @@ function makeTestCases(): TestCase[] {
 }
 
 const TEST_CASES: [string, TestCase][] = makeTestCases().map(c => {
-    return [`${c.pattern.toString()} ${c.matches ? "positive" : "negative"}`, c]
+    return [`${c.pattern} should${c.matches ? "" : "n't"} match ${c.input}`, c]
 })
 
 beforeAll(() => console.log("random seed", randomSeed))
