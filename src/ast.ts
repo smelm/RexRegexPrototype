@@ -53,12 +53,37 @@ export class Repeat extends Expression {
         ),
     ])
 
-    constructor(value: Expression, public from: number, public to?: number) {
+    constructor(value: Expression, public lower: number, public upper?: number) {
         super(ExpressionType.REPEAT, value)
     }
 
     toString(): string {
-        return `${this.type}(${this.from}, ${this.to}, ${this.value.toString()})`
+        return `${this.type}(${this.lower}, ${this.upper}, ${this.value.toString()})`
+    }
+
+    /**
+     * @returns the upper bound or a random number representing an upper bound of many
+     */
+    private generateUpper(rng: RandomGenerator): number {
+        //TODO remove magic number
+        return this.upper || rng.intBetween(this.lower, this.lower + 5)
+    }
+
+    generate(valid: boolean, rng: RandomGenerator): string[] {
+        if (valid) {
+            const childStr: string[] = this.value.generate(true, rng)
+            const lowerStr = childStr.map(s => s.repeat(this.lower))
+
+            if (this.lower === this.upper) {
+                return lowerStr
+            } else {
+                const upperStr = childStr.map(s => s.repeat(this.generateUpper(rng)))
+                return [...lowerStr, ...upperStr]
+            }
+        } else {
+            //TODO
+            return []
+        }
     }
 }
 

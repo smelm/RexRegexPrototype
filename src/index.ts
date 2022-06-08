@@ -4,7 +4,7 @@ import { ExpressionSequenceParser } from "./ExpressionSequence"
 export * from "./ast"
 
 //TODO make sure that each branch is tested
-function compileRepeatOperator({ from: lowerBound, to: upperBound }: Repeat) {
+function compileRepeatOperator({ lower: lowerBound, upper: upperBound }: Repeat) {
     if (lowerBound == null) {
         throw new Error(
             "to avoid ambiguity between 0 or 1 repetitions, the lower bound of the repeat operator may not be undefined"

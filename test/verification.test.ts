@@ -1,4 +1,4 @@
-import { any, character, compile, Expression, literal, maybe, sequence } from "../src"
+import { any, character, compile, countOf, Expression, literal, maybe, sequence } from "../src"
 import { spawnSync } from "child_process"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
 
@@ -42,6 +42,7 @@ function makeTestCases(): TestCase[] {
         literal("abc"),
         sequence([character("a"), any(), character("c")]),
         sequence([character("a"), maybe(character("b")), character("c")]),
+        sequence([character("a"), countOf(3, character("b")), character("c")]),
     ]
     const cases = []
 
