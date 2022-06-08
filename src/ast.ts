@@ -6,6 +6,7 @@ import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
 import { RandomGenerator } from "./RandomGenerator"
+import shuffle from "shuffle-array"
 
 export enum ExpressionType {
     ANY = "any",
@@ -64,31 +65,26 @@ export class Sequence extends Expression {
         return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
 
+    combinations(examplesPerElement: InputExample[][]): InputExample[] {
+        const MAX_LENGTH = Math.max(...examplesPerElement.map(arr => arr.length))
+
+        return Array(MAX_LENGTH)
+            .fill(undefined)
+            .map((_, i) => ({
+                str: examplesPerElement.map(examples => examples[i % examples.length].str).join(""),
+                description: "",
+            }))
+    }
+
     generate(valid: boolean, generator: RandomGenerator): InputExample[] {
-        const result: InputExample[] = []
         //TODO shuffleing these lists first would simplify the proccess a bit
-        const examplesPerElement: InputExample[][] = this.value.map((v: Expression) =>
-            v.generate(valid, generator)
-        )
+        const examplesPerElement: InputExample[][] = this.value.map((v: Expression) => {
+            let examples = v.generate(valid, generator)
+            shuffle(examples, { rng: generator.random })
+            return examples
+        })
 
-        const NUMBER_OF_SAMPLES = Math.max(...examplesPerElement.map(arr => arr.length))
-        for (
-            let currentSampleIndex = 0;
-            currentSampleIndex < NUMBER_OF_SAMPLES;
-            currentSampleIndex++
-        ) {
-            let currentSample: InputExample[] = []
-            for (let examples of examplesPerElement) {
-                if (examples.length > currentSampleIndex) {
-                    currentSample.push(examples[currentSampleIndex])
-                } else {
-                    currentSample.push(randomListElemement(examples, generator))
-                }
-            }
-            result.push({ str: currentSample.map(ex => ex.str).join(""), description: "" })
-        }
-
-        return result
+        return this.combinations(examplesPerElement)
     }
 }
 
@@ -109,13 +105,17 @@ export class Character extends Expression {
             //TODO: make this work with unicode
             //TODO: this could cause problems with greedy repetition before
             let char
+
             do {
-                let charCode = generator.intBetween(40, 122)
-                char = String.fromCharCode(charCode)
-            } while (char == this.value)
+                char = randomCharacter(generator)
+            } while (char === this.value)
             return [{ str: char, description: "" }]
         }
     }
+}
+
+function randomCharacter(generator: RandomGenerator) {
+    return String.fromCharCode(generator.intBetween(40, 122))
 }
 
 export function character(char: string): Character {
@@ -149,11 +149,7 @@ export class Any extends Expression {
     //TODO: this is terrible
     //TODO: use random seed
     generate(valid: boolean, generator: RandomGenerator): InputExample[] {
-        return [
-            { str: "x", description: "" },
-            { str: "y", description: "" },
-            { str: "z", description: "" },
-        ]
+        return [{ str: randomCharacter(generator), description: "" }]
     }
 }
 
