@@ -15,8 +15,7 @@ const PYTHON: RegexEngine = {
 }
 const PERL: RegexEngine = {
     name: "perl",
-    match: (regex: string, input: string) =>
-        runProcess("perl", ["test/engines/perl/run.pl"], regex, input),
+    match: (regex: string, input: string) => runProcess("perl", ["test/engines/perl/run.pl"], regex, input),
 }
 
 const NODEJS: RegexEngine = {
@@ -38,7 +37,7 @@ const randomSeed = generateRandomSeed()
 const generator = newRandomGenerator(randomSeed)
 
 function makeTestCases(): TestCase[] {
-    const asts = [literal("abc"), sequence([character("a"), any(), character("c")])]
+    const asts = [literal("abc")] //, sequence([character("a"), any(), character("c")])]
     const cases = []
 
     for (let ast of asts) {

@@ -35,9 +35,7 @@ export class Repeat extends Expression {
             _,
             OF,
             expressionOrBlock,
-        ]).builder(
-            ([from, to, expr]: any[]) => new Repeat(expr, from, to === "many" ? undefined : to)
-        ),
+        ]).builder(([from, to, expr]: any[]) => new Repeat(expr, from, to === "many" ? undefined : to)),
     ])
 
     constructor(value: Expression, public from: number, public to?: number) {
@@ -47,11 +45,6 @@ export class Repeat extends Expression {
     toString(): string {
         return `${this.type}(${this.from}, ${this.to}, ${this.value.toString()})`
     }
-}
-
-function randomListElemement<T>(arr: T[], generator: RandomGenerator): T {
-    const index = generator.range(arr.length)
-    return arr[index]
 }
 
 export class Sequence extends Expression {
@@ -65,7 +58,7 @@ export class Sequence extends Expression {
         return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
 
-    combinations(examplesPerElement: InputExample[][]): InputExample[] {
+    private combinations(examplesPerElement: InputExample[][]): InputExample[] {
         const MAX_LENGTH = Math.max(...examplesPerElement.map(arr => arr.length))
 
         return Array(MAX_LENGTH)
@@ -76,15 +69,43 @@ export class Sequence extends Expression {
             }))
     }
 
-    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
-        //TODO shuffleing these lists first would simplify the proccess a bit
-        const examplesPerElement: InputExample[][] = this.value.map((v: Expression) => {
-            let examples = v.generate(valid, generator)
-            shuffle(examples, { rng: generator.random })
+    private examplesFromChildren(valid: boolean, rng: RandomGenerator): InputExample[][] {
+        return this.value.map((child: Expression) => {
+            let examples = child.generate(valid, rng)
+            shuffle(examples, { rng: rng.random })
             return examples
         })
+    }
 
-        return this.combinations(examplesPerElement)
+    private generateValid(rng: RandomGenerator): InputExample[] {
+        return this.combinations(this.examplesFromChildren(true, rng))
+    }
+
+    //TODO: generate a few examples where more than one child is randomly wrong
+    private generateInvalid(rng: RandomGenerator): InputExample[] {
+        const validExamples = this.examplesFromChildren(true, rng)
+        const invalidExamples = this.examplesFromChildren(false, rng)
+
+        let result: InputExample[] = []
+
+        invalidExamples.forEach((example, i) => {
+            let combinations = this.combinations([
+                ...validExamples.slice(0, i),
+                example,
+                ...validExamples.slice(i + 1),
+            ])
+            result = [...result, ...combinations]
+        })
+
+        return result
+    }
+
+    generate(valid: boolean, rng: RandomGenerator): InputExample[] {
+        if (valid) {
+            return this.generateValid(rng)
+        } else {
+            return this.generateInvalid(rng)
+        }
     }
 }
 
@@ -166,8 +187,8 @@ export function countRangeOf(from: number, to: number, value: any): Repeat {
 }
 
 export class Maybe extends Expression {
-    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(
-        ([expr]: Expression[]) => maybe(expr)
+    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(([expr]: Expression[]) =>
+        maybe(expr)
     )
 
     constructor(value: Expression) {
