@@ -69,20 +69,57 @@ export class Repeat extends Expression {
         return this.upper || rng.intBetween(this.lower, this.lower + 5)
     }
 
+    private repeatLower(str: string): string {
+        return str.repeat(this.lower)
+    }
+
+    private repeatUpper(str: string, rng: RandomGenerator): string {
+        return str.repeat(this.generateUpper(rng))
+    }
+
+    private repeat(str: string, rng: RandomGenerator): string[] {
+        if (this.lower === this.upper) {
+            return [this.repeatLower(str)]
+        } else {
+            return [this.repeatLower(str), this.repeatUpper(str, rng)]
+        }
+    }
+
+    private generateValid(rng: RandomGenerator): string[] {
+        const childStrings: string[] = this.value.generate(true, rng)
+        return childStrings.map(s => this.repeat(s, rng)).flat()
+    }
+
+    private generateInvalid(rng: RandomGenerator): string[] {
+        const validChildStr: string[] = this.value.generate(true, rng)
+        const invalidChildStr: string[] = this.value.generate(false, rng)
+
+        const invalidStringRepeatedCorrectly = invalidChildStr
+            .map(s => [
+                ...(this.lower === 0 ? [] : [this.repeatLower(s)]),
+                this.repeatUpper(s, rng),
+            ])
+            .flat()
+        const validStringRepeatedTooFew =
+            this.lower === 0 ? [] : validChildStr.map(s => s.repeat(this.lower - 1))
+        const validStringRepeatedTooMany =
+            this.upper == null ? [] : validChildStr.map(s => s.repeat(this.upper! + 1))
+
+        const result = [
+            ...invalidStringRepeatedCorrectly,
+            ...validStringRepeatedTooFew,
+            ...validStringRepeatedTooMany,
+        ]
+
+        return result
+    }
+
     generate(valid: boolean, rng: RandomGenerator): string[] {
         if (valid) {
-            const childStr: string[] = this.value.generate(true, rng)
-            const lowerStr = childStr.map(s => s.repeat(this.lower))
-
-            if (this.lower === this.upper) {
-                return lowerStr
-            } else {
-                const upperStr = childStr.map(s => s.repeat(this.generateUpper(rng)))
-                return [...lowerStr, ...upperStr]
-            }
+            return this.generateValid(rng)
         } else {
             //TODO
-            return []
+            return this.generateInvalid(rng)
         }
     }
 }
