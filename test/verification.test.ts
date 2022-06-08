@@ -1,6 +1,5 @@
-import { any, character, compile, literal, maybe, sequence } from "../src"
+import { any, character, compile, Expression, literal, maybe, sequence } from "../src"
 import { spawnSync } from "child_process"
-import { Expression } from "../src/Expression"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
 
 interface RegexEngine {
@@ -48,7 +47,7 @@ function makeTestCases(): TestCase[] {
 
     for (let ast of asts) {
         for (let valid of [true, false]) {
-            for (let { str } of ast.generate(valid, generator)) {
+            for (let str of ast.generate(valid, generator)) {
                 cases.push({ input: str, pattern: compile(ast), matches: valid, ast })
             }
         }

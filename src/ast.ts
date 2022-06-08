@@ -1,7 +1,7 @@
 import { AlternativeParser, SequenceParser, spaces as _ } from "./commonParsers"
 import { expressionOrBlock } from "./Expression"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
-import { InputExample, InputGenerator } from "./Generator"
+import { InputGenerator } from "./Generator"
 import { ANY, MANY, MAYBE, OF, TO } from "./keywords"
 import { LiteralParser } from "./Literal"
 import { number } from "./NumberParser"
@@ -20,7 +20,7 @@ export enum ExpressionType {
 export class Expression implements InputGenerator {
     constructor(public type: ExpressionType, public value: any) {}
 
-    generate(valid: boolean, rng: RandomGenerator): InputExample[] {
+    generate(valid: boolean, rng: RandomGenerator): string[] {
         throw new Error("not implemented")
     }
 
@@ -73,18 +73,17 @@ export class Sequence extends Expression {
         return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
     }
 
-    private combinations(examplesPerElement: InputExample[][]): InputExample[] {
+    private combinations(examplesPerElement: string[][]): string[] {
         const MAX_LENGTH = Math.max(...examplesPerElement.map(arr => arr.length))
 
         return Array(MAX_LENGTH)
             .fill(undefined)
-            .map((_, i) => ({
-                str: examplesPerElement.map(examples => examples[i % examples.length].str).join(""),
-                description: "",
-            }))
+            .map((_, i) =>
+                examplesPerElement.map(examples => examples[i % examples.length]).join("")
+            )
     }
 
-    private examplesFromChildren(valid: boolean, rng: RandomGenerator): InputExample[][] {
+    private examplesFromChildren(valid: boolean, rng: RandomGenerator): string[][] {
         return this.value.map((child: Expression) => {
             let examples = child.generate(valid, rng)
             shuffle(examples, { rng: rng.random })
@@ -92,15 +91,15 @@ export class Sequence extends Expression {
         })
     }
 
-    private generateValid(rng: RandomGenerator): InputExample[] {
+    private generateValid(rng: RandomGenerator): string[] {
         return this.combinations(this.examplesFromChildren(true, rng))
     }
 
-    private generateInvalid(rng: RandomGenerator): InputExample[] {
+    private generateInvalid(rng: RandomGenerator): string[] {
         const validExamples = this.examplesFromChildren(true, rng)
         const invalidExamples = this.examplesFromChildren(false, rng)
 
-        let result: InputExample[] = []
+        let result: string[] = []
 
         invalidExamples.forEach((example, i) => {
             if (example.length === 0) {
@@ -118,7 +117,7 @@ export class Sequence extends Expression {
         return result
     }
 
-    generate(valid: boolean, rng: RandomGenerator): InputExample[] {
+    generate(valid: boolean, rng: RandomGenerator): string[] {
         if (valid) {
             return this.generateValid(rng)
         } else {
@@ -136,9 +135,9 @@ export class Character extends Expression {
         return `${this.type}(${this.value})`
     }
 
-    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
+    generate(valid: boolean, generator: RandomGenerator): string[] {
         if (valid) {
-            return [{ str: this.value, description: "" }]
+            return [this.value]
         } else {
             //TODO: this is not good
             //TODO: make this work with unicode
@@ -148,7 +147,7 @@ export class Character extends Expression {
             do {
                 char = randomCharacter(generator)
             } while (char === this.value)
-            return [{ str: char, description: "" }]
+            return [char]
         }
     }
 }
@@ -187,9 +186,9 @@ export class Any extends Expression {
 
     //TODO: this is terrible
     //TODO: use random seed
-    generate(valid: boolean, generator: RandomGenerator): InputExample[] {
+    generate(valid: boolean, generator: RandomGenerator): string[] {
         if (valid) {
-            return [{ str: randomCharacter(generator), description: "" }]
+            return [randomCharacter(generator)]
         } else {
             //TODO: handle dotall mode here
             return []
@@ -218,10 +217,10 @@ export class Maybe extends Expression {
         super(ExpressionType.MAYBE, value)
     }
 
-    generate(valid: boolean, rng: RandomSeed): InputExample[] {
+    generate(valid: boolean, rng: RandomSeed): string[] {
         const childExamples = this.value.generate(valid, rng)
         if (valid) {
-            return [...childExamples, { str: "", description: "" }]
+            return [...childExamples, ""]
         } else {
             return childExamples
         }
