@@ -37,7 +37,7 @@ const randomSeed = generateRandomSeed()
 const generator = newRandomGenerator(randomSeed)
 
 function makeTestCases(): TestCase[] {
-    const asts = [literal("abc")] //, sequence([character("a"), any(), character("c")])]
+    const asts = [any(), literal("abc"), sequence([character("a"), any(), character("c")])]
     const cases = []
 
     for (let ast of asts) {

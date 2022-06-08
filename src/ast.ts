@@ -81,7 +81,6 @@ export class Sequence extends Expression {
         return this.combinations(this.examplesFromChildren(true, rng))
     }
 
-    //TODO: generate a few examples where more than one child is randomly wrong
     private generateInvalid(rng: RandomGenerator): InputExample[] {
         const validExamples = this.examplesFromChildren(true, rng)
         const invalidExamples = this.examplesFromChildren(false, rng)
@@ -89,6 +88,10 @@ export class Sequence extends Expression {
         let result: InputExample[] = []
 
         invalidExamples.forEach((example, i) => {
+            if (example.length === 0) {
+                return
+            }
+
             let combinations = this.combinations([
                 ...validExamples.slice(0, i),
                 example,
@@ -170,7 +173,12 @@ export class Any extends Expression {
     //TODO: this is terrible
     //TODO: use random seed
     generate(valid: boolean, generator: RandomGenerator): InputExample[] {
-        return [{ str: randomCharacter(generator), description: "" }]
+        if (valid) {
+            return [{ str: randomCharacter(generator), description: "" }]
+        } else {
+            //TODO: handle dotall mode here
+            return []
+        }
     }
 }
 
