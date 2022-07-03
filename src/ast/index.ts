@@ -1,25 +1,25 @@
-import { SequenceParser, spaces as _ } from "../commonParsers"
-import { expressionOrBlock } from "../Expression"
-import { ANY, MAYBE } from "../keywords"
+import { spaces as _ } from "../commonParsers"
 import { LiteralParser } from "../Literal"
-import { RandomGenerator } from "../RandomGenerator"
-import { RandomSeed } from "random-seed"
 
-import { Expression, ExpressionType } from "./Expression"
+import { Expression } from "./Expression"
 import { Sequence } from "./Sequence"
 import { Repeat } from "./Repeat"
-import { Character, randomCharacter } from "./Character"
+import { Character } from "./Character"
+import { Any } from "./Any"
+import { Maybe } from "./Maybe"
 
 export { Expression, ExpressionType } from "./Expression"
 export { Sequence } from "./Sequence"
 export { Repeat } from "./Repeat"
 export { Character } from "./Character"
+export { Any } from "./Any"
+export { Maybe } from "./Maybe"
 
 export function character(char: string): Character {
     return new Character(char)
 }
 
-function charSeqFromLiteral(s: string): Sequence {
+function charSeqFromLiteral(s: string): Expression {
     return sequence(s.split("").map(c => new Character(c)))
 }
 
@@ -27,69 +27,30 @@ export class Literal extends Expression {
     public static parser = new LiteralParser().builder(charSeqFromLiteral)
 }
 
-export class Any extends Expression {
-    public static parser = ANY.builder(() => new Any())
-
-    constructor() {
-        super(ExpressionType.ANY, "any")
-    }
-
-    toString(): string {
-        return this.type.toString()
-    }
-
-    generateValid(rng: RandomSeed): string[] {
-        return [randomCharacter(rng)]
-    }
-
-    generateInvalid(rng: RandomGenerator): string[] {
-        //TODO: handle dotall mode here
-        return []
-    }
-}
-
-export function any(): Any {
+export function any(): Expression {
     return new Any()
 }
 
-export function countOf(count: number, value: any): Repeat {
+export function countOf(count: number, value: any): Expression {
     return new Repeat(value, count, count)
 }
 
-export function countRangeOf(from: number, to: number, value: any): Repeat {
+export function countRangeOf(from: number, to: number, value: any): Expression {
     return new Repeat(value, from, to)
 }
 
-export class Maybe extends Expression {
-    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(
-        ([expr]: Expression[]) => maybe(expr)
-    )
-
-    constructor(value: Expression) {
-        super(ExpressionType.MAYBE, value)
-    }
-
-    generateValid(rng: RandomSeed): string[] {
-        return [...this.value.generateValid(rng), ""]
-    }
-
-    generateInvalid(rng: RandomSeed): string[] {
-        return this.value.generateInvalid(rng)
-    }
-}
-
-export function maybe(value: any): Maybe {
+export function maybe(value: any): Expression {
     return new Maybe(value)
 }
 
-export function sequence(value: Expression[]): Sequence {
+export function sequence(value: Expression[]): Expression {
     return new Sequence(value)
 }
 
-export function manyOf(value: Expression): Repeat {
+export function manyOf(value: Expression): Expression {
     return new Repeat(value, 1, undefined)
 }
 
-export function literal(value: string): Sequence {
+export function literal(value: string): Expression {
     return charSeqFromLiteral(value)
 }
