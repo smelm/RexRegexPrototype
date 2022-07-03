@@ -20,7 +20,11 @@ export enum ExpressionType {
 export class Expression implements InputGenerator {
     constructor(public type: ExpressionType, public value: any) {}
 
-    generate(valid: boolean, rng: RandomGenerator): string[] {
+    generateValid(rng: RandomSeed): string[] {
+        throw new Error("not implemented")
+    }
+
+    generateInvalid(rng: RandomSeed): string[] {
         throw new Error("not implemented")
     }
 
@@ -69,8 +73,8 @@ export class Repeat extends Expression {
         return this.upper || rng.intBetween(this.lower, this.lower + 5)
     }
 
-    private generateValid(rng: RandomGenerator): string[] {
-        const childStrings: string[] = this.value.generate(true, rng)
+    generateValid(rng: RandomGenerator): string[] {
+        const childStrings: string[] = this.value.generateValid(rng)
 
         if (this.lower === this.upper) {
             return childStrings.map(s => s.repeat(this.lower))
@@ -81,9 +85,9 @@ export class Repeat extends Expression {
         }
     }
 
-    private generateInvalid(rng: RandomGenerator): string[] {
-        const validChildStr: string[] = this.value.generate(true, rng)
-        const invalidChildStr: string[] = this.value.generate(false, rng)
+    generateInvalid(rng: RandomGenerator): string[] {
+        const validChildStr: string[] = this.value.generateValid(rng)
+        const invalidChildStr: string[] = this.value.generateInvalid(rng)
 
         let result: string[] = []
 
@@ -106,14 +110,6 @@ export class Repeat extends Expression {
         result.push(...invalidStringRepeatedCorrectlyUpper)
 
         return result
-    }
-
-    generate(valid: boolean, rng: RandomGenerator): string[] {
-        if (valid) {
-            return this.generateValid(rng)
-        } else {
-            return this.generateInvalid(rng)
-        }
     }
 }
 
@@ -140,17 +136,17 @@ export class Sequence extends Expression {
 
     private examplesFromChildren(valid: boolean, rng: RandomGenerator): string[][] {
         return this.value.map((child: Expression) => {
-            let examples = child.generate(valid, rng)
+            let examples = valid ? child.generateValid(rng) : child.generateInvalid(rng)
             shuffle(examples, { rng: rng.random })
             return examples
         })
     }
 
-    private generateValid(rng: RandomGenerator): string[] {
+    generateValid(rng: RandomGenerator): string[] {
         return this.combinations(this.examplesFromChildren(true, rng))
     }
 
-    private generateInvalid(rng: RandomGenerator): string[] {
+    generateInvalid(rng: RandomGenerator): string[] {
         const validExamples = this.examplesFromChildren(true, rng)
         const invalidExamples = this.examplesFromChildren(false, rng)
 
@@ -171,14 +167,6 @@ export class Sequence extends Expression {
 
         return result
     }
-
-    generate(valid: boolean, rng: RandomGenerator): string[] {
-        if (valid) {
-            return this.generateValid(rng)
-        } else {
-            return this.generateInvalid(rng)
-        }
-    }
 }
 
 export class Character extends Expression {
@@ -190,23 +178,25 @@ export class Character extends Expression {
         return `${this.type}(${this.value})`
     }
 
-    generate(valid: boolean, generator: RandomGenerator): string[] {
-        if (valid) {
-            return [this.value]
-        } else {
-            //TODO: this is not good
-            //TODO: make this work with unicode
-            //TODO: this could cause problems with greedy repetition before
-            let char
+    generateValid(rng: RandomSeed): string[] {
+        return [this.value]
+    }
 
-            do {
-                char = randomCharacter(generator)
-            } while (char === this.value)
-            return [char]
-        }
+    generateInvalid(generator: RandomGenerator): string[] {
+        //TODO: this is not good
+        //TODO: make this work with unicode
+        //TODO: this could cause problems with greedy repetition before
+        let char
+
+        do {
+            char = randomCharacter(generator)
+        } while (char === this.value)
+
+        return [char]
     }
 }
 
+//TODO: this is terrible
 function randomCharacter(generator: RandomGenerator) {
     return String.fromCharCode(generator.intBetween(40, 122))
 }
@@ -239,15 +229,13 @@ export class Any extends Expression {
         return this.type.toString()
     }
 
-    //TODO: this is terrible
-    //TODO: use random seed
-    generate(valid: boolean, generator: RandomGenerator): string[] {
-        if (valid) {
-            return [randomCharacter(generator)]
-        } else {
-            //TODO: handle dotall mode here
-            return []
-        }
+    generateValid(rng: RandomSeed): string[] {
+        return [randomCharacter(rng)]
+    }
+
+    generateInvalid(rng: RandomGenerator): string[] {
+        //TODO: handle dotall mode here
+        return []
     }
 }
 
@@ -272,13 +260,12 @@ export class Maybe extends Expression {
         super(ExpressionType.MAYBE, value)
     }
 
-    generate(valid: boolean, rng: RandomSeed): string[] {
-        const childExamples = this.value.generate(valid, rng)
-        if (valid) {
-            return [...childExamples, ""]
-        } else {
-            return childExamples
-        }
+    generateValid(rng: RandomSeed): string[] {
+        return [...this.value.generateValid(rng), ""]
+    }
+
+    generateInvalid(rng: RandomSeed): string[] {
+        return this.value.generateInvalid(rng)
     }
 }
 

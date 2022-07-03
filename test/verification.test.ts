@@ -62,7 +62,9 @@ function makeTestCases(): TestCase[] {
 
     for (let ast of asts) {
         for (let valid of [true, false]) {
-            for (let str of ast.generate(valid, generator)) {
+            let strs = valid ? ast.generateValid(generator) : ast.generateInvalid(generator)
+
+            for (let str of strs) {
                 cases.push({ input: str, pattern: compile(ast), matches: valid, ast })
             }
         }

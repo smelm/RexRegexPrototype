@@ -4,10 +4,6 @@ import { RandomGenerator } from "./RandomGenerator"
 
 //TODO: change signature to validExamples() and invalidExamples()
 export interface InputGenerator {
-    /**
-     *  @param valid whether the generated string should be accepted/valid
-     *  @param randomSeed the random seed used for sampling
-     *  @returns str: the generated string and message: something like "repeated once too many"
-     */
-    generate: (valid: boolean, rng: RandomGenerator) => string[]
+    generateValid: (rng: RandomGenerator) => string[]
+    generateInvalid: (rng: RandomGenerator) => string[]
 }
