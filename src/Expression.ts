@@ -1,7 +1,6 @@
-import { CustomParser } from "./Parser"
-import { ParseResult } from "./ParseResult"
-
 import {
+    CustomParser,
+    ParseResult,
     SequenceParser,
     RepeatParser,
     AlternativeParser,

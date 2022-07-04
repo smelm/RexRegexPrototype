@@ -1,6 +1,4 @@
-import { BaseParser } from "../Parser"
-import { ParseResult } from "../ParseResult"
-import { AlternativeParser, RepeatParser, StringParser } from "."
+import { BaseParser, ParseResult, AlternativeParser, RepeatParser, StringParser } from "."
 import { escapeNewlines } from "../utils"
 
 export class NumberParser extends BaseParser {

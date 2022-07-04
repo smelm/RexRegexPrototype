@@ -1,5 +1,4 @@
-import { BaseParser } from "../Parser"
-import { err, ok, ParseResult } from "../ParseResult"
+import { BaseParser, err, ok, ParseResult } from "."
 import { escapeNewlines } from "../utils"
 
 export class StringParser extends BaseParser {

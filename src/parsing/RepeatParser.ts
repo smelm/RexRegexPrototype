@@ -1,5 +1,4 @@
-import { BaseParser, Parser } from "../Parser"
-import { ok, err, ParseResult } from "../ParseResult"
+import { BaseParser, Parser, ok, err, ParseResult } from "."
 
 export class RepeatParser extends BaseParser {
     constructor(private parser: Parser, private optional: boolean = false) {

@@ -1,7 +1,12 @@
-import { BaseParser, Parser } from "../Parser"
-import { ok, ParseResult } from "../ParseResult"
-import { intersperse } from "../utils"
-import { AlternativeParser, RepeatParser, StringParser } from "."
+import {
+    BaseParser,
+    Parser,
+    ok,
+    ParseResult,
+    AlternativeParser,
+    RepeatParser,
+    StringParser,
+} from "."
 
 export const space = new AlternativeParser([new StringParser(" "), new StringParser("\t")]).ignore()
 export const spaces = new RepeatParser(space, false).ignore()

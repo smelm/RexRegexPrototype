@@ -1,7 +1,5 @@
-import { BaseParser, Parser } from "./Parser"
-import { err, ok, ParseResult } from "./ParseResult"
+import { BaseParser, err, ok, ParseResult } from "./parsing"
 import { escapeNewlines } from "./utils"
-import * as AST from "./ast"
 
 // TODO: does the dsl need quote escaping?
 /* ab"c can also be done via
