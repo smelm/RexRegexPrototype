@@ -41,7 +41,7 @@ export class AlternativeParser extends BaseParser {
     }
 }
 
-export class Repeat extends BaseParser {
+export class RepeatParser extends BaseParser {
     constructor(private parser: Parser, private optional: boolean = false) {
         super()
     }
@@ -95,11 +95,11 @@ export class SequenceParser extends BaseParser {
 }
 
 export const space = new AlternativeParser([new StringParser(" "), new StringParser("\t")]).ignore()
-export const spaces = new Repeat(space, false).ignore()
-export const optionalSpaces = new Repeat(space, true).ignore()
+export const spaces = new RepeatParser(space, false).ignore()
+export const optionalSpaces = new RepeatParser(space, true).ignore()
 
 export const newline = new AlternativeParser(
     ["\n", "\r", "\r\n"].map(s => new StringParser(s))
 ).ignore()
-export const newlines = new Repeat(newline, false).ignore()
-export const optionalNewlines = new Repeat(newline, true).ignore()
+export const newlines = new RepeatParser(newline, false).ignore()
+export const optionalNewlines = new RepeatParser(newline, true).ignore()

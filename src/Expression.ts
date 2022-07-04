@@ -4,7 +4,7 @@ import { ParseResult } from "./ParseResult"
 import {
     SequenceParser,
     AlternativeParser,
-    Repeat as RepeatParser,
+    RepeatParser,
     newlines,
     optionalSpaces,
     spaces,

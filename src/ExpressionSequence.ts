@@ -1,6 +1,6 @@
 import { BaseParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
-import { SequenceParser, Repeat, newlines, optionalSpaces } from "./commonParsers"
+import { SequenceParser, RepeatParser, newlines, optionalSpaces } from "./commonParsers"
 import { expression } from "./Expression"
 import { Expression, sequence } from "./ast"
 
@@ -9,7 +9,7 @@ export class ExpressionSequenceParser extends BaseParser {
         optionalSpaces,
         expression,
         optionalSpaces,
-        new Repeat(
+        new RepeatParser(
             new SequenceParser([newlines, optionalSpaces, expression, optionalSpaces]).builder(
                 (exp: Expression[]) => exp[0]
             ),
