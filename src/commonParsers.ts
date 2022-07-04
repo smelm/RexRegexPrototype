@@ -1,31 +1,7 @@
 import { BaseParser, Parser } from "./Parser"
-import { ok, err, ParseResult } from "./ParseResult"
-import { AlternativeParser } from "./parsing"
-import { StringParser } from "./parsing/StringParser"
+import { ok, ParseResult } from "./ParseResult"
+import { StringParser, AlternativeParser, RepeatParser } from "./parsing"
 import { intersperse } from "./utils"
-
-export class RepeatParser extends BaseParser {
-    constructor(private parser: Parser, private optional: boolean = false) {
-        super()
-    }
-
-    parse(input: string): ParseResult {
-        let values: any[] = []
-
-        let result = this.parser.parse(input)
-
-        while (result.isSuccess) {
-            values.push(result.value)
-            result = this.parser.parse(result.remaining)
-        }
-
-        if (!this.optional && values.length === 0) {
-            return err(input, `expected at least one but ran into error: ${result.value}`)
-        }
-
-        return ok(values, input.slice(0, result.remaining.length), result.remaining)
-    }
-}
 
 export class SequenceParser extends BaseParser {
     constructor(private parsers: Parser[]) {
