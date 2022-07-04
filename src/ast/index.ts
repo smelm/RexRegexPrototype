@@ -1,5 +1,3 @@
-import { spaces as _ } from "../commonParsers"
-
 import { Expression } from "./Expression"
 import { Sequence } from "./Sequence"
 import { Repeat } from "./Repeat"

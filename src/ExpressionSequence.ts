@@ -1,7 +1,6 @@
 import { BaseParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
-import { newlines, optionalSpaces } from "./commonParsers"
-import { SequenceParser, RepeatParser } from "./parsing"
+import { SequenceParser, RepeatParser, newlines, optionalSpaces } from "./parsing"
 import { expression } from "./Expression"
 import { Expression, sequence } from "./ast"
 

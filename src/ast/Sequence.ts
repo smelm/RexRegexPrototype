@@ -1,4 +1,4 @@
-import { spaces as _ } from "../commonParsers"
+import { spaces as _ } from "../parsing"
 import { ExpressionSequenceParser } from "../ExpressionSequence"
 import { RandomGenerator } from "../RandomGenerator"
 import shuffle from "shuffle-array"
