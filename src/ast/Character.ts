@@ -1,7 +1,7 @@
 import { spaces as _ } from "../parsing"
 import { RandomGenerator } from "../RandomGenerator"
 import { RandomSeed } from "random-seed"
-import { LiteralParser } from "../Literal"
+import { LiteralParser } from "../parsing"
 import { literal } from "."
 
 import { Expression, ExpressionType } from "./Expression"
