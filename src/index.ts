@@ -1,4 +1,4 @@
-import { ExpressionType, Repeat, Sequence, Literal, Expression } from "./ast"
+import { ExpressionType, Repeat, Sequence, Character, Expression } from "./ast"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
 
 export * from "./ast"
@@ -39,7 +39,7 @@ export function compile(ast: Expression): string {
             `${compile(ast.value)}${compileRepeatOperator(ast)}`,
         [ExpressionType.MAYBE]: (ast: Expression) => `${compile(ast.value)}?`,
         [ExpressionType.SEQUENCE]: (ast: Sequence) => `(?:${ast.value.map(compile).join("")})`,
-        [ExpressionType.CHARACTER]: (ast: Literal) => ast.value,
+        [ExpressionType.CHARACTER]: (ast: Character) => ast.value,
     }[ast.type](ast as any)
 }
 

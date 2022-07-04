@@ -1,10 +1,14 @@
 import { spaces as _ } from "../commonParsers"
 import { RandomGenerator } from "../RandomGenerator"
 import { RandomSeed } from "random-seed"
+import { LiteralParser } from "../Literal"
+import { literal } from "."
 
 import { Expression, ExpressionType } from "./Expression"
 
 export class Character extends Expression {
+    public static parser = new LiteralParser().builder(literal)
+
     constructor(value: string) {
         super(ExpressionType.CHARACTER, value)
     }

@@ -10,7 +10,7 @@ import {
     spaces,
 } from "./commonParsers"
 import { END } from "./keywords"
-import { Any, Expression, Literal, Maybe, Repeat, sequence } from "./ast"
+import { Any, Expression, Character, Maybe, Repeat, sequence } from "./ast"
 
 export const expression = new CustomParser(parseExpression)
 
@@ -37,7 +37,7 @@ export const expressionOrBlock = new AlternativeParser([
 ])
 
 function parseExpression(input: string): ParseResult {
-    const literal = Literal.parser
+    const literal = Character.parser
     const any = Any.parser
     const maybe = Maybe.parser
     const countRangeOf = Repeat.parser

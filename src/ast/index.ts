@@ -1,5 +1,4 @@
 import { spaces as _ } from "../commonParsers"
-import { LiteralParser } from "../Literal"
 
 import { Expression } from "./Expression"
 import { Sequence } from "./Sequence"
@@ -15,16 +14,8 @@ export { Character } from "./Character"
 export { Any } from "./Any"
 export { Maybe } from "./Maybe"
 
-export function character(char: string): Character {
+export function character(char: string): Expression {
     return new Character(char)
-}
-
-function charSeqFromLiteral(s: string): Expression {
-    return sequence(s.split("").map(c => new Character(c)))
-}
-
-export class Literal extends Expression {
-    public static parser = new LiteralParser().builder(charSeqFromLiteral)
 }
 
 export function any(): Expression {
@@ -51,6 +42,6 @@ export function manyOf(value: Expression): Expression {
     return new Repeat(value, 1, undefined)
 }
 
-export function literal(value: string): Expression {
-    return charSeqFromLiteral(value)
+export function literal(str: string): Expression {
+    return sequence(str.split("").map(c => new Character(c)))
 }
