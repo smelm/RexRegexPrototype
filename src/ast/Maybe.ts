@@ -1,7 +1,8 @@
-import { SequenceParser, spaces as _ } from "../commonParsers"
+import { spaces as _ } from "../commonParsers"
 import { expressionOrBlock } from "../Expression"
 import { MAYBE } from "../keywords"
 import { RandomGenerator } from "../RandomGenerator"
+import { SequenceParser } from "../parsing"
 
 import { Expression, ExpressionType } from "./Expression"
 
