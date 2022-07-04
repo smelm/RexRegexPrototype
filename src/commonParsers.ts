@@ -1,27 +1,8 @@
 import { BaseParser, Parser } from "./Parser"
 import { ok, err, ParseResult } from "./ParseResult"
+import { AlternativeParser } from "./parsing"
 import { StringParser } from "./parsing/StringParser"
 import { intersperse } from "./utils"
-
-export class AlternativeParser extends BaseParser {
-    constructor(private parsers: Parser[]) {
-        super()
-    }
-
-    parse(input: string): ParseResult {
-        const errors: string[] = []
-        for (const p of this.parsers) {
-            const result = p.parse(input)
-
-            if (result.isSuccess) {
-                return result
-            }
-
-            errors.push(result.value)
-        }
-        return err(input, `no alternative matched: \n${errors.map(err => "    " + err).join("\n")}`)
-    }
-}
 
 export class RepeatParser extends BaseParser {
     constructor(private parser: Parser, private optional: boolean = false) {

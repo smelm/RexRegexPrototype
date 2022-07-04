@@ -1,6 +1,7 @@
 import { BaseParser } from "../Parser"
 import { ParseResult } from "../ParseResult"
-import { AlternativeParser, RepeatParser } from "../commonParsers"
+import { RepeatParser } from "../commonParsers"
+import { AlternativeParser } from "./AlternativeParser"
 import { StringParser } from "../parsing/StringParser"
 import { escapeNewlines } from "../utils"
 

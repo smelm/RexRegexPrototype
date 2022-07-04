@@ -1,4 +1,5 @@
-import { AlternativeParser, SequenceParser, spaces as _ } from "../commonParsers"
+import { SequenceParser, spaces as _ } from "../commonParsers"
+import { AlternativeParser } from "../parsing"
 import { expressionOrBlock } from "../Expression"
 import { MANY, OF, TO } from "../keywords"
 import { NumberParser } from "../parsing"

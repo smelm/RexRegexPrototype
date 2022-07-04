@@ -1,14 +1,9 @@
 import { CustomParser } from "./Parser"
 import { ParseResult } from "./ParseResult"
 
-import {
-    SequenceParser,
-    AlternativeParser,
-    RepeatParser,
-    newlines,
-    optionalSpaces,
-    spaces,
-} from "./commonParsers"
+import { SequenceParser, RepeatParser, newlines, optionalSpaces, spaces } from "./commonParsers"
+
+import { AlternativeParser } from "./parsing"
 import { END } from "./keywords"
 import { Any, Expression, Character, Maybe, Repeat, sequence } from "./ast"
 
