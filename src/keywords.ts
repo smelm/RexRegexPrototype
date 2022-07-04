@@ -1,4 +1,4 @@
-import { StringParser } from "./commonParsers"
+import { StringParser } from "./parsing"
 
 export const ANY = new StringParser("any").ignore()
 export const MAYBE = new StringParser("maybe").ignore()

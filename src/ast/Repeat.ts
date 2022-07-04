@@ -1,10 +1,12 @@
 import { AlternativeParser, SequenceParser, spaces as _ } from "../commonParsers"
 import { expressionOrBlock } from "../Expression"
 import { MANY, OF, TO } from "../keywords"
-import { number } from "../NumberParser"
+import { NumberParser } from "../parsing"
 import { RandomGenerator } from "../RandomGenerator"
 
 import { Expression, ExpressionType } from "./Expression"
+
+const number = new NumberParser()
 
 // TODO support "0 to many"
 // TODO support "maybe many of", or not?

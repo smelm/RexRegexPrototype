@@ -1,7 +1,8 @@
-import { BaseParser } from "./Parser"
-import { ParseResult } from "./ParseResult"
-import { AlternativeParser, RepeatParser, StringParser } from "./commonParsers"
-import { escapeNewlines } from "./utils"
+import { BaseParser } from "../Parser"
+import { ParseResult } from "../ParseResult"
+import { AlternativeParser, RepeatParser } from "../commonParsers"
+import { StringParser } from "../parsing/StringParser"
+import { escapeNewlines } from "../utils"
 
 export class NumberParser extends BaseParser {
     private parser = new RepeatParser(
@@ -16,5 +17,3 @@ export class NumberParser extends BaseParser {
         return result
     }
 }
-
-export const number = new NumberParser()
