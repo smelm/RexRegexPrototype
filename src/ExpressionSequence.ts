@@ -34,3 +34,5 @@ export class ExpressionSequenceParser extends BaseParser {
         return this.parser.parse(input)
     }
 }
+
+export const expressionSequenceParser = new ExpressionSequenceParser()

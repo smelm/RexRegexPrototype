@@ -33,6 +33,11 @@ export class Character extends Expression {
 
         return [char]
     }
+
+    //TODO handle escaping
+    toRegex(): string {
+        return this.value
+    }
 }
 
 //TODO: this is terrible

@@ -86,4 +86,36 @@ export class Repeat extends Expression {
 
         return result
     }
+    //
+    //TODO make sure that each branch is tested
+    private compileRepeatOperator() {
+        if (this.lower == null) {
+            throw new Error(
+                "to avoid ambiguity between 0 or 1 repetitions, the lower bound of the repeat operator may not be undefined"
+            )
+        }
+
+        const noUpperBound = this.upper == null
+
+        if (noUpperBound) {
+            switch (this.lower) {
+                case 0:
+                    return `*`
+                case 1:
+                    return "+"
+                default:
+                    return `{${this.lower},}`
+            }
+        } else {
+            if (this.lower === this.upper) {
+                return `{${this.lower}}`
+            } else {
+                return `{${this.lower},${this.upper}}`
+            }
+        }
+    }
+
+    toRegex(): string {
+        return `${this.value.toRegex()}${this.compileRepeatOperator()}`
+    }
 }

@@ -1,4 +1,4 @@
-import { any, countOf, countRangeOf, manyOf, maybe, sequence, compile } from "../src"
+import { any, countOf, countRangeOf, Expression, manyOf, maybe, sequence } from "../src"
 
 // TODO: string literals
 const TEST_CASES = [
@@ -19,7 +19,7 @@ const TEST_CASES = [
 ].map(([ast, regex]) => [ast.toString(), regex, ast])
 
 describe.only("codegen", () => {
-    test.each(TEST_CASES)("%s compiles to %s", (_testName, regex, ast) => {
-        expect(compile(ast)).toEqual(regex)
+    test.each(TEST_CASES)("%s compiles to %s", (_testName, regex, ast: Expression) => {
+        expect(ast.toRegex()).toEqual(regex)
     })
 })

@@ -1,7 +1,6 @@
 import {
     any,
     character,
-    compile,
     countOf,
     countRangeOf,
     Expression,
@@ -65,7 +64,7 @@ function makeTestCases(): TestCase[] {
             let strs = valid ? ast.generateValid(generator) : ast.generateInvalid(generator)
 
             for (let str of strs) {
-                cases.push({ input: str, pattern: compile(ast), matches: valid, ast })
+                cases.push({ input: str, pattern: ast.toRegex(), matches: valid, ast })
             }
         }
     }

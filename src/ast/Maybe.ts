@@ -21,4 +21,8 @@ export class Maybe extends Expression {
     generateInvalid(rng: RandomGenerator): string[] {
         return this.value.generateInvalid(rng)
     }
+
+    toRegex(): string {
+        return `${this.value.toRegex()}?`
+    }
 }

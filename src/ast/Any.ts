@@ -23,4 +23,8 @@ export class Any extends Expression {
         //TODO: handle dotall mode here
         return []
     }
+
+    toRegex(): string {
+        return "."
+    }
 }

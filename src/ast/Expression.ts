@@ -9,7 +9,7 @@ export enum ExpressionType {
     CHARACTER = "character",
 }
 
-export class Expression implements InputGenerator {
+export abstract class Expression implements InputGenerator {
     constructor(public type: ExpressionType, public value: any) {}
 
     generateValid(rng: RandomGenerator): string[] {
@@ -23,4 +23,6 @@ export class Expression implements InputGenerator {
     toString(): string {
         return `${this.type}(${this.value.toString()})`
     }
+
+    abstract toRegex(): string
 }
