@@ -1,9 +1,6 @@
-import { Expression } from "./ast"
 import { ExpressionSequenceParser } from "./ExpressionSequence"
 
 export * from "./ast"
-
-// TODO: account for literal escaping
 
 export function parse(input: string) {
     const { value, remaining, isSuccess } = new ExpressionSequenceParser().parse(input)
