@@ -4,6 +4,7 @@ import {
     countOf,
     countRangeOf,
     Expression,
+    group,
     literal,
     manyOf,
     maybe,
@@ -12,25 +13,24 @@ import {
 import { spawnSync } from "child_process"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
 
-interface RegexEngine {
-    name: string
-    match: (regex: string, input: string) => boolean
+interface MatchResult {
+    matches: boolean
+    groups?: Record<string, string>
 }
 
-const PYTHON: RegexEngine = {
-    name: "python",
-    match: (regex: string, input: string) =>
-        runProcess("python3", ["test/engines/python/run.py"], regex, input),
-}
-const PERL: RegexEngine = {
-    name: "perl",
-    match: (regex: string, input: string) =>
-        runProcess("perl", ["test/engines/perl/run.pl"], regex, input),
+interface RegexEngine {
+    name: string
+    match: (regex: string, input: string) => MatchResult
 }
 
 const NODEJS: RegexEngine = {
     name: "nodejs",
-    match: (regex: string, input: string) => new RegExp(regex).test(input),
+    match: (regex: string, input: string) => {
+        const expr = new RegExp(regex)
+        const result = expr.exec(input)
+
+        return { matches: !!result, groups: result?.groups }
+    },
 }
 
 const ENGINES: [string, RegexEngine][] = [/*PYTHON, PERL,*/ NODEJS].map(e => [e.name, e])
@@ -40,7 +40,7 @@ interface TestCase {
     pattern: string
     input: string
     matches: boolean
-    //groups?: any[]
+    groups?: Record<string, string>
 }
 
 const randomSeed = generateRandomSeed()
@@ -48,23 +48,31 @@ const generator = newRandomGenerator(randomSeed)
 
 function makeTestCases(): TestCase[] {
     const asts = [
-        any(),
-        literal("abc"),
-        sequence([character("a"), any(), character("c")]),
-        sequence([character("a"), maybe(character("b")), character("c")]),
-        sequence([character("a"), countOf(3, character("b")), character("c")]),
-        sequence([character("a"), countRangeOf(3, 5, character("b")), character("c")]),
-        sequence([character("a"), countRangeOf(0, 3, character("b")), character("c")]),
-        sequence([character("a"), manyOf(character("b")), character("c")]),
+        [any()],
+        [literal("abc")],
+        [sequence([character("a"), any(), character("c")])],
+        [sequence([character("a"), maybe(character("b")), character("c")])],
+        [sequence([character("a"), countOf(3, character("b")), character("c")])],
+        [sequence([character("a"), countRangeOf(3, 5, character("b")), character("c")])],
+        [sequence([character("a"), countRangeOf(0, 3, character("b")), character("c")])],
+        [sequence([character("a"), manyOf(character("b")), character("c")])],
+        [group("foo", sequence([literal("abc")])), { foo: "abc" }],
     ]
     const cases = []
 
-    for (let ast of asts) {
-        for (let valid of [true, false]) {
-            let strs = valid ? ast.generateValid(generator) : ast.generateInvalid(generator)
+    for (let [ast, groups] of asts) {
+        ast = ast as Expression
+        for (let matches of [true, false]) {
+            let strs = matches ? ast.generateValid(generator) : ast.generateInvalid(generator)
 
             for (let str of strs) {
-                cases.push({ input: str, pattern: ast.toRegex(), matches: valid, ast })
+                cases.push({
+                    input: str,
+                    pattern: ast.toRegex(),
+                    matches: matches,
+                    ast,
+                    groups: matches ? groups : undefined,
+                })
             }
         }
     }
@@ -79,10 +87,11 @@ const TEST_CASES: [string, TestCase][] = makeTestCases().map(c => {
 beforeAll(() => console.log("random seed", randomSeed))
 
 describe.each(ENGINES)("%s regex", (_engineName, engine) => {
-    test.each(TEST_CASES)("%s", async (_name, { pattern, input, ...expected }) => {
-        const matches = engine.match(pattern, input)
+    test.each(TEST_CASES)("%s", async (_name, { pattern, input, groups, matches }) => {
+        const actual = engine.match(pattern, input)
 
-        expect(matches).toEqual(expected.matches)
+        expect(actual.matches).toEqual(matches)
+        expect(actual.groups).toEqual(groups)
     })
 })
 

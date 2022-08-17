@@ -7,6 +7,7 @@ export enum ExpressionType {
     MAYBE = "maybe",
     SEQUENCE = "sequence",
     CHARACTER = "character",
+    GROUP = "group",
 }
 
 export abstract class Expression implements InputGenerator {

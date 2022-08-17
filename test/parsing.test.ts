@@ -7,6 +7,7 @@ import {
     sequence,
     literal,
     Expression,
+    group,
 } from "../src/ast"
 import { parse } from "../src"
 
@@ -42,12 +43,13 @@ const MULTI_LINE_CASES = [
         "maybe\nany\nmaybe any\nmany of any\nend",
         maybe(sequence([any(), maybe(any()), manyOf(any())])),
     ],
+    ['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
 ].map(generateTestNames)
 
 describe("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const result = parse(input)
-        expect(result).toEqual(expected)
+        expect(expected).toEqual(result)
     })
 })
 

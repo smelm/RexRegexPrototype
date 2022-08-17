@@ -4,6 +4,7 @@ import { Repeat } from "./Repeat"
 import { Character } from "./Character"
 import { Any } from "./Any"
 import { Maybe } from "./Maybe"
+import { Group } from "./Group"
 
 export { Expression, ExpressionType } from "./Expression"
 export { Sequence } from "./Sequence"
@@ -11,6 +12,7 @@ export { Repeat } from "./Repeat"
 export { Character } from "./Character"
 export { Any } from "./Any"
 export { Maybe } from "./Maybe"
+export { Group } from "./Group"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -42,4 +44,8 @@ export function manyOf(value: Expression): Expression {
 
 export function literal(str: string): Expression {
     return sequence(str.split("").map(c => new Character(c)))
+}
+
+export function group(name: string, content: Expression): Expression {
+    return new Group(name, content)
 }
