@@ -1,15 +1,7 @@
-import { expressionOrBlock } from "../Expression"
-import { MAYBE } from "../keywords"
 import { RandomGenerator } from "../RandomGenerator"
-import { SequenceParser, spaces as _ } from "../parsing"
-
 import { Expression, ExpressionType } from "./Expression"
 
 export class Maybe extends Expression {
-    public static parser = new SequenceParser([MAYBE, expressionOrBlock]).builder(
-        ([expr]: Expression[]) => new Maybe(expr)
-    )
-
     constructor(value: Expression) {
         super(ExpressionType.MAYBE, value)
     }

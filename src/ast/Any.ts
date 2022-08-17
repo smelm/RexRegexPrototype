@@ -1,12 +1,9 @@
-import { ANY } from "../keywords"
 import { RandomGenerator } from "../RandomGenerator"
 
 import { Expression, ExpressionType } from "./Expression"
 import { randomCharacter } from "./Character"
 
 export class Any extends Expression {
-    public static parser = ANY.builder(() => new Any())
-
     constructor() {
         super(ExpressionType.ANY, "any")
     }

@@ -1,37 +1,9 @@
-import { SequenceParser, AlternativeParser } from "../parsing"
-import { expressionOrBlock } from "../Expression"
-import { MANY, OF, TO } from "../keywords"
-import { NumberParser, spaces as _ } from "../parsing"
 import { RandomGenerator } from "../RandomGenerator"
-
 import { Expression, ExpressionType } from "./Expression"
-
-const number = new NumberParser()
 
 // TODO support "0 to many"
 // TODO support "maybe many of", or not?
 export class Repeat extends Expression {
-    public static parser = new AlternativeParser([
-        new SequenceParser([MANY, _, OF, expressionOrBlock]).builder(
-            ([expr]: Expression[]) => new Repeat(expr, 1)
-        ),
-        new SequenceParser([number, _, OF, expressionOrBlock]).builder(
-            ([number, expr]: any[]) => new Repeat(expr, number, number)
-        ),
-        new SequenceParser([
-            number,
-            _,
-            TO,
-            _,
-            new AlternativeParser([number, MANY]),
-            _,
-            OF,
-            expressionOrBlock,
-        ]).builder(
-            ([from, to, expr]: any[]) => new Repeat(expr, from, to === "many" ? undefined : to)
-        ),
-    ])
-
     constructor(value: Expression, public lower: number, public upper?: number) {
         super(ExpressionType.REPEAT, value)
     }
