@@ -1,5 +1,5 @@
 import { BaseParser, err, ok, ParseResult } from "."
-import { escapeNewlines } from "../utils"
+import { escapeNewlines } from "./utils"
 
 export class StringParser extends BaseParser {
     constructor(private str: string, private value?: any) {

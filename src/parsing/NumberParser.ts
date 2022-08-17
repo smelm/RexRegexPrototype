@@ -1,5 +1,5 @@
 import { BaseParser, ParseResult, AlternativeParser, RepeatParser, StringParser } from "."
-import { escapeNewlines } from "../utils"
+import { escapeNewlines } from "./utils"
 
 export class NumberParser extends BaseParser {
     private parser = new RepeatParser(
