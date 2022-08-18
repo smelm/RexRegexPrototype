@@ -1,17 +1,17 @@
-import { ExpressionSequenceParser } from "./ExpressionSequence"
+import { any, Expression, sequence } from "./ast"
+import { Parser, string } from "parsimmon"
 
 export * from "./ast"
 
-export function parse(input: string) {
-    const { value, remaining, isSuccess } = new ExpressionSequenceParser().parse(input)
+export function parse(input: string): Expression {
+    let expressionParser: Parser<Expression> = string("any").map(any)
+    let dslParser: Parser<Expression[]> = expressionParser.many()
 
-    if (isSuccess && remaining !== "") {
-        return `input could not be parsed completely, "${remaining} could not be parsed"`
-    }
+    let result = dslParser.tryParse(input)
 
-    if (value.length === 1) {
-        return value[0]
+    if (result.length === 1) {
+        return result[0]
     } else {
-        return value
+        return sequence(result)
     }
 }

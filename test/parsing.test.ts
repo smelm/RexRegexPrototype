@@ -17,18 +17,20 @@ function generateTestNames([input, ast]) {
 
 const SINGLE_LINE_CASES = [
     ["any", any()],
-    ['"abc"', literal("abc")],
-    ["5 of any", countOf(5, any())],
-    ["many of any", manyOf(any())],
-    ["maybe any", maybe(any())],
-    ["1 to 5 of any", countRangeOf(1, 5, any())],
-    ["maybe 5 of any", maybe(countOf(5, any()))],
-    ["0 to many of any", countRangeOf(0, undefined, any())],
+    //['"abc"', literal("abc")],
+    //["5 of any", countOf(5, any())],
+    //["many of any", manyOf(any())],
+    //["maybe any", maybe(any())],
+    //["1 to 5 of any", countRangeOf(1, 5, any())],
+    //["maybe 5 of any", maybe(countOf(5, any()))],
+    //["0 to many of any", countRangeOf(0, undefined, any())],
 ].map(generateTestNames)
 
-describe("single line expressions", () => {
+describe.only("single line expressions", () => {
     test.each(SINGLE_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        expect(parse(input)).toEqual(expected)
+        const result = parse(input)
+        console.log(result)
+        expect(result).toEqual(expected)
     })
 })
 
