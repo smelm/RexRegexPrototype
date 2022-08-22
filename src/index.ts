@@ -34,9 +34,25 @@ function debug(label: string): Parser {
     }
 }
 
+const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/)
+
+function block(
+    header: Parser<any>,
+    expression: Parser<Expression>,
+    expressionSequence: Parser<Expression[]>
+): Parser<Expression> {
+    return alt(
+        header
+            .then(statementSeperator)
+            .then(expressionSequence)
+            .skip(statementSeperator)
+            .skip(kw.end),
+        header.then(_).then(expression)
+    )
+}
+
 export function parse(input: string): Expression {
     const QUOTE: Parser<string> = string('"')
-    const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/)
 
     const dslParser: Language = createLanguage({
         expressionSequence: r =>
@@ -73,15 +89,9 @@ export function parse(input: string): Expression {
                     return builders.repeat(exp, lower, upper)
                 }
             }),
-        manyOneline: r => seq(kw.many, _, kw.of, _).then(r.expression),
-        manyMultiline: r =>
-            seq(kw.many, _, kw.of, statementSeperator)
-                .then(r.expressionSequence)
-                .chain(debug("multiline many"))
-                .skip(statementSeperator)
-                .skip(kw.end),
-        many: r => alt(r.manyMultiline, r.manyOneline).map(builders.manyOf),
-        maybe: r => seq(kw.maybe, _).then(r.expression).map(builders.maybe),
+        many: r =>
+            block(seq(kw.many, _, kw.of), r.expression, r.expressionSequence).map(builders.manyOf),
+        maybe: r => block(kw.maybe, r.expression, r.expressionSequence).map(builders.maybe),
         number: () => regex(/[0-9]+/).map(Number),
     })
 
