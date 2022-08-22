@@ -22,6 +22,13 @@ export function countRangeOf(from: number, to: number, value: any): Expression {
     return new Repeat(value, from, to)
 }
 
+/**
+ * if upper is undefined => open upper bound
+ */
+export function repeat(value: Expression, lower: number, upper?: number): Expression {
+    return new Repeat(value, lower, upper)
+}
+
 export function maybe(value: any): Expression {
     return new Maybe(value)
 }

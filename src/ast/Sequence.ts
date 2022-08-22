@@ -1,16 +1,10 @@
 import { spaces as _ } from "../parsing"
-import { expressionSequenceParser } from "../ExpressionSequence"
 import { RandomGenerator } from "../RandomGenerator"
 import shuffle from "shuffle-array"
 
 import { Expression, ExpressionType } from "./Expression"
 
 export class Sequence extends Expression {
-    // TODO for some reason new ExpressionSequenceParser() does not work
-    // because "undefined is not a constructor"
-    // seems like a circular reference to me
-    public static parser = expressionSequenceParser
-
     constructor(value: Expression[]) {
         super(ExpressionType.SEQUENCE, value)
     }
