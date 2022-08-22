@@ -35,17 +35,17 @@ describe("single line expressions", () => {
 
 const MULTI_LINE_CASES = [
     //['\n"abc"\n\n', literal("abc")],
-    //['any\nmaybe "hello"\nmany of any', sequence([any(), maybe(literal("hello")), manyOf(any())])],
+    ['any\nmaybe "hello"\nmany of any', sequence([any(), maybe(literal("hello")), manyOf(any())])],
     ["maybe\nany\nend", maybe(any())],
     ["many of\nany\nend", manyOf(any())],
-    //["3 of\nany\nend", countOf(3, any())],
-    //["3 to 5 of\nany\nend", countRangeOf(3, 5, any())],
-    //["maybe\nany\nmaybe any\nend", maybe(sequence([any(), maybe(any())]))],
-    //[
-    //    "maybe\nany\nmaybe any\nmany of any\nend",
-    //    maybe(sequence([any(), maybe(any()), manyOf(any())])),
-    //],
-    //['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
+    ["3 of\nany\nend", countOf(3, any())],
+    ["3 to 5 of\nany\nend", countRangeOf(3, 5, any())],
+    ["maybe\nany\nmaybe any\nend", maybe(sequence([any(), maybe(any())]))],
+    [
+        "maybe\nany\nmaybe any\nmany of any\nend",
+        maybe(sequence([any(), maybe(any()), manyOf(any())])),
+    ],
+    ['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
 ].map(generateTestNames)
 
 describe("multi line expressions", () => {

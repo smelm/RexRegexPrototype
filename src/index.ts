@@ -1,4 +1,4 @@
-import { Expression } from "./ast"
+import { Expression, group } from "./ast"
 import {
     alt,
     Parser,
@@ -36,23 +36,30 @@ function debug(label: string): Parser {
 
 const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/)
 
-function block(
+type BlockResult<T> = { header: T; content: Expression }
+
+function block<T>(
     header: Parser<any>,
     expression: Parser<Expression>,
     expressionSequence: Parser<Expression[]>
-): Parser<Expression> {
+): Parser<BlockResult<T>> {
     return alt(
-        header
-            .then(statementSeperator)
-            .then(expressionSequence)
-            .skip(statementSeperator)
-            .skip(kw.end),
-        header.then(_).then(expression)
+        seqObj<{ header: any; content: any }>(
+            ["header", header],
+            statementSeperator,
+            ["content", expressionSequence],
+            statementSeperator,
+            kw.end
+        ),
+        seqObj<BlockResult<T>>(["header", header], _, ["content", expression])
     )
 }
 
+type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
+
 export function parse(input: string): Expression {
     const QUOTE: Parser<string> = string('"')
+    const identifier: Parser<string> = regex(/[a-zA-Z]\w*/)
 
     const dslParser: Language = createLanguage({
         expressionSequence: r =>
@@ -65,33 +72,43 @@ export function parse(input: string): Expression {
                     }
                 })
                 .desc("expression sequence"),
-        expression: r => alt(r.any, r.literal, r.rangeTimes, r.many, r.maybe).desc("expression"),
+        expression: r =>
+            alt(r.any, r.literal, r.rangeTimes, r.many, r.maybe, r.group).desc("expression"),
         any: () => kw.any.map(builders.any),
         literal: () => regex(/[^"]+/).wrap(QUOTE, QUOTE).map(builders.literal),
         upperBound: r =>
             seq(_, kw.to, _)
                 .then(alt(r.number, string("many")))
                 .or(of("lower")),
+        rangeHeader: r =>
+            seqObj<RepeatBounds>(["lower", r.number], ["upper", r.upperBound], _, kw.of),
         rangeTimes: r =>
-            seqObj<{ lower: number; upper: number | "many" | "lower"; exp: Expression }>(
-                ["lower", r.number],
-                ["upper", r.upperBound],
-                _,
-                kw.of,
-                _,
-                ["exp", r.expression]
-            ).map(({ lower, upper, exp }) => {
-                if (upper === "lower") {
-                    return builders.repeat(exp, lower, lower)
-                } else if (upper === "many") {
-                    return builders.repeat(exp, lower, undefined)
-                } else {
-                    return builders.repeat(exp, lower, upper)
+            block<RepeatBounds>(r.rangeHeader, r.expression, r.expressionSequence).map(
+                ({ header, content }: BlockResult<RepeatBounds>) => {
+                    const { lower, upper } = header
+                    if (upper === "lower") {
+                        return builders.repeat(content, lower, lower)
+                    } else if (upper === "many") {
+                        return builders.repeat(content, lower, undefined)
+                    } else {
+                        return builders.repeat(content, lower, upper)
+                    }
                 }
-            }),
+            ),
         many: r =>
-            block(seq(kw.many, _, kw.of), r.expression, r.expressionSequence).map(builders.manyOf),
-        maybe: r => block(kw.maybe, r.expression, r.expressionSequence).map(builders.maybe),
+            block<never>(seq(kw.many, _, kw.of), r.expression, r.expressionSequence).map(
+                ({ content }: BlockResult<never>) => builders.manyOf(content)
+            ),
+        maybe: r =>
+            block<never>(kw.maybe, r.expression, r.expressionSequence).map(
+                ({ content }: BlockResult<never>) => builders.maybe(content)
+            ),
+        group: r =>
+            block<string>(
+                kw.begin.then(_).then(identifier),
+                r.expression,
+                r.expressionSequence
+            ).map(({ header, content }: BlockResult<string>) => group(header, content)),
         number: () => regex(/[0-9]+/).map(Number),
     })
 
