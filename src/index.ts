@@ -12,6 +12,7 @@ import {
     seq,
     sepBy,
     succeed,
+    newline,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
 
@@ -27,8 +28,8 @@ const kw = {
     begin: string("begin").desc("begin"),
 }
 
-function debug(label: string): Parser {
-    return function (result: any) {
+function debug<T>(label: string): (result: T) => Parser<T> {
+    return function (result: T) {
         console.log(label, result)
         return succeed(result)
     }
@@ -63,14 +64,18 @@ export function parse(input: string): Expression {
 
     const dslParser: Language = createLanguage({
         expressionSequence: r =>
-            sepBy(r.expression, statementSeperator)
-                .map((expr: Expression[]) => {
-                    if (expr.length === 1) {
-                        return expr[0]
-                    } else {
-                        return builders.sequence(expr)
-                    }
-                })
+            newline
+                .many()
+                .then(
+                    sepBy(r.expression, statementSeperator).map((expr: Expression[]) => {
+                        if (expr.length === 1) {
+                            return expr[0]
+                        } else {
+                            return builders.sequence(expr)
+                        }
+                    })
+                )
+                .skip(newline.many())
                 .desc("expression sequence"),
         expression: r =>
             alt(r.any, r.literal, r.rangeTimes, r.many, r.maybe, r.group).desc("expression"),
