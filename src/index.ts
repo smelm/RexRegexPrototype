@@ -64,18 +64,14 @@ export function parse(input: string): Expression {
 
     const dslParser: Language = createLanguage({
         expressionSequence: r =>
-            newline
-                .many()
-                .then(
-                    sepBy(r.expression, statementSeperator).map((expr: Expression[]) => {
-                        if (expr.length === 1) {
-                            return expr[0]
-                        } else {
-                            return builders.sequence(expr)
-                        }
-                    })
-                )
-                .skip(newline.many())
+            sepBy(r.expression, statementSeperator)
+                .map((expr: Expression[]) => {
+                    if (expr.length === 1) {
+                        return expr[0]
+                    } else {
+                        return builders.sequence(expr)
+                    }
+                })
                 .desc("expression sequence"),
         expression: r =>
             alt(r.any, r.literal, r.rangeTimes, r.many, r.maybe, r.group).desc("expression"),

@@ -34,7 +34,7 @@ describe("single line expressions", () => {
 })
 
 const MULTI_LINE_CASES = [
-    ['\n"abc"\n\n', literal("abc")],
+    //['\n"abc"\n\n', literal("abc")],
     ['any\nmaybe "hello"\nmany of any', sequence([any(), maybe(literal("hello")), manyOf(any())])],
     ["maybe\nany\nend", maybe(any())],
     ["many of\nany\nend", manyOf(any())],
