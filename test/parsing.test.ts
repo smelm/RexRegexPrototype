@@ -8,6 +8,7 @@ import {
     literal,
     Expression,
     group,
+    alternative,
 } from "../src/ast"
 import { parse } from "../src"
 
@@ -24,6 +25,8 @@ const SINGLE_LINE_CASES = [
     ["1 to 5 of any", countRangeOf(1, 5, any())],
     ["maybe 5 of any", maybe(countOf(5, any()))],
     ["0 to many of any", countRangeOf(0, undefined, any())],
+    ['either "a" or "b"', alternative(literal("a"), literal("b"))],
+    ['either "a" or "b" or "c"', alternative(literal("a"), literal("b"), literal("c"))],
 ].map(generateTestNames)
 
 describe("single line expressions", () => {
@@ -46,6 +49,8 @@ const MULTI_LINE_CASES = [
         maybe(sequence([any(), maybe(any()), manyOf(any())])),
     ],
     ['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
+    ['either\n"a"\nor\n"b"\nend', alternative(literal("a"), literal("b"))],
+    ['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
 ].map(generateTestNames)
 
 describe("multi line expressions", () => {
