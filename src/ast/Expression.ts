@@ -8,22 +8,17 @@ export enum ExpressionType {
     SEQUENCE = "sequence",
     CHARACTER = "character",
     GROUP = "group",
+    ALTERNATIVE = "alternative",
 }
 
 export abstract class Expression implements InputGenerator {
     constructor(public type: ExpressionType, public value: any) {}
 
-    generateValid(rng: RandomGenerator): string[] {
-        throw new Error("not implemented")
-    }
-
-    generateInvalid(rng: RandomGenerator): string[] {
-        throw new Error("not implemented")
-    }
+    abstract generateValid(rng: RandomGenerator): string[]
+    abstract generateInvalid(rng: RandomGenerator): string[]
+    abstract toRegex(): string
 
     toString(): string {
         return `${this.type}(${this.value.toString()})`
     }
-
-    abstract toRegex(): string
 }

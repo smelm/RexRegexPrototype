@@ -5,6 +5,7 @@ import { Character } from "./Character"
 import { Any } from "./Any"
 import { Maybe } from "./Maybe"
 import { Group } from "./Group"
+import { Alternative } from "./Alternative"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -47,4 +48,8 @@ export function literal(str: string): Expression {
 
 export function group(name: string, content: Expression): Expression {
     return new Group(name, content)
+}
+
+export function alternative(...alternatives: Expression[]): Expression {
+    return new Alternative(alternatives)
 }

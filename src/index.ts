@@ -12,7 +12,6 @@ import {
     seq,
     sepBy,
     succeed,
-    newline,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
 

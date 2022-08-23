@@ -9,6 +9,7 @@ import {
     manyOf,
     maybe,
     sequence,
+    alternative,
 } from "../src"
 import { spawnSync } from "child_process"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
@@ -57,6 +58,8 @@ function makeTestCases(): TestCase[] {
         [sequence([character("a"), countRangeOf(0, 3, character("b")), character("c")])],
         [sequence([character("a"), manyOf(character("b")), character("c")])],
         [group("foo", sequence([literal("abc")])), { foo: "abc" }],
+        [alternative(literal("foo"), literal("bar"))],
+        [alternative(literal("foo"), any())],
     ]
     const cases = []
 
