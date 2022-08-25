@@ -30,9 +30,9 @@ export class CharacterClass extends Expression {
     }
 
     private generateRanges(members: string[], ranges: [string, string][]): [number, number][] {
-        ranges = shuffle([...ranges, ...(members.map(m => [m, m]) as [string, string][])])
+        ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
 
-        return ranges.map(([lower, upper]) => {
+        let bounds = ranges.map(([lower, upper]) => {
             if (lower.length !== 1 || upper.length !== 1) {
                 throw new Error(`expected single character got ${lower} - ${upper}`)
             }
@@ -47,7 +47,20 @@ export class CharacterClass extends Expression {
             }
 
             return [lowerCode, upperCode]
-        })
+        }) as [number, number][]
+
+        bounds.sort(([a], [b]) => a - b)
+
+        // prune overlaps
+        const lower = 0
+        const upper = 1
+        for (let i = 0; i < bounds.length; i++) {
+            if (bounds[i + 1][lower] < bounds[i][upper]) {
+                bounds[i + 1][lower] = bounds[i][upper] + 1
+            }
+        }
+
+        return bounds
     }
 
     private verifyRanges() {}
@@ -102,10 +115,21 @@ export class CharacterClass extends Expression {
     }
 
     generateInvalid(rng: RandomSeed): string[] {
+        //TODO: use actual unicode maximum
+        const maxValidCharacter = 20_000
+        for (let i = 0; i < this.numSamplesToGenerate; i++) {
+            const charRange = maxValidCharacter - this.size() - i
+        }
         return []
     }
 
     toRegex(): string {
-        return ""
+        return `[${this.ranges
+            .map(([lower, upper]) =>
+                lower === upper
+                    ? String.fromCharCode(lower)
+                    : String.fromCharCode(lower) + "-" + String.fromCharCode(upper)
+            )
+            .join("")}]`
     }
 }
