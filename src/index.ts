@@ -108,12 +108,12 @@ export function parse(input: string): Expression {
                 }
             ),
         many: r =>
-            lineOrBlock<never>(seq(kw.many, _, kw.of), r.expression, r.expressionSequence).map(
-                ({ content }: BlockResult<never>) => builders.manyOf(content)
+            lineOrBlock<any>(seq(kw.many, _, kw.of), r.expression, r.expressionSequence).map(
+                ({ content }: BlockResult<any>) => builders.manyOf(content)
             ),
         maybe: r =>
-            lineOrBlock<never>(kw.maybe, r.expression, r.expressionSequence).map(
-                ({ content }: BlockResult<never>) => builders.maybe(content)
+            lineOrBlock<any>(kw.maybe, r.expression, r.expressionSequence).map(
+                ({ content }: BlockResult<any>) => builders.maybe(content)
             ),
         group: r =>
             lineOrBlock<string>(
