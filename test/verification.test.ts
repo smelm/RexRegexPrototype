@@ -10,6 +10,7 @@ import {
     maybe,
     sequence,
     alternative,
+    characterClass,
 } from "../src"
 import { spawnSync } from "child_process"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
@@ -60,6 +61,9 @@ function makeTestCases(): TestCase[] {
         [group("foo", sequence([literal("abc")])), { foo: "abc" }],
         [alternative(literal("foo"), literal("bar"))],
         [alternative(literal("foo"), any())],
+        [characterClass("a", "b", "c")],
+        [characterClass(["x", "z"])],
+        [characterClass("a", "b", ["x", "z"])],
     ]
     const cases = []
 

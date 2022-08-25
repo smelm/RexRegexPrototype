@@ -9,6 +9,7 @@ export enum ExpressionType {
     CHARACTER = "character",
     GROUP = "group",
     ALTERNATIVE = "alternative",
+    CHARACTER_CLASS = "characterClass",
 }
 
 export abstract class Expression implements InputGenerator {

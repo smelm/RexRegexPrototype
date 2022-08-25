@@ -6,6 +6,7 @@ import { Any } from "./Any"
 import { Maybe } from "./Maybe"
 import { Group } from "./Group"
 import { Alternative } from "./Alternative"
+import { CharacterClass } from "./CharacterClass"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -52,4 +53,11 @@ export function group(name: string, content: Expression): Expression {
 
 export function alternative(...alternatives: Expression[]): Expression {
     return new Alternative(alternatives)
+}
+
+export function characterClass(...members: (string | [string, string])[]): Expression {
+    const characters = members.filter(m => typeof m === "string") as string[]
+    const ranges = members.filter(m => typeof m !== "string") as [string, string][]
+
+    return new CharacterClass(characters, ranges)
 }
