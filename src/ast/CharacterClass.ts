@@ -1,9 +1,15 @@
 import { RandomSeed } from "random-seed"
-import { cummulativeSum, randomInt, shuffle } from "../utils"
+import { cummulativeSum, randomInt } from "../utils"
 import { Expression, ExpressionType } from "./Expression"
 
+type Range = [number, number]
+
+// to index into ranges
+const LOWER = 0
+const UPPER = 1
+
 export class CharacterClass extends Expression {
-    private ranges: [number, number][]
+    private ranges: Range[]
     /*
      * Contains what number of character the range ends at
      * example: [ a-b d e-f x ]
@@ -29,7 +35,7 @@ export class CharacterClass extends Expression {
         this.endIndices = cummulativeSum(this.ranges.map(this.rangeLength))
     }
 
-    private generateRanges(members: string[], ranges: [string, string][]): [number, number][] {
+    private generateRanges(members: string[], ranges: [string, string][]): Range[] {
         ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
 
         let bounds = ranges.map(([lower, upper]) => {
@@ -47,16 +53,14 @@ export class CharacterClass extends Expression {
             }
 
             return [lowerCode, upperCode]
-        }) as [number, number][]
+        }) as Range[]
 
         bounds.sort(([a], [b]) => a - b)
 
         // prune overlaps
-        const lower = 0
-        const upper = 1
         for (let i = 0; i < bounds.length; i++) {
-            if (bounds[i + 1][lower] < bounds[i][upper]) {
-                bounds[i + 1][lower] = bounds[i][upper] + 1
+            if (bounds[i + 1][LOWER] < bounds[i][UPPER]) {
+                bounds[i + 1][LOWER] = bounds[i][UPPER] + 1
             }
         }
 
@@ -65,7 +69,7 @@ export class CharacterClass extends Expression {
 
     private verifyRanges() {}
 
-    private rangeLength([lower, upper]: [number, number]): number {
+    private rangeLength([lower, upper]: Range): number {
         return upper - lower + 1
     }
 
@@ -102,7 +106,7 @@ export class CharacterClass extends Expression {
         return samples
     }
 
-    private charFromRange([lower, upper]: [number, number], charIndex: number): string {
+    private charFromRange([lower, upper]: Range, charIndex: number): string {
         if (lower + charIndex > upper) {
             throw new Error(
                 `Character index ${charIndex} out of range in char range ${String.fromCharCode(
@@ -115,12 +119,28 @@ export class CharacterClass extends Expression {
     }
 
     generateInvalid(rng: RandomSeed): string[] {
+        return []
+    }
+
+    private invertRanges(ranges: Range[]): Range[] {
         //TODO: use actual unicode maximum
         const maxValidCharacter = 20_000
-        for (let i = 0; i < this.numSamplesToGenerate; i++) {
-            const charRange = maxValidCharacter - this.size() - i
+        const minValidCharacter = 0
+
+        const invertedRanges: Range[] = []
+
+        let currentLower = minValidCharacter
+        for (let [lower, upper] of this.ranges) {
+            if (currentLower < lower) {
+                invertedRanges.push([currentLower, lower - 1])
+            }
+            currentLower = upper + 1
         }
-        return []
+        const [lastRange] = this.ranges.slice(-1)
+        const maxOfCharClass = lastRange[UPPER]
+        invertedRanges.push([maxOfCharClass + 1, maxValidCharacter])
+
+        return invertedRanges
     }
 
     toRegex(): string {
