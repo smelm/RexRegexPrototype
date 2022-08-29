@@ -1,6 +1,7 @@
 import { RandomSeed } from "random-seed"
 import { cummulativeSum, randomInt } from "../utils"
 import { Expression, ExpressionType } from "./Expression"
+import { WrappingExpression } from "./WrappingExpression"
 
 class CharRange {
     constructor(public lower: number, public upper: number) {
@@ -40,6 +41,14 @@ class CharRange {
 
     length() {
         return this.upper - this.lower + 1
+    }
+
+    toString(): string {
+        if (this.lower === this.upper) {
+            return String.fromCharCode(this.lower)
+        } else {
+            return `${String.fromCharCode(this.lower)}-${String.fromCharCode(this.upper)}`
+        }
     }
 }
 
@@ -133,7 +142,7 @@ class RangeList {
     }
 }
 
-export class CharacterClass extends Expression {
+export class CharacterClass extends WrappingExpression {
     private ranges: RangeList
 
     constructor(
@@ -154,6 +163,10 @@ export class CharacterClass extends Expression {
         ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
 
         return RangeList.fromStringList(ranges)
+    }
+
+    contentToString(): string {
+        return this.ranges.map<string>(r => r.toString()).join(", ")
     }
 
     generateValid(rng: RandomSeed): string[] {

@@ -5,7 +5,7 @@ import { randomCharacter } from "./Character"
 
 export class Any extends Expression {
     constructor() {
-        super(ExpressionType.ANY, "any")
+        super(ExpressionType.ANY)
     }
 
     toString(): string {

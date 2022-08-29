@@ -2,14 +2,15 @@ import { RandomGenerator } from "../RandomGenerator"
 import shuffle from "shuffle-array"
 
 import { Expression, ExpressionType } from "./Expression"
+import { WrappingExpression } from "./WrappingExpression"
 
-export class Sequence extends Expression {
-    constructor(value: Expression[]) {
-        super(ExpressionType.SEQUENCE, value)
+export class Sequence extends WrappingExpression {
+    constructor(private value: Expression[]) {
+        super(ExpressionType.SEQUENCE)
     }
 
-    toString(): string {
-        return `${this.type}(${this.value.map((v: Expression) => v.toString()).join(", ")})`
+    contentToString(): string {
+        return this.value.map((v: Expression) => v.toString()).join(", ")
     }
 
     private combinations(examplesPerElement: string[][]): string[] {

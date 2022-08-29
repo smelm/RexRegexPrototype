@@ -1,15 +1,16 @@
 import { RandomGenerator } from "../RandomGenerator"
 import { RandomSeed } from "random-seed"
 
-import { Expression, ExpressionType } from "./Expression"
+import { ExpressionType } from "./Expression"
+import { WrappingExpression } from "./WrappingExpression"
 
-export class Character extends Expression {
-    constructor(value: string) {
-        super(ExpressionType.CHARACTER, value)
+export class Character extends WrappingExpression {
+    constructor(private value: string) {
+        super(ExpressionType.CHARACTER)
     }
 
-    toString(): string {
-        return `${this.type}(${this.value})`
+    contentToString(): string {
+        return this.value
     }
 
     generateValid(rng: RandomSeed): string[] {

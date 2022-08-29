@@ -1,15 +1,16 @@
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
+import { WrappingExpression } from "./WrappingExpression"
 
 // TODO support "0 to many"
 // TODO support "maybe many of", or not?
-export class Repeat extends Expression {
-    constructor(value: Expression, public lower: number, public upper?: number) {
-        super(ExpressionType.REPEAT, value)
+export class Repeat extends WrappingExpression {
+    constructor(private value: Expression, public lower: number, public upper?: number) {
+        super(ExpressionType.REPEAT)
     }
 
-    toString(): string {
-        return `${this.type}(${this.lower}, ${this.upper}, ${this.value.toString()})`
+    contentToString(): string {
+        return `${this.value.toString()}, ${this.lower}-${this.upper}`
     }
 
     /**

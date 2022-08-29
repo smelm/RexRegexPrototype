@@ -1,13 +1,18 @@
 import { RandomSeed } from "random-seed"
 import { Expression, ExpressionType } from "./Expression"
+import { WrappingExpression } from "./WrappingExpression"
 
-export class Alternative extends Expression {
+export class Alternative extends WrappingExpression {
     constructor(private alternatives: Expression[]) {
-        super(ExpressionType.ALTERNATIVE, alternatives)
+        super(ExpressionType.ALTERNATIVE)
     }
 
     toRegex(): string {
         return this.alternatives.map((e: Expression) => e.toRegex()).join("|")
+    }
+
+    contentToString(): string {
+        return this.alternatives.map(a => a.toString()).join(", ")
     }
 
     private matchedByAlternative(input: string): boolean {

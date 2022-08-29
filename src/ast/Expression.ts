@@ -13,13 +13,10 @@ export enum ExpressionType {
 }
 
 export abstract class Expression implements InputGenerator {
-    constructor(public type: ExpressionType, public value: any) {}
+    constructor(public type: ExpressionType) {}
 
     abstract generateValid(rng: RandomGenerator): string[]
     abstract generateInvalid(rng: RandomGenerator): string[]
     abstract toRegex(): string
-
-    toString(): string {
-        return `${this.type}(${this.value.toString()})`
-    }
+    abstract toString(): string
 }
