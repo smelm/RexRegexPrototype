@@ -43,8 +43,7 @@ class CharRange {
     }
 }
 
-export class CharacterClass extends Expression {
-    private ranges: CharRange[]
+class RangeList {
     /*
      * Contains what number of character the range ends at
      * example: [ a-b d e-f x ]
@@ -52,49 +51,45 @@ export class CharacterClass extends Expression {
      */
     private endIndices: number[]
 
-    constructor(
-        members: string[],
-        ranges: [string, string][],
-        private numSamplesToGenerate: number = 5
-    ) {
-        super(ExpressionType.CHARACTER_CLASS, null)
-
-        this.ranges = this.generateRanges(members, ranges)
-
-        if (this.numSamplesToGenerate > this.size()) {
-            this.numSamplesToGenerate = this.size()
-        }
-
-        this.endIndices = cummulativeSum(this.ranges.map(r => r.length()))
+    constructor(private ranges: CharRange[]) {
+        this.endIndices = this.generateEndIndices()
     }
 
-    private generateRanges(members: string[], ranges: [string, string][]): CharRange[] {
-        ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
+    private generateEndIndices(): number[] {
+        return cummulativeSum(this.ranges.map(r => r.length()))
+    }
 
+    static fromStringList(ranges: [string, string][]): RangeList {
         let charRanges = ranges.map(([lower, upper]) => CharRange.fromStrings(lower, upper))
 
         charRanges.sort((a, b) => a.lower - b.lower)
+        this.pruneOverlaps(charRanges)
 
-        // prune overlaps
-        for (let i = 0; i < charRanges.length - 1; i++) {
-            if (charRanges[i].upper > charRanges[i + 1].lower) {
-                charRanges[i + 1].lower = charRanges[i].upper + 1
+        return new RangeList(charRanges)
+    }
+
+    private static pruneOverlaps(ranges: CharRange[]) {
+        for (let i = 0; i < ranges.length - 1; i++) {
+            if (ranges[i].upper > ranges[i + 1].lower) {
+                ranges[i + 1].lower = ranges[i].upper + 1
             }
         }
-
-        return charRanges
     }
 
-    private size(): number {
-        return this.ranges.map(r => r.length()).reduce((a, b) => a + b, 0)
+    public size(): number {
+        return this.ranges.map(r => r.length()).reduce((a: number, b: number) => a + b, 0)
     }
 
-    generateValid(rng: RandomSeed): string[] {
+    map<T>(func: (r: CharRange) => T): T[] {
+        return this.ranges.map(func)
+    }
+
+    sample(n: number): string[] {
         const size = this.size()
         const samples = []
         const wasGenerated: boolean[][] = this.ranges.map(r => new Array(r.length()).fill(false))
 
-        for (let i = 0; i < this.numSamplesToGenerate; i++) {
+        for (let i = 0; i < n; i++) {
             const ind = randomInt(size)
             const rangeIndex = this.endIndices.findIndex(end => ind < end)!
 
@@ -116,11 +111,7 @@ export class CharacterClass extends Expression {
         return samples
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
-        return []
-    }
-
-    static invertRanges(ranges: CharRange[]): CharRange[] {
+    invert(): RangeList {
         //TODO: use actual unicode maximum
         const maxValidCharacter = 20_000
         const minValidCharacter = 0
@@ -128,18 +119,49 @@ export class CharacterClass extends Expression {
         const invertedRanges: CharRange[] = []
 
         let currentLower = minValidCharacter
-        for (let r of ranges) {
-            const [lower, upper] = r.toList()
+        for (let { lower, upper } of this.ranges) {
             if (currentLower < lower) {
-                invertedRanges.push(new CharRange(currentLower, r.lower - 1))
+                invertedRanges.push(new CharRange(currentLower, lower - 1))
             }
             currentLower = upper + 1
         }
-        const [lastRange] = ranges.slice(-1)
+        const [lastRange] = this.ranges.slice(-1)
         const maxOfCharClass = lastRange.upper
         invertedRanges.push(new CharRange(maxOfCharClass + 1, maxValidCharacter))
 
-        return invertedRanges
+        return new RangeList(invertedRanges)
+    }
+}
+
+export class CharacterClass extends Expression {
+    private ranges: RangeList
+
+    constructor(
+        members: string[],
+        ranges: [string, string][],
+        private numSamplesToGenerate: number = 5
+    ) {
+        super(ExpressionType.CHARACTER_CLASS, null)
+
+        this.ranges = this.generateRanges(members, ranges)
+
+        if (this.numSamplesToGenerate > this.ranges.size()) {
+            this.numSamplesToGenerate = this.ranges.size()
+        }
+    }
+
+    private generateRanges(members: string[], ranges: [string, string][]): RangeList {
+        ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
+
+        return RangeList.fromStringList(ranges)
+    }
+
+    generateValid(rng: RandomSeed): string[] {
+        return this.ranges.sample(this.numSamplesToGenerate)
+    }
+
+    generateInvalid(rng: RandomSeed): string[] {
+        return this.ranges.invert().sample(this.numSamplesToGenerate)
     }
 
     toRegex(): string {
