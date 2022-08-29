@@ -2,14 +2,49 @@ import { RandomSeed } from "random-seed"
 import { cummulativeSum, randomInt } from "../utils"
 import { Expression, ExpressionType } from "./Expression"
 
-type Range = [number, number]
+class CharRange {
+    constructor(public lower: number, public upper: number) {
+        if (lower > upper) {
+            throw new Error(
+                `invalid range (${lower} - ${upper}): upper bound smaller than lower bound`
+            )
+        }
+    }
 
-// to index into ranges
-const LOWER = 0
-const UPPER = 1
+    static fromStrings(lower: string, upper: string): CharRange {
+        if (lower.length !== 1 || upper.length !== 1) {
+            throw new Error(`expected single character got ${lower} - ${upper}`)
+        }
+
+        const lowerCode = lower.charCodeAt(0)
+        const upperCode = upper.charCodeAt(0)
+
+        return new CharRange(lowerCode, upperCode)
+    }
+
+    char(index: number): string {
+        if (this.lower + index > this.upper) {
+            throw new Error(
+                `Character index ${index} out of range in char range ${String.fromCharCode(
+                    this.lower
+                )} - ${String.fromCharCode(this.upper)}`
+            )
+        }
+
+        return String.fromCharCode(this.lower + index)
+    }
+
+    toList(): [number, number] {
+        return [this.lower, this.upper]
+    }
+
+    length() {
+        return this.upper - this.lower + 1
+    }
+}
 
 export class CharacterClass extends Expression {
-    private ranges: Range[]
+    private ranges: CharRange[]
     /*
      * Contains what number of character the range ends at
      * example: [ a-b d e-f x ]
@@ -26,63 +61,38 @@ export class CharacterClass extends Expression {
 
         this.ranges = this.generateRanges(members, ranges)
 
-        this.verifyRanges()
-
         if (this.numSamplesToGenerate > this.size()) {
             this.numSamplesToGenerate = this.size()
         }
 
-        this.endIndices = cummulativeSum(this.ranges.map(this.rangeLength))
+        this.endIndices = cummulativeSum(this.ranges.map(r => r.length()))
     }
 
-    private generateRanges(members: string[], ranges: [string, string][]): Range[] {
+    private generateRanges(members: string[], ranges: [string, string][]): CharRange[] {
         ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
 
-        let bounds = ranges.map(([lower, upper]) => {
-            if (lower.length !== 1 || upper.length !== 1) {
-                throw new Error(`expected single character got ${lower} - ${upper}`)
-            }
+        let charRanges = ranges.map(([lower, upper]) => CharRange.fromStrings(lower, upper))
 
-            const lowerCode = lower.charCodeAt(0)
-            const upperCode = upper.charCodeAt(0)
-
-            if (lowerCode > upperCode) {
-                throw new Error(
-                    `lower bound of range is bigger than upper bound ${lower} - ${upper}`
-                )
-            }
-
-            return [lowerCode, upperCode]
-        }) as Range[]
-
-        bounds.sort(([a], [b]) => a - b)
+        charRanges.sort((a, b) => a.lower - b.lower)
 
         // prune overlaps
-        for (let i = 0; i < bounds.length; i++) {
-            if (bounds[i + 1][LOWER] < bounds[i][UPPER]) {
-                bounds[i + 1][LOWER] = bounds[i][UPPER] + 1
+        for (let i = 0; i < charRanges.length - 1; i++) {
+            if (charRanges[i].upper > charRanges[i + 1].lower) {
+                charRanges[i + 1].lower = charRanges[i].upper + 1
             }
         }
 
-        return bounds
-    }
-
-    private verifyRanges() {}
-
-    private rangeLength([lower, upper]: Range): number {
-        return upper - lower + 1
+        return charRanges
     }
 
     private size(): number {
-        return this.ranges.map(this.rangeLength).reduce((a, b) => a + b, 0)
+        return this.ranges.map(r => r.length()).reduce((a, b) => a + b, 0)
     }
 
     generateValid(rng: RandomSeed): string[] {
         const size = this.size()
         const samples = []
-        const wasGenerated: boolean[][] = this.ranges.map(r =>
-            new Array(this.rangeLength(r)).fill(false)
-        )
+        const wasGenerated: boolean[][] = this.ranges.map(r => new Array(r.length()).fill(false))
 
         for (let i = 0; i < this.numSamplesToGenerate; i++) {
             const ind = randomInt(size)
@@ -100,55 +110,44 @@ export class CharacterClass extends Expression {
             }
 
             wasGenerated[rangeIndex][charIndex] = true
-            samples.push(this.charFromRange(this.ranges[rangeIndex], charIndex))
+            samples.push(this.ranges[rangeIndex].char(charIndex))
         }
 
         return samples
-    }
-
-    private charFromRange([lower, upper]: Range, charIndex: number): string {
-        if (lower + charIndex > upper) {
-            throw new Error(
-                `Character index ${charIndex} out of range in char range ${String.fromCharCode(
-                    lower
-                )} - ${String.fromCharCode(upper)}`
-            )
-        }
-
-        return String.fromCharCode(lower + charIndex)
     }
 
     generateInvalid(rng: RandomSeed): string[] {
         return []
     }
 
-    private invertRanges(ranges: Range[]): Range[] {
+    static invertRanges(ranges: CharRange[]): CharRange[] {
         //TODO: use actual unicode maximum
         const maxValidCharacter = 20_000
         const minValidCharacter = 0
 
-        const invertedRanges: Range[] = []
+        const invertedRanges: CharRange[] = []
 
         let currentLower = minValidCharacter
-        for (let [lower, upper] of this.ranges) {
+        for (let r of ranges) {
+            const [lower, upper] = r.toList()
             if (currentLower < lower) {
-                invertedRanges.push([currentLower, lower - 1])
+                invertedRanges.push(new CharRange(currentLower, r.lower - 1))
             }
             currentLower = upper + 1
         }
-        const [lastRange] = this.ranges.slice(-1)
-        const maxOfCharClass = lastRange[UPPER]
-        invertedRanges.push([maxOfCharClass + 1, maxValidCharacter])
+        const [lastRange] = ranges.slice(-1)
+        const maxOfCharClass = lastRange.upper
+        invertedRanges.push(new CharRange(maxOfCharClass + 1, maxValidCharacter))
 
         return invertedRanges
     }
 
     toRegex(): string {
         return `[${this.ranges
-            .map(([lower, upper]) =>
-                lower === upper
-                    ? String.fromCharCode(lower)
-                    : String.fromCharCode(lower) + "-" + String.fromCharCode(upper)
+            .map(range =>
+                range.lower === range.upper
+                    ? String.fromCharCode(range.lower)
+                    : String.fromCharCode(range.lower) + "-" + String.fromCharCode(range.upper)
             )
             .join("")}]`
     }
