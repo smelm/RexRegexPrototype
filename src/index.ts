@@ -69,7 +69,7 @@ function lineOrBlock<T>(
 
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
 
-export function makeDSLParser(input: string): Parser<Expression> {
+export function makeDSLParser(variables: Record<string, Expression> = {}): Parser<Expression> {
     const QUOTE: Parser<string> = string('"')
 
     const dslParser: Language = createLanguage({
@@ -94,7 +94,8 @@ export function makeDSLParser(input: string): Parser<Expression> {
                 r.maybe,
                 r.alternative,
                 r.group,
-                r.variableDefinition
+                r.variableDefinition,
+                r.variable
             ).desc("expression"),
         any: () => kw.any.map(builders.any),
         literal: () => regex(/[^"]+/).wrap(QUOTE, QUOTE).map(builders.literal),
@@ -142,7 +143,16 @@ export function makeDSLParser(input: string): Parser<Expression> {
                 )
             ).map(({ content }: BlockResult<any>) => content),
         variableDefinition: r =>
-            lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence),
+            lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence)
+                .assert(
+                    ({ header: name }) => !(name in variables),
+                    "duplicate identifier definition"
+                )
+                .chain(({ header: name, content }) =>
+                    makeDSLParser({ ...variables, [name]: content })
+                ),
+        variable: r =>
+            r.identifier.assert(n => n in variables, "undefined variables").map(n => variables[n]),
         identifier: () => regex(/[a-zA-Z]\w*/),
         number: () => regex(/[0-9]+/).map(Number),
     })
