@@ -150,7 +150,7 @@ export class CharacterClass extends WrappingExpression {
         ranges: [string, string][],
         private numSamplesToGenerate: number = 5
     ) {
-        super(ExpressionType.CHARACTER_CLASS, null)
+        super(ExpressionType.CHARACTER_CLASS)
 
         this.ranges = this.generateRanges(members, ranges)
 
