@@ -27,6 +27,7 @@ const kw = {
     begin: string("begin").desc("begin"),
     either: string("either").desc("either"),
     or: string("or").desc("or"),
+    define: string("define").desc("define"),
 }
 
 function debug<T>(label: string): (result: T) => Parser<T> {
@@ -69,7 +70,6 @@ type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expr
 
 export function parse(input: string): Expression {
     const QUOTE: Parser<string> = string('"')
-    const identifier: Parser<string> = regex(/[a-zA-Z]\w*/)
 
     const dslParser: Language = createLanguage({
         expressionSequence: r =>
@@ -83,9 +83,16 @@ export function parse(input: string): Expression {
                 })
                 .desc("expression sequence"),
         expression: r =>
-            alt(r.any, r.literal, r.rangeTimes, r.many, r.maybe, r.alternative, r.group).desc(
-                "expression"
-            ),
+            alt(
+                r.any,
+                r.literal,
+                r.rangeTimes,
+                r.many,
+                r.maybe,
+                r.alternative,
+                r.group,
+                r.variableDefinition
+            ).desc("expression"),
         any: () => kw.any.map(builders.any),
         literal: () => regex(/[^"]+/).wrap(QUOTE, QUOTE).map(builders.literal),
         upperBound: r =>
@@ -117,7 +124,7 @@ export function parse(input: string): Expression {
             ),
         group: r =>
             lineOrBlock<string>(
-                kw.begin.then(_).then(identifier),
+                kw.begin.then(_).then(r.identifier),
                 r.expression,
                 r.expressionSequence
             ).map(({ header, content }: BlockResult<string>) => group(header, content)),
@@ -131,6 +138,9 @@ export function parse(input: string): Expression {
                     (exps: Expression[]) => builders.alternative(...exps)
                 )
             ).map(({ content }: BlockResult<any>) => content),
+        variableDefinition: r =>
+            lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence),
+        identifier: () => regex(/[a-zA-Z]\w*/),
         number: () => regex(/[0-9]+/).map(Number),
     })
 
