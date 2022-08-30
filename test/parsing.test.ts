@@ -10,7 +10,9 @@ import {
     group,
     alternative,
 } from "../src/ast"
-import { parse } from "../src"
+import { makeDSLParser, parse } from "../src"
+
+const parser = makeDSLParser()
 
 function generateTestNames([input, ast]) {
     return [ast.toString(), input, ast]
@@ -31,34 +33,35 @@ const SINGLE_LINE_CASES = [
 
 describe("single line expressions", () => {
     test.each(SINGLE_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        const result = parse(input)
+        const result = parser.tryParse(input)
         expect(result).toEqual(expected)
     })
 })
 
 const MULTI_LINE_CASES = [
-    //['\n"abc"\n\n', literal("abc")],
-    //['any\nmaybe "hello"\nmany of any', sequence([any(), maybe(literal("hello")), manyOf(any())])],
-    //["maybe\nany\nend", maybe(any())],
-    //["many of\nany\nend", manyOf(any())],
-    //["3 of\nany\nend", countOf(3, any())],
-    //["3 to 5 of\nany\nend", countRangeOf(3, 5, any())],
-    //["maybe\nany\nmaybe any\nend", maybe(sequence([any(), maybe(any())]))],
-    //[
-    //    "maybe\nany\nmaybe any\nmany of any\nend",
-    //    maybe(sequence([any(), maybe(any()), manyOf(any())])),
-    //],
-    //['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
-    //['either\n"a"\nor\n"b"\nend', alternative(literal("a"), literal("b"))],
-    //['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
-    ['define foo\n"foo"\nend\n"nothing"', literal("nothing")],
-    ['define foo\n"foo"\nend\nfoo', literal("foo")],
+    ['\n"abc"', literal("abc")],
+    ['\n"abc"\n\n', literal("abc")],
+    ['"abc"\n', literal("abc")],
+    // ['any\nmaybe "hello"\nmany of any', sequence([any(), maybe(literal("hello")), manyOf(any())])],
+    // ["maybe\nany\nend", maybe(any())],
+    // ["many of\nany\nend", manyOf(any())],
+    // ["3 of\nany\nend", countOf(3, any())],
+    // ["3 to 5 of\nany\nend", countRangeOf(3, 5, any())],
+    // ["maybe\nany\nmaybe any\nend", maybe(sequence([any(), maybe(any())]))],
+    // [
+    //     "maybe\nany\nmaybe any\nmany of any\nend",
+    //     maybe(sequence([any(), maybe(any()), manyOf(any())])),
+    // ],
+    // ['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
+    // ['either\n"a"\nor\n"b"\nend', alternative(literal("a"), literal("b"))],
+    // ['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
+    // ['define foo\n"bar"\nend\n"nothing"', literal("nothing")],
+    // ['define foo\n"foo"\nend\nfoo', literal("foo")],
 ].map(generateTestNames)
 
 describe.only("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        const result = parse(input)
-        console.log(expected.toString())
+        const result = parser.tryParse(input)
         console.log(result.toString())
         expect(expected).toEqual(result)
     })
@@ -68,6 +71,6 @@ describe("multi line expressions with random white spaces", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const randomWhitespace = () => " ".repeat(Math.random() * 4)
         input = input.replace("\n", `${randomWhitespace()}\n${randomWhitespace()}`)
-        expect(parse(input)).toEqual(expected)
+        expect(parser.tryParse(input)).toEqual(expected)
     })
 })

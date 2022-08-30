@@ -38,6 +38,7 @@ function debug<T>(label: string): (result: T) => Parser<T> {
 }
 
 const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/)
+const optionalStatementSeperator: Parser<string> = regex(/( *[\n\r] *)*/)
 
 type BlockResult<T> = { header: T; content: Expression }
 
@@ -68,10 +69,12 @@ function lineOrBlock<T>(
 
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
 
-export function parse(input: string): Expression {
+export function makeDSLParser(input: string): Parser<Expression> {
     const QUOTE: Parser<string> = string('"')
 
     const dslParser: Language = createLanguage({
+        dslScript: r =>
+            optionalStatementSeperator.then(r.expressionSequence).skip(optionalStatementSeperator),
         expressionSequence: r =>
             sepBy(r.expression, statementSeperator)
                 .map((expr: Expression[]) => {
@@ -144,7 +147,5 @@ export function parse(input: string): Expression {
         number: () => regex(/[0-9]+/).map(Number),
     })
 
-    let result = dslParser.expressionSequence.tryParse(input)
-
-    return result
+    return dslParser.dslScript
 }
