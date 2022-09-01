@@ -100,9 +100,13 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
     const dslParser: Language = createLanguage({
         dslScript: r => r.expressionSequence.trim(optionalStatementSeperator),
         expressionSequence: r =>
-            sepBy(r.expression, statementSeperator)
+            sepBy(r.expressionWithTrailingComment, statementSeperator)
                 .map((expr: Expression[]) => {
-                    expr = expr.filter(e => e !== DUMMY)
+                    expr = expr.filter(e => e.type !== ExpressionType.DUMMY)
+                    console.log(
+                        expr,
+                        expr.map(x => x.type === ExpressionType.DUMMY)
+                    )
 
                     if (expr.length === 1) {
                         return expr[0]
@@ -111,9 +115,10 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                     }
                 })
                 .desc("expression sequence"),
+        expressionWithTrailingComment: r => r.expression.skip(_).skip(r.comment),
         expression: r =>
             alt(
-                seq(string("#"), regex(/.*/)).map(r => DUMMY),
+                r.comment,
                 r.literal,
                 r.rangeTimes,
                 r.many,
@@ -125,6 +130,7 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 r.any,
                 r.variable
             ).desc("expression"),
+        comment: () => seq(string("#"), regex(/.*/)).result(DUMMY),
         any: () => kw.any.map(builders.any),
         literal: () => regex(/[^"]+/).wrap(QUOTE, QUOTE).map(builders.literal),
         upperBound: r =>

@@ -33,6 +33,7 @@ const SINGLE_LINE_CASES = [
     ["any of a, b, c", characterClass("a", "b", "c")],
     ["any of a to c, x to z", characterClass(["a", "c"], ["x", "z"])],
     ["any of a, b, c, x to z", characterClass("a", "b", "c", ["x", "z"])],
+    ['"abc" # this is a comment', literal("abc")],
 ].map(generateTestNames)
 
 describe("single line expressions", () => {
