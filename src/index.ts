@@ -37,40 +37,41 @@ function debug<T>(label: string): (result: T) => Parser<T> {
     }
 }
 
-const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/)
+const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/).desc("statement_separator")
 const optionalStatementSeperator: Parser<string> = regex(/( *[\n\r] *)*/)
 
-type BlockResult<T> = { header: T; content: Expression }
+type BlockResult<T, U> = { header: T; content: U; type: "block" | "line" }
 
-function line<T>(header: Parser<T>, expression: Parser<Expression>): Parser<BlockResult<T>> {
-    return seqObj<BlockResult<T>>(["header", header], _, ["content", expression])
+function line<T, U>(header: Parser<T>, expression: Parser<U>): Parser<BlockResult<T, U>> {
+    return seqObj<BlockResult<T, U>>(["header", header], _, ["content", expression]).map(obj => ({
+        ...obj,
+        type: "line",
+    }))
 }
 
-function block<T>(
-    header: Parser<T>,
-    expressionSequence: Parser<Expression>
-): Parser<BlockResult<T>> {
+function block<T, U>(header: Parser<T>, content: Parser<U>): Parser<BlockResult<T, U>> {
     return seqObj<{ header: any; content: any }>(
         ["header", header],
         statementSeperator,
-        ["content", expressionSequence],
+        ["content", content],
         statementSeperator,
         kw.end
-    )
+    ).map(obj => ({ ...obj, type: "block" }))
 }
 
-function lineOrBlock<T>(
+function lineOrBlock<T, U>(
     header: Parser<T>,
-    expression: Parser<Expression>,
-    expressionSequence: Parser<Expression>
-): Parser<BlockResult<T>> {
-    return alt(block(header, expressionSequence), line(header, expression))
+    content: Parser<U>,
+    contentSequence: Parser<U>
+): Parser<BlockResult<T, U>> {
+    return alt(block(header, contentSequence), line(header, content))
 }
 
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
 
 export function makeDSLParser(variables: Record<string, Expression> = {}): Parser<Expression> {
     const QUOTE: Parser<string> = string('"')
+    const letter: Parser<string> = regex(/[a-zA-Z]/)
 
     const dslParser: Language = createLanguage({
         dslScript: r =>
@@ -87,7 +88,6 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 .desc("expression sequence"),
         expression: r =>
             alt(
-                r.any,
                 r.literal,
                 r.rangeTimes,
                 r.many,
@@ -95,6 +95,8 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 r.alternative,
                 r.group,
                 r.variableDefinition,
+                r.characterClass,
+                r.any,
                 r.variable
             ).desc("expression"),
         any: () => kw.any.map(builders.any),
@@ -106,32 +108,36 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
         rangeHeader: r =>
             seqObj<RepeatBounds>(["lower", r.number], ["upper", r.upperBound], _, kw.of),
         rangeTimes: r =>
-            lineOrBlock<RepeatBounds>(r.rangeHeader, r.expression, r.expressionSequence).map(
-                ({ header, content }: BlockResult<RepeatBounds>) => {
-                    const { lower, upper } = header
-                    if (upper === "lower") {
-                        return builders.repeat(content, lower, lower)
-                    } else if (upper === "many") {
-                        return builders.repeat(content, lower, undefined)
-                    } else {
-                        return builders.repeat(content, lower, upper)
-                    }
+            lineOrBlock<RepeatBounds, Expression>(
+                r.rangeHeader,
+                r.expression,
+                r.expressionSequence
+            ).map(({ header, content }) => {
+                const { lower, upper } = header
+                if (upper === "lower") {
+                    return builders.repeat(content, lower, lower)
+                } else if (upper === "many") {
+                    return builders.repeat(content, lower, undefined)
+                } else {
+                    return builders.repeat(content, lower, upper)
                 }
-            ),
+            }),
         many: r =>
-            lineOrBlock<any>(seq(kw.many, _, kw.of), r.expression, r.expressionSequence).map(
-                ({ content }: BlockResult<any>) => builders.manyOf(content)
-            ),
+            lineOrBlock<any, Expression>(
+                seq(kw.many, _, kw.of),
+                r.expression,
+                r.expressionSequence
+            ).map(({ content }: BlockResult<any, Expression>) => builders.manyOf(content)),
         maybe: r =>
-            lineOrBlock<any>(kw.maybe, r.expression, r.expressionSequence).map(
-                ({ content }: BlockResult<any>) => builders.maybe(content)
+            lineOrBlock<any, Expression>(kw.maybe, r.expression, r.expressionSequence).map(
+                ({ content }) => builders.maybe(content)
             ),
         group: r =>
-            lineOrBlock<string>(
+            lineOrBlock<string, Expression>(
                 kw.begin.then(_).then(r.identifier),
                 r.expression,
                 r.expressionSequence
-            ).map(({ header, content }: BlockResult<string>) => group(header, content)),
+            ).map(({ header, content }) => group(header, content)),
         alternative: r =>
             lineOrBlock(
                 kw.either,
@@ -141,7 +147,7 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 sepBy(r.expressionSequence, seq(statementSeperator, kw.or, statementSeperator)).map(
                     (exps: Expression[]) => builders.alternative(...exps)
                 )
-            ).map(({ content }: BlockResult<any>) => content),
+            ).map(({ content }) => content),
         variableDefinition: r =>
             lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence)
                 .assert(
@@ -153,6 +159,35 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 ),
         variable: r =>
             r.identifier.assert(n => n in variables, "undefined variables").map(n => variables[n]),
+        characterClassList: r =>
+            sepBy(
+                alt(
+                    seq(letter, seq(_, kw.to, _), letter).map(([lower, _ws, upper]) => [
+                        lower,
+                        upper,
+                    ]),
+                    letter
+                ),
+                regex(/ *, */).desc("list_separator")
+            ),
+        characterClass: r =>
+            lineOrBlock(
+                seq(kw.any, _, kw.of),
+                r.characterClassList,
+                sepBy(r.characterClassList, statementSeperator.notFollowedBy(kw.end))
+            ).map(({ content, type }) => {
+                let chars
+                if (type === "block") {
+                    //unwrap from list
+                    chars = []
+                    for (let l of content) {
+                        chars.push(...l)
+                    }
+                } else {
+                    chars = content
+                }
+                return builders.characterClass(...chars)
+            }),
         identifier: () => regex(/[a-zA-Z]\w*/),
         number: () => regex(/[0-9]+/).map(Number),
     })

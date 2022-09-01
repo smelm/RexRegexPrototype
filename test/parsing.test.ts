@@ -9,6 +9,7 @@ import {
     Expression,
     group,
     alternative,
+    characterClass,
 } from "../src/ast"
 import { makeDSLParser, parse } from "../src"
 
@@ -29,6 +30,9 @@ const SINGLE_LINE_CASES = [
     ["0 to many of any", countRangeOf(0, undefined, any())],
     ['either "a" or "b"', alternative(literal("a"), literal("b"))],
     ['either "a" or "b" or "c"', alternative(literal("a"), literal("b"), literal("c"))],
+    ["any of a, b, c", characterClass("a", "b", "c")],
+    ["any of a to c, x to z", characterClass(["a", "c"], ["x", "z"])],
+    ["any of a, b, c, x to z", characterClass("a", "b", "c", ["x", "z"])],
 ].map(generateTestNames)
 
 describe("single line expressions", () => {
@@ -58,6 +62,9 @@ const MULTI_LINE_CASES = [
     ['define foo\n"bar"\nend\n"nothing"', literal("nothing")],
     ['define foo\n"foo"\nend\nfoo', literal("foo")],
     ['define foo "foo"\nfoo', literal("foo")], // online variable definition
+    ["any of\na, b\nc\nend", characterClass("a", "b", "c")],
+    ["any of\na to c\nx to z\nend", characterClass(["a", "c"], ["x", "z"])],
+    ["any of\na\nb\nc\nx to z\nend", characterClass("a", "b", "c", ["x", "z"])],
 ].map(generateTestNames)
 
 describe("multi line expressions", () => {
@@ -71,7 +78,8 @@ describe("multi line expressions with random white spaces", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const randomWhitespace = () => " ".repeat(Math.random() * 4)
         input = input.replace("\n", `${randomWhitespace()}\n${randomWhitespace()}`)
-        expect(parser.tryParse(input)).toEqual(expected)
+        const result = parser.tryParse(input)
+        expect(result).toEqual(expected)
     })
 })
 
