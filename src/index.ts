@@ -103,10 +103,6 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
             sepBy(r.expressionWithTrailingComment, statementSeperator)
                 .map((expr: Expression[]) => {
                     expr = expr.filter(e => e.type !== ExpressionType.DUMMY)
-                    console.log(
-                        expr,
-                        expr.map(x => x.type === ExpressionType.DUMMY)
-                    )
 
                     if (expr.length === 1) {
                         return expr[0]
@@ -115,7 +111,7 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                     }
                 })
                 .desc("expression sequence"),
-        expressionWithTrailingComment: r => r.expression.skip(_).skip(r.comment),
+        expressionWithTrailingComment: r => r.expression.skip(seq(_, r.comment).atMost(1)),
         expression: r =>
             alt(
                 r.comment,
