@@ -65,6 +65,8 @@ const MULTI_LINE_CASES = [
     ["any of\na, b\nc\nend", characterClass("a", "b", "c")],
     ["any of\na to c\nx to z\nend", characterClass(["a", "c"], ["x", "z"])],
     ["any of\na\nb\nc\nx to z\nend", characterClass("a", "b", "c", ["x", "z"])],
+    ['# this is a comment\n"abc"', literal("abc")],
+    ['# this is a comment\n# this is another\n"abc"\n# and another', literal("abc")],
 ].map(generateTestNames)
 
 describe("multi line expressions", () => {

@@ -1,4 +1,4 @@
-import { Expression, group } from "./ast"
+import { Character, Expression, ExpressionType, group } from "./ast"
 import {
     alt,
     Parser,
@@ -12,8 +12,12 @@ import {
     seq,
     sepBy,
     succeed,
+    newline,
+    whitespace,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
+import { WrappingExpression } from "./ast/WrappingExpression"
+import { RandomSeed } from "random-seed"
 
 export * from "./ast"
 
@@ -69,16 +73,37 @@ function lineOrBlock<T, U>(
 
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
 
+class Dummy extends Expression {
+    constructor() {
+        super(ExpressionType.DUMMY)
+    }
+    generateValid(_rng: RandomSeed): string[] {
+        throw new Error("Method not implemented.")
+    }
+    generateInvalid(_rng: RandomSeed): string[] {
+        throw new Error("Method not implemented.")
+    }
+    toRegex(): string {
+        throw new Error("Method not implemented.")
+    }
+    toString(): string {
+        throw new Error("Method not implemented.")
+    }
+}
+
+const DUMMY = new Dummy()
+
 export function makeDSLParser(variables: Record<string, Expression> = {}): Parser<Expression> {
     const QUOTE: Parser<string> = string('"')
     const letter: Parser<string> = regex(/[a-zA-Z]/)
 
     const dslParser: Language = createLanguage({
-        dslScript: r =>
-            optionalStatementSeperator.then(r.expressionSequence).skip(optionalStatementSeperator),
+        dslScript: r => r.expressionSequence.trim(optionalStatementSeperator),
         expressionSequence: r =>
             sepBy(r.expression, statementSeperator)
                 .map((expr: Expression[]) => {
+                    expr = expr.filter(e => e !== DUMMY)
+
                     if (expr.length === 1) {
                         return expr[0]
                     } else {
@@ -88,6 +113,7 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 .desc("expression sequence"),
         expression: r =>
             alt(
+                seq(string("#"), regex(/.*/)).map(r => DUMMY),
                 r.literal,
                 r.rangeTimes,
                 r.many,
