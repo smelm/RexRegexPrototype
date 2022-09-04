@@ -1,3 +1,5 @@
+import { RandomSeed } from "random-seed"
+
 export function cummulativeSum(l: number[]): number[] {
     let result = [...l]
 
@@ -8,10 +10,10 @@ export function cummulativeSum(l: number[]): number[] {
     return result
 }
 
-export function randomInt(upper: number): number {
-    return randomIntBetween(0, upper)
+export function randomInt(upper: number, rng: RandomSeed): number {
+    return randomIntBetween(0, upper, rng)
 }
 
-export function randomIntBetween(lower: number, upper: number): number {
+export function randomIntBetween(lower: number, upper: number, rng: RandomSeed): number {
     return Math.floor(Math.random() * upper) + lower
 }

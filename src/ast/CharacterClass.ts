@@ -1,6 +1,6 @@
 import { RandomSeed } from "random-seed"
 import { cummulativeSum, randomInt } from "../utils"
-import { Expression, ExpressionType } from "./Expression"
+import { ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 class CharRange {
@@ -93,13 +93,13 @@ class RangeList {
         return this.ranges.map(func)
     }
 
-    sample(n: number): string[] {
+    sample(n: number, rng: RandomSeed): string[] {
         const size = this.size()
         const samples = []
         const wasGenerated: boolean[][] = this.ranges.map(r => new Array(r.length()).fill(false))
 
         for (let i = 0; i < n; i++) {
-            const ind = randomInt(size)
+            const ind = randomInt(size, rng)
             const rangeIndex = this.endIndices.findIndex(end => ind < end)!
 
             // calculate total offset where previous range did end
@@ -170,11 +170,11 @@ export class CharacterClass extends WrappingExpression {
     }
 
     generateValid(rng: RandomSeed): string[] {
-        return this.ranges.sample(this.numSamplesToGenerate)
+        return this.ranges.sample(this.numSamplesToGenerate, rng)
     }
 
     generateInvalid(rng: RandomSeed): string[] {
-        return this.ranges.invert().sample(this.numSamplesToGenerate)
+        return this.ranges.invert().sample(this.numSamplesToGenerate, rng)
     }
 
     toRegex(): string {
