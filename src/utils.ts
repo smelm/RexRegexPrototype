@@ -1,12 +1,3 @@
-export function sampleFromList<T>(l: T[], k = 1): T[] {
-    if (k === 1) {
-        const element = l[Math.floor(Math.random() * l.length)]
-        return [element]
-    }
-
-    return shuffle(l).slice(0, k)
-}
-
 export function cummulativeSum(l: number[]): number[] {
     let result = [...l]
 
