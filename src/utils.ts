@@ -7,22 +7,6 @@ export function sampleFromList<T>(l: T[], k = 1): T[] {
     return shuffle(l).slice(0, k)
 }
 
-/**
- * Taken from https://stackoverflow.com/a/6274381/11458415
- */
-export function shuffle<T>(arr: T[]): T[] {
-    let arrCopy = [...arr]
-
-    let j, tmp
-    for (let i = arrCopy.length - 1; i > 0; i--) {
-        j = Math.floor(Math.random() * (i + 1))
-        tmp = arrCopy[i]
-        arrCopy[i] = arrCopy[j]
-        arrCopy[j] = tmp
-    }
-    return arrCopy
-}
-
 export function cummulativeSum(l: number[]): number[] {
     let result = [...l]
 
