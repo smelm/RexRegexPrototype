@@ -58,6 +58,6 @@ export class Sequence extends WrappingExpression {
     }
 
     toRegex(): string {
-        return `(?:${this.value.map((v: Expression) => v.toRegex()).join("")})`
+        return `${this.value.map((v: Expression) => v.toRegex()).join("")}`
     }
 }

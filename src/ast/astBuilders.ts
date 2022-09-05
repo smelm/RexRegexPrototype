@@ -7,6 +7,7 @@ import { Maybe } from "./Maybe"
 import { Group } from "./Group"
 import { Alternative } from "./Alternative"
 import { CharacterClass } from "./CharacterClass"
+import { zip } from "../utils"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -60,4 +61,75 @@ export function characterClass(...members: (string | [string, string])[]): Expre
     const ranges = members.filter(m => typeof m !== "string") as [string, string][]
 
     return new CharacterClass(characters, ranges)
+}
+
+export function numberBetween(
+    lower: number,
+    upper: number,
+    { leadingZeroes = false }: { leadingZeroes?: boolean } = {}
+): Expression {
+    if (lower > upper) {
+        throw new Error(`lower ${lower} is bigger than upper ${upper}`)
+    }
+
+    let upperDigits = String(upper)
+        .split("")
+        .map(d => Number.parseInt(d))
+    let lowerDigits = String(lower)
+        .split("")
+        .map(d => Number.parseInt(d))
+    // padding
+    lowerDigits = [...new Array(upperDigits.length - lowerDigits.length).fill(0), ...lowerDigits]
+
+    let lowerPrefix = ""
+    let upperPrefix = ""
+    const alternatives = []
+
+    for (let [l, u] of zip(lowerDigits, upperDigits)) {
+        const paddingLength = upperDigits.length - upperPrefix.length - 1
+        const padding =
+            paddingLength > 0
+                ? [repeat(characterClass(["0", "9"]), paddingLength, paddingLength)]
+                : []
+
+        if (lowerPrefix === upperPrefix) {
+            if (u - l >= 2) {
+                alternatives.push(
+                    sequence([
+                        ...(upperPrefix.length > 0 ? [literal(upperPrefix)] : []),
+                        characterClass([(l + 1).toString(), (u - 1).toString()]),
+                        ...padding,
+                    ])
+                )
+            }
+        } else {
+            // lower
+            if (l < 9) {
+                alternatives.push(
+                    sequence([
+                        literal(lowerPrefix),
+                        characterClass([(l + 1).toString(), "9"]),
+                        ...padding,
+                    ])
+                )
+            }
+
+            // upper
+            if (u > 0) {
+                alternatives.push(
+                    sequence([
+                        literal(upperPrefix),
+                        characterClass(["0", (u - 1).toString()]),
+                        ...padding,
+                    ])
+                )
+            }
+        }
+
+        if (l !== 0 || leadingZeroes) {
+            lowerPrefix += l.toString()
+        }
+        upperPrefix += u.toString()
+    }
+    return alternative(...alternatives)
 }
