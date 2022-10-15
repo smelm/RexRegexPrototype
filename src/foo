@@ -1,0 +1,61 @@
+any
+"hello"
+5 of any
+many of any
+maybe any
+1 to 5 of any
+maybe 5 of any
+0 to many of any
+either "a" or "b"
+either "a" or "b" or "c"
+any of a, b, c
+any of a to c, x to z
+any of a, b, c, x to z
+"abc" # this is a comment
+
+maybe
+    any
+end
+
+many of
+    any
+end
+
+3 of
+    any
+end
+
+3 to 5 of
+    any
+end
+
+maybe
+    any
+    maybe any
+    many of any
+end
+
+begin group_name
+    "abc"
+end
+
+either
+    "a"
+or
+    "b"
+or
+    "c"
+end
+
+define foo
+    "bar"
+end
+3 of foo
+
+# character classes
+any of
+    a to c
+    c
+    x, y, z
+end
+

@@ -122,7 +122,7 @@ class RangeList {
 
     invert(): RangeList {
         //TODO: use actual unicode maximum
-        const maxValidCharacter = 20_000
+        const maxValidCharacter = 1000
         const minValidCharacter = 0
 
         const invertedRanges: CharRange[] = []

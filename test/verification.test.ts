@@ -98,15 +98,16 @@ describe.each(ENGINES)("number ranges in %s", (_engineName, engine) => {
                 ;[lower, upper] = [upper, lower]
             }
 
+            if (lower === upper) {
+                upper++
+            }
+
             testCases.push([lower, upper])
         }
     }
 
-    testCases = [[9, 16]]
-
     test.each(testCases)("%d < X < %d", (lower: number, upper: number) => {
         const pattern = "^(?:" + numberBetween(lower, upper).toRegex() + ")$"
-        console.log(lower, upper, pattern)
 
         const diff = upper - lower
         const below = new Array(5).fill(undefined).map(() => Math.floor(Math.random() * lower))
