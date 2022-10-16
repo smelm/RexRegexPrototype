@@ -62,7 +62,9 @@ const MULTI_LINE_CASES = [
     ['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
     ['define foo\n"bar"\nend\n"nothing"', literal("nothing")],
     ['define foo\n"foo"\nend\nfoo', literal("foo")],
-    ['define foo "foo"\nfoo', literal("foo")], // online variable definition
+    ['define foo "foo"\nfoo', literal("foo")], // one-line variable definition
+    ['begin namespace\ndefine foo "bar"\nend\nnamespace.foo', literal("bar")],
+    ['begin outer_namespace\nbegin inner_namespace\ndefine foo "bar"\nend\nend\nouter_namespace.inner_namespace.foo', literal("bar")],
     ["any of\na, b\nc\nend", characterClass("a", "b", "c")],
     ["any of\na to c\nx to z\nend", characterClass(["a", "c"], ["x", "z"])],
     ["any of\na\nb\nc\nx to z\nend", characterClass("a", "b", "c", ["x", "z"])],
