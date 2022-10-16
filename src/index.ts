@@ -18,6 +18,7 @@ import {
 import * as builders from "./ast/astBuilders"
 import { WrappingExpression } from "./ast/WrappingExpression"
 import { RandomSeed } from "random-seed"
+import { DSLScript } from "./ast/DSLScript"
 
 export * from "./ast"
 
@@ -93,7 +94,7 @@ class Dummy extends Expression {
 
 const DUMMY = new Dummy()
 
-export function makeDSLParser(variables: Record<string, Expression> = {}): Parser<Expression> {
+export function makeDSLParser(variables: Record<string, Expression> = {}): Parser<DSLScript> {
     const QUOTE: Parser<string> = string('"')
     const letter: Parser<string> = regex(/[a-zA-Z]/)
 
@@ -220,5 +221,11 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
         number: () => regex(/[0-9]+/).map(Number),
     })
 
-    return dslParser.dslScript
+    return dslParser.dslScript.map(expression => {
+        if (expression.type === ExpressionType.SCRIPT) {
+            return expression
+        } else {
+            return new DSLScript(expression)
+         }
+    })
 }

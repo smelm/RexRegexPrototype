@@ -38,7 +38,7 @@ const SINGLE_LINE_CASES = [
 
 describe("single line expressions", () => {
     test.each(SINGLE_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        const result = parser.tryParse(input)
+        const result = parser.tryParse(input).child
         expect(result).toEqual(expected)
     })
 })
@@ -72,7 +72,7 @@ const MULTI_LINE_CASES = [
 
 describe("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
-        const result = parser.tryParse(input)
+        const result = parser.tryParse(input).child
         expect(expected).toEqual(result)
     })
 })
@@ -81,7 +81,7 @@ describe("multi line expressions with random white spaces", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const randomWhitespace = () => " ".repeat(Math.random() * 4)
         input = input.replace("\n", `${randomWhitespace()}\n${randomWhitespace()}`)
-        const result = parser.tryParse(input)
+        const result = parser.tryParse(input).child
         expect(result).toEqual(expected)
     })
 })

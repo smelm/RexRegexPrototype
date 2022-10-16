@@ -11,6 +11,7 @@ export enum ExpressionType {
     ALTERNATIVE = "alternative",
     CHARACTER_CLASS = "characterClass",
     DUMMY = "dummy", // used for parsing
+    SCRIPT = "script"
 }
 
 export abstract class Expression implements InputGenerator {
