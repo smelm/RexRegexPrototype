@@ -19,10 +19,7 @@ export class DSLScript extends WrappingExpression {
 
     constructor(public child: Expression, settings?: ScriptSettings) {
         super(ExpressionType.SCRIPT)
-
-        if (!settings) {
-            this.settings = new ScriptSettings()
-        }
+        this.settings = settings || new ScriptSettings()
     }
 
     contentToString(): string {
@@ -40,8 +37,6 @@ export class DSLScript extends WrappingExpression {
     toRegex(): string {
         const pattern = this.child.toRegex()
 
-        // this seems counter-intuitive
-        // since the DSL defaults to whole string match
         let [prefix, suffix] = (() => {
             switch (this.settings.positionInInput) {
                 case PositionInInput.BEGINNING:
