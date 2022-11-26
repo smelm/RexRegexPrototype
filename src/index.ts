@@ -18,7 +18,7 @@ import {
 import * as builders from "./ast/astBuilders"
 import { WrappingExpression } from "./ast/WrappingExpression"
 import { RandomSeed } from "random-seed"
-import { DSLScript } from "./ast/DSLScript"
+import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
 
 export * from "./ast"
 
@@ -99,7 +99,17 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
     const letter: Parser<string> = regex(/[a-zA-Z]/)
 
     const dslParser: Language = createLanguage({
-        dslScript: r => r.expressionSequence.trim(optionalStatementSeperator),
+        dslScript: r =>
+            seq(r.preamble.skip(statementSeperator).atMost(1), r.script)
+                .trim(optionalStatementSeperator)
+                .map(([[preamble], script]) => [preamble, script]),
+        preamble: r =>
+            alt(
+                string("at beginning of input").map(() => PositionInInput.BEGINNING),
+                string("at end of input").map(() => PositionInInput.END),
+                string("somewhere in input").map(() => PositionInInput.WITHIN)
+            ).map(position => new ScriptSettings(position)),
+        script: r => r.expressionSequence,
         expressionSequence: r =>
             sepBy(r.expressionWithTrailingComment, statementSeperator)
                 .map((expr: Expression[]) => {
@@ -221,11 +231,11 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
         number: () => regex(/[0-9]+/).map(Number),
     })
 
-    return dslParser.dslScript.map(expression => {
+    return dslParser.dslScript.map(([settings, expression]) => {
         if (expression.type === ExpressionType.SCRIPT) {
             return expression
         } else {
-            return new DSLScript(expression)
-         }
+            return new DSLScript(expression, settings)
+        }
     })
 }

@@ -12,6 +12,7 @@ import {
     characterClass,
 } from "../src/ast"
 import { makeDSLParser, parse } from "../src"
+import { PositionInInput } from "../src/ast/DSLScript"
 
 const parser = makeDSLParser()
 
@@ -97,5 +98,13 @@ describe("error handling", () => {
 
     test("redefinition of variable", () => {
         expect(() => parser.tryParse("define foo\nany\nend\ndefine foo\nany\nend"))
+    })
+})
+
+describe("settings", () => {
+    test("beginning of input", () => {
+        let { child, settings } = parser.tryParse("at beginning of input\n\nany")
+        expect(child).toEqual(any())
+        expect(settings.positionInInput).toEqual(PositionInInput.BEGINNING)
     })
 })

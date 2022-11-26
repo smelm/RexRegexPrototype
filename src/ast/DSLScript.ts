@@ -2,7 +2,7 @@ import { RandomSeed } from "random-seed"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
-enum PositionInInput {
+export enum PositionInInput {
     BEGINNING,
     END,
     WITHIN,
@@ -15,7 +15,7 @@ export class ScriptSettings {
 }
 
 export class DSLScript extends WrappingExpression {
-    private settings: ScriptSettings
+    public readonly settings: ScriptSettings
 
     constructor(public child: Expression, settings?: ScriptSettings) {
         super(ExpressionType.SCRIPT)
