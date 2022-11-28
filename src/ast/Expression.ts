@@ -10,8 +10,9 @@ export enum ExpressionType {
     GROUP = "group",
     ALTERNATIVE = "alternative",
     CHARACTER_CLASS = "characterClass",
-    DUMMY = "dummy", // used for parsing
-    SCRIPT = "script"
+    DUMMY = "dummy",
+    SCRIPT = "script",
+    BACKREFERENCE = "backreference",
 }
 
 export abstract class Expression implements InputGenerator {

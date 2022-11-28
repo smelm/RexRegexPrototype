@@ -1,4 +1,4 @@
-import { Character, Expression, ExpressionType, group } from "./ast"
+import { backreference, Expression, ExpressionType, group } from "./ast"
 import {
     alt,
     Parser,
@@ -12,11 +12,8 @@ import {
     seq,
     sepBy,
     succeed,
-    newline,
-    whitespace,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
-import { WrappingExpression } from "./ast/WrappingExpression"
 import { RandomSeed } from "random-seed"
 import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
 
@@ -33,6 +30,7 @@ const kw = {
     either: string("either").desc("either"),
     or: string("or").desc("or"),
     define: string("define").desc("define"),
+    repeat: string("repeat").desc("repeat"),
 }
 
 function debug<T>(label: string): (result: T) => Parser<T> {
@@ -135,7 +133,8 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 r.variableDefinition,
                 r.characterClass,
                 r.any,
-                r.variable
+                r.variable,
+                r.backreference
             ).desc("expression"),
         comment: () => seq(string("#"), regex(/.*/)).result(DUMMY),
         any: () => kw.any.map(builders.any),
@@ -177,6 +176,8 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 r.expression,
                 r.expressionSequence
             ).map(({ header, content }) => group(header, content)),
+        backreference: r =>
+            line(kw.repeat, r.identifier).map(({ content: groupName }) => backreference(groupName)),
         alternative: r =>
             lineOrBlock(
                 kw.either,

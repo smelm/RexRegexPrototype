@@ -19,6 +19,6 @@ export class Backreference extends Expression {
     }
 
     toString(): string {
-        throw new Error("Method not implemented.")
+        return `${this.type}(${this.groupName})`
     }
 }
