@@ -7,6 +7,7 @@ import { Maybe } from "./Maybe"
 import { Group } from "./Group"
 import { Alternative } from "./Alternative"
 import { CharacterClass } from "./CharacterClass"
+import { Backreference } from "./Backreference"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -49,6 +50,10 @@ export function literal(str: string): Expression {
 
 export function group(name: string, content: Expression): Expression {
     return new Group(name, content)
+}
+
+export function backreference(groupName: string): Expression {
+    return new Backreference(groupName)
 }
 
 export function alternative(...alternatives: Expression[]): Expression {

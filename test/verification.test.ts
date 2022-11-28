@@ -11,6 +11,7 @@ import {
     sequence,
     alternative,
     characterClass,
+    backreference,
 } from "../src"
 import { spawnSync } from "child_process"
 import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
@@ -99,6 +100,25 @@ describe.each(ENGINES)("%s regex", (_engineName, engine) => {
 
         expect(actual.matches).toEqual(matches)
         expect(actual.groups).toEqual(groups)
+    })
+})
+
+describe("special cases", () => {
+    const expressionWithBackreference = sequence([
+        group("symbol", characterClass("+", "#", "|")),
+        literal("foo"),
+        backreference("symbol"),
+    ])
+    const pattern = expressionWithBackreference.toRegex()
+
+    test("matching backreference", () => {
+        const result = NODEJS.match(pattern, "#foo#")
+        expect(result.matches).toEqual(true)
+    })
+
+    test("not matching backreference", () => {
+        const result = NODEJS.match(pattern, "#foo+")
+        expect(result.matches).toEqual(false)
     })
 })
 
