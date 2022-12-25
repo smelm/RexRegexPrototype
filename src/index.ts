@@ -31,6 +31,7 @@ const kw = {
     or: string("or").desc("or"),
     define: string("define").desc("define"),
     repeat: string("repeat").desc("repeat"),
+    except: string("except").desc("except"),
 }
 
 function debug<T>(label: string): (result: T) => Parser<T> {
@@ -210,12 +211,13 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 ),
                 regex(/ *, */).desc("list_separator")
             ),
+        characterClassHeader: r => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
         characterClass: r =>
             lineOrBlock(
-                seq(kw.any, _, kw.of),
+                r.characterClassHeader,
                 r.characterClassList,
                 sepBy(r.characterClassList, statementSeperator.notFollowedBy(kw.end))
-            ).map(({ content, type }) => {
+            ).map(({ content, header, type }) => {
                 let chars
                 if (type === "block") {
                     //unwrap from list
@@ -226,7 +228,12 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                 } else {
                     chars = content
                 }
-                return builders.characterClass(...chars)
+
+                if (header.flat().includes("except")) {
+                    return builders.anyExcept(...chars)
+                } else {
+                    return builders.characterClass(...chars)
+                }
             }),
         identifier: () => regex(/[a-zA-Z]\w*/),
         number: () => regex(/[0-9]+/).map(Number),

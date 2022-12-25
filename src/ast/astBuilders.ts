@@ -76,7 +76,7 @@ export function characterClass(...members: Member[]): Expression {
     return new CharacterClass(characters, ranges)
 }
 
-export function anythingExcept(...members: Member[]): InvertedCharacterClass {
+export function anyExcept(...members: Member[]): InvertedCharacterClass {
     const [characters, ranges] = splitCharactersAndRanges(members)
     return new InvertedCharacterClass(characters, ranges)
 }

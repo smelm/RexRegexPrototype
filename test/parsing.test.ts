@@ -11,6 +11,7 @@ import {
     alternative,
     characterClass,
     backreference,
+    anyExcept,
 } from "../src/ast"
 import { makeDSLParser } from "../src"
 import { PositionInInput } from "../src/ast/DSLScript"
@@ -35,6 +36,7 @@ const SINGLE_LINE_CASES = [
     ["any of a, b, c", characterClass("a", "b", "c")],
     ["any of a to c, x to z", characterClass(["a", "c"], ["x", "z"])],
     ["any of a, b, c, x to z", characterClass("a", "b", "c", ["x", "z"])],
+    ["any except of a, b, c", anyExcept("a", "b", "c")],
     ['"abc" # this is a comment', literal("abc")],
 ].map(generateTestNames)
 
@@ -68,6 +70,7 @@ const MULTI_LINE_CASES = [
     ["any of\na, b\nc\nend", characterClass("a", "b", "c")],
     ["any of\na to c\nx to z\nend", characterClass(["a", "c"], ["x", "z"])],
     ["any of\na\nb\nc\nx to z\nend", characterClass("a", "b", "c", ["x", "z"])],
+    ["any except of\na\nb\nc\nx to z\nend", characterClass("a", "b", "c", ["x", "z"])],
     ['# this is a comment\n"abc"', literal("abc")],
     ['# this is a comment\n# this is another\n"abc"\n# and another', literal("abc")],
     [
