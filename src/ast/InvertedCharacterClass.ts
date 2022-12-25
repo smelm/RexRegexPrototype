@@ -1,7 +1,7 @@
 import { RandomSeed } from "random-seed"
 import { CharacterClass } from "./CharacterClass"
 
-class InvertedCharacterClass extends CharacterClass {
+export class InvertedCharacterClass extends CharacterClass {
     constructor(
         members: string[],
         ranges: [string, string][],

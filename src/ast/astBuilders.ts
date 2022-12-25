@@ -6,6 +6,7 @@ import { Any } from "./Any"
 import { Group } from "./Group"
 import { Alternative } from "./Alternative"
 import { CharacterClass } from "./CharacterClass"
+import { InvertedCharacterClass } from "./InvertedCharacterClass"
 import { Backreference } from "./Backreference"
 
 export function character(char: string): Expression {
@@ -59,9 +60,23 @@ export function alternative(...alternatives: Expression[]): Expression {
     return new Alternative(alternatives)
 }
 
-export function characterClass(...members: (string | [string, string])[]): Expression {
-    const characters = members.filter(m => typeof m === "string") as string[]
-    const ranges = members.filter(m => typeof m !== "string") as [string, string][]
+type RawRange = [string, string]
+type Member = string | RawRange
+
+function splitCharactersAndRanges(members: Member[]): [string[], RawRange[]] {
+    return [
+        members.filter(m => typeof m === "string") as string[],
+        members.filter(m => typeof m !== "string") as [string, string][],
+    ]
+}
+
+export function characterClass(...members: Member[]): Expression {
+    const [characters, ranges] = splitCharactersAndRanges(members)
 
     return new CharacterClass(characters, ranges)
+}
+
+export function anythingExcept(...members: Member[]): InvertedCharacterClass {
+    const [characters, ranges] = splitCharactersAndRanges(members)
+    return new InvertedCharacterClass(characters, ranges)
 }
