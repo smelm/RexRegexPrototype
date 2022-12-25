@@ -6,7 +6,7 @@ class InvertedCharacterClass extends CharacterClass {
         members: string[],
         ranges: [string, string][],
         inverted: boolean = false,
-        private numSamplesToGenerate: number = 5
+        numSamplesToGenerate: number = 5
     ) {
         super(members, ranges, true, numSamplesToGenerate)
     }

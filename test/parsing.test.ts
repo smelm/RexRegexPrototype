@@ -12,7 +12,7 @@ import {
     characterClass,
     backreference,
 } from "../src/ast"
-import { makeDSLParser, parse } from "../src"
+import { makeDSLParser } from "../src"
 import { PositionInInput } from "../src/ast/DSLScript"
 
 const parser = makeDSLParser()
@@ -49,15 +49,15 @@ const MULTI_LINE_CASES = [
     ['\n"abc"', literal("abc")],
     ['\n"abc"\n\n', literal("abc")],
     ['"abc"\n', literal("abc")],
-    ['any\nmaybe "hello"\nmany of any', sequence([any(), maybe(literal("hello")), manyOf(any())])],
+    ['any\nmaybe "hello"\nmany of any', sequence(any(), maybe(literal("hello")), manyOf(any()))],
     ["maybe\nany\nend", maybe(any())],
     ["many of\nany\nend", manyOf(any())],
     ["3 of\nany\nend", countOf(3, any())],
     ["3 to 5 of\nany\nend", countRangeOf(3, 5, any())],
-    ["maybe\nany\nmaybe any\nend", maybe(sequence([any(), maybe(any())]))],
+    ["maybe\nany\nmaybe any\nend", maybe(sequence(any(), maybe(any())))],
     [
         "maybe\nany\nmaybe any\nmany of any\nend",
-        maybe(sequence([any(), maybe(any()), manyOf(any())])),
+        maybe(sequence(any(), maybe(any()), manyOf(any()))),
     ],
     ['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
     ['either\n"a"\nor\n"b"\nend', alternative(literal("a"), literal("b"))],
@@ -72,7 +72,7 @@ const MULTI_LINE_CASES = [
     ['# this is a comment\n# this is another\n"abc"\n# and another', literal("abc")],
     [
         'begin symbol\n"#"\nend\n\n"foo"\nrepeat symbol',
-        sequence([group("symbol", literal("#")), literal("foo"), backreference("symbol")]),
+        sequence(group("symbol", literal("#")), literal("foo"), backreference("symbol")),
     ],
 ].map(generateTestNames)
 

@@ -35,7 +35,7 @@ export function maybe(value: any): Expression {
     return new Repeat(value, 0, 1)
 }
 
-export function sequence(value: Expression[]): Expression {
+export function sequence(...value: Expression[]): Expression {
     return new Sequence(value)
 }
 
@@ -44,7 +44,7 @@ export function manyOf(value: Expression): Expression {
 }
 
 export function literal(str: string): Expression {
-    return sequence(str.split("").map(c => new Character(c)))
+    return sequence(...str.split("").map(c => new Character(c)))
 }
 
 export function group(name: string, content: Expression): Expression {

@@ -1,5 +1,6 @@
 import { CharRange } from "./CharRange"
 import { cummulativeSum, randomInt } from "../utils"
+import { RandomSeed } from "random-seed"
 
 export class RangeList {
     /*

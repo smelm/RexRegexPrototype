@@ -116,7 +116,7 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                     if (expr.length === 1) {
                         return expr[0]
                     } else {
-                        return builders.sequence(expr)
+                        return builders.sequence(...expr)
                     }
                 })
                 .desc("expression sequence"),

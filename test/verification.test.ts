@@ -53,13 +53,13 @@ function makeTestCases(): TestCase[] {
     const asts = [
         [any()],
         [literal("abc")],
-        [sequence([character("a"), any(), character("c")])],
-        [sequence([character("a"), maybe(character("b")), character("c")])],
-        [sequence([character("a"), countOf(3, character("b")), character("c")])],
-        [sequence([character("a"), countRangeOf(3, 5, character("b")), character("c")])],
-        [sequence([character("a"), countRangeOf(0, 3, character("b")), character("c")])],
-        [sequence([character("a"), manyOf(character("b")), character("c")])],
-        [group("foo", sequence([literal("abc")])), { foo: "abc" }],
+        [sequence(character("a"), any(), character("c"))],
+        [sequence(character("a"), maybe(character("b")), character("c"))],
+        [sequence(character("a"), countOf(3, character("b")), character("c"))],
+        [sequence(character("a"), countRangeOf(3, 5, character("b")), character("c"))],
+        [sequence(character("a"), countRangeOf(0, 3, character("b")), character("c"))],
+        [sequence(character("a"), manyOf(character("b")), character("c"))],
+        [group("foo", sequence(literal("abc"))), { foo: "abc" }],
         [alternative(literal("foo"), literal("bar"))],
         [alternative(literal("foo"), any())],
         [characterClass("a", "b", "c")],
@@ -104,11 +104,11 @@ describe.each(ENGINES)("%s regex", (_engineName, engine) => {
 })
 
 describe("special cases", () => {
-    const expressionWithBackreference = sequence([
+    const expressionWithBackreference = sequence(
         group("symbol", characterClass("+", "#", "|")),
         literal("foo"),
-        backreference("symbol"),
-    ])
+        backreference("symbol")
+    )
     const pattern = expressionWithBackreference.toRegex()
 
     test("matching backreference", () => {
