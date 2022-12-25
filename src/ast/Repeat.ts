@@ -59,7 +59,11 @@ export class Repeat extends WrappingExpression {
 
         return result
     }
-    //
+
+    private noUpperBound() {
+        return this.upper == null
+    }
+
     //TODO make sure that each branch is tested
     private compileRepeatOperator() {
         if (this.lower == null) {
@@ -68,9 +72,7 @@ export class Repeat extends WrappingExpression {
             )
         }
 
-        const noUpperBound = this.upper == null
-
-        if (noUpperBound) {
+        if (this.noUpperBound()) {
             switch (this.lower) {
                 case 0:
                     return `*`
@@ -79,6 +81,8 @@ export class Repeat extends WrappingExpression {
                 default:
                     return `{${this.lower},}`
             }
+        } else if (this.lower == 0 && this.upper == 1) {
+            return "?"
         } else {
             if (this.lower === this.upper) {
                 return `{${this.lower}}`

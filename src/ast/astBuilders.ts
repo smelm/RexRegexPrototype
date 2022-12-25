@@ -3,7 +3,6 @@ import { Sequence } from "./Sequence"
 import { Repeat } from "./Repeat"
 import { Character } from "./Character"
 import { Any } from "./Any"
-import { Maybe } from "./Maybe"
 import { Group } from "./Group"
 import { Alternative } from "./Alternative"
 import { CharacterClass } from "./CharacterClass"
@@ -33,7 +32,7 @@ export function repeat(value: Expression, lower: number, upper?: number): Expres
 }
 
 export function maybe(value: any): Expression {
-    return new Maybe(value)
+    return new Repeat(value, 0, 1)
 }
 
 export function sequence(value: Expression[]): Expression {
