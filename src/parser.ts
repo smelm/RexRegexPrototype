@@ -1,5 +1,5 @@
 import { backreference, Expression, ExpressionType, group } from "./ast"
-import {
+import Parsimmon, {
     alt,
     Parser,
     regex,
@@ -11,7 +11,9 @@ import {
     of,
     seq,
     sepBy,
+    sepBy1,
     succeed,
+    fail,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
 import { RandomSeed } from "random-seed"
@@ -31,6 +33,8 @@ const kw = {
     repeat: string("repeat").desc("repeat"),
     except: string("except").desc("except"),
 }
+
+const DOT = string(".").desc("DOT")
 
 function debug<T>(label: string): (result: T) => Parser<T> {
     return function (result: T) {
@@ -91,7 +95,10 @@ class Dummy extends Expression {
 
 const DUMMY = new Dummy()
 
-export function makeDSLParser(variables: Record<string, Expression> = {}): Parser<DSLScript> {
+// TODO is there a better type for variables
+// it was Record<string, Expression>
+// but now it is Record<Record<string, Expression>> with varying levels of depth
+export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
     const QUOTE: Parser<string> = string('"')
     const letter: Parser<string> = regex(/[a-zA-Z]/)
 
@@ -171,12 +178,14 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
             ),
         group: r =>
             lineOrBlock<string, Expression>(
-                kw.begin.then(_).then(r.identifier),
+                kw.begin.then(_).then(r.identifierName),
                 r.expression,
                 r.expressionSequence
             ).map(({ header, content }) => group(header, content)),
         backreference: r =>
-            line(kw.repeat, r.identifier).map(({ content: groupName }) => backreference(groupName)),
+            line(kw.repeat, r.identifierName).map(({ content: groupName }) =>
+                backreference(groupName)
+            ),
         alternative: r =>
             lineOrBlock(
                 kw.either,
@@ -193,11 +202,36 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                     ({ header: name }) => !(name in variables),
                     "duplicate identifier definition"
                 )
-                .chain(({ header: name, content }) =>
-                    makeDSLParser({ ...variables, [name]: content })
-                ),
+                .chain(({ header: path, content }) => {
+                    let variablesCopy = { ...variables }
+                    let variableName = path.pop()
+
+                    let currentPosition = variablesCopy
+                    for (let key of path) {
+                        if (!currentPosition[key]) {
+                            currentPosition[key] = {}
+                        } else if (typeof currentPosition[key] !== "object") {
+                            throw new Error("overwriting variable with namespace")
+                        }
+                        currentPosition = currentPosition[key]
+                    }
+                    currentPosition[variableName] = content
+                    return makeDSLParser(variablesCopy)
+                }),
         variable: r =>
-            r.identifier.assert(n => n in variables, "undefined variables").map(n => variables[n]),
+            r.identifier.map(path => {
+                let position = variables
+
+                for (let key of path) {
+                    position = position[key]
+
+                    if (!position) {
+                        throw new Error(`could not find ${path.join(".")}`)
+                    }
+                }
+
+                return position
+            }),
         characterClassList: r =>
             sepBy(
                 alt(
@@ -224,13 +258,19 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
                     chars = content
                 }
 
+                // needs to be flatten twice
                 if (header.flat().flat().includes("except")) {
                     return builders.anyExcept(...chars)
                 } else {
                     return builders.characterClass(...chars)
                 }
             }),
-        identifier: () => regex(/[a-zA-Z]\w*/),
+        identifier: r =>
+            sepBy1(r.identifierName, DOT).assert(
+                ident => !ident.some(isKeyword),
+                "keyword cannot be used in variable names"
+            ),
+        identifierName: () => regex(/[a-zA-Z]\w*/),
         number: () => regex(/[0-9]+/).map(Number),
     })
 
@@ -241,4 +281,8 @@ export function makeDSLParser(variables: Record<string, Expression> = {}): Parse
             return new DSLScript(expression, settings)
         }
     })
+}
+
+function isKeyword(word: string): boolean {
+    return Object.keys(kw).includes(word)
 }

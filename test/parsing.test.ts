@@ -66,7 +66,12 @@ const MULTI_LINE_CASES = [
     ['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
     ['define foo\n"bar"\nend\n"nothing"', literal("nothing")],
     ['define foo\n"foo"\nend\nfoo', literal("foo")],
-    ['define foo "foo"\nfoo', literal("foo")], // online variable definition
+    ['define foo "foo"\nfoo', literal("foo")], // one-line variable definition
+    ['define foo.bar "word"\nfoo.bar', literal("word")],
+    [
+        'define one.two.this "first"\ndefine one.two.that "second"\none.two.that\none.two.this',
+        sequence(literal("second"), literal("first")),
+    ],
     ["any of\na, b\nc\nend", characterClass("a", "b", "c")],
     ["any of\na to c\nx to z\nend", characterClass(["a", "c"], ["x", "z"])],
     ["any of\na\nb\nc\nx to z\nend", characterClass("a", "b", "c", ["x", "z"])],
@@ -82,6 +87,7 @@ const MULTI_LINE_CASES = [
 describe("multi line expressions", () => {
     test.each(MULTI_LINE_CASES)("%s", (_testName: string, input: string, expected: Expression) => {
         const result = parser.tryParse(input).child
+
         expect(expected).toEqual(result)
     })
 })
