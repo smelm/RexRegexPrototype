@@ -12,6 +12,9 @@ export function generateRandomSeed(): string {
     return Math.random().toString(base).slice(2)
 }
 
-export function newRandomGenerator(seed: string): RandomGenerator {
+export function newRandomGenerator(seed: string = ""): RandomGenerator {
+    if(seed === ""){
+        seed = generateRandomSeed()
+    }
     return gen.create(seed)
 }
