@@ -123,18 +123,17 @@ describe("settings", () => {
     })
 })
 
-describe("library", () => {
-    test("simple library", () => {
-        let dsl = makeDSL()
-    })
-})
-
 describe("macros", () => {
     test("simple macro", () => {
         let dsl = makeDSL({
             myMacros: {
-                pet: (isDogPerson: string) =>
-                    isDogPerson === "true" ? literal("dog") : literal("cat"),
+                pet: (isDogPerson: string) => {
+                    if (isDogPerson === "true") {
+                        return literal("dog")
+                    } else {
+                        return literal("cat")
+                    }
+                },
             },
         })
 

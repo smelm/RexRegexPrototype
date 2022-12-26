@@ -12,10 +12,12 @@ import {
     seq,
     sepBy,
     sepBy1,
+    Rule,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
 import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
 import { RandomGenerator } from "./RandomGenerator"
+import { Library } from "./libraries"
 
 const kw = Object.fromEntries(
     [
@@ -100,7 +102,7 @@ const DUMMY = new Dummy()
 // TODO is there a better type for variables
 // it was Record<string, Expression>
 // but now it is Record<Record<string, Expression>> with varying levels of depth
-export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
+export function makeDSLParser(variables: any, rule: Rule): Parser<DSLScript> {
     const QUOTE: Parser<string> = string('"')
     const letter: Parser<string> = regex(/[a-zA-Z]/)
 
@@ -131,19 +133,22 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
         expressionWithTrailingComment: r => r.expression.skip(seq(_, r.comment).atMost(1)),
         expression: r =>
             alt(
-                r.comment,
-                r.literal,
-                r.rangeTimes,
-                r.many,
-                r.maybe,
-                r.alternative,
-                r.group,
-                r.variableDefinition,
-                r.characterClass,
-                r.any,
-                r.functionCall,
-                r.variable,
-                r.backreference
+                ...[
+                    r.literal,
+                    r.rangeTimes,
+                    r.many,
+                    r.maybe,
+                    r.alternative,
+                    r.group,
+                    r.variableDefinition,
+                    r.characterClass,
+                    r.any,
+                    ...Object.keys(rule).map(ruleName => r[ruleName]),
+                    r.functionCall,
+                    r.variable,
+                    r.backreference,
+                    r.comment,
+                ]
             ).desc("expression"),
         comment: () => seq(string("#"), regex(/.*/)).result(DUMMY),
         any: () => kw.any.map(builders.any),
@@ -252,7 +257,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                         currentPosition = currentPosition[key]
                     }
                     currentPosition[variableName] = content
-                    return makeDSLParser(variablesCopy)
+                    return makeDSLParser(variablesCopy, rule)
                 }),
         variable: r =>
             r.identifier.map(path => {
@@ -275,12 +280,14 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 return func(...args)
             }),
         identifier: r =>
-            sepBy1(r.identifierName, DOT).assert(
-                ident => !ident.some(isKeyword),
-                "keyword cannot be used in variable names"
-            ),
+            sepBy1(r.identifierName, DOT)
+                .assert(ident => !ident.some(isKeyword), "keyword cannot be used in variable names")
+                .map(x => {
+                    return x
+                }),
         identifierName: () => regex(/[a-zA-Z]\w*/),
         number: () => regex(/[0-9]+/).map(Number),
+        ...rule,
     })
 
     return dslParser.dslScript.map(([settings, expression]) => {
@@ -292,7 +299,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
     })
 }
 
-export function makeDSL(variables: any = {}): Parser<DSLScript> {
+export function makeDSL(variables: any = {}, libs: Library[] = []): Parser<DSLScript> {
     const CONSTANTS = {
         CHAR: {
             QUOTE: builders.literal('"'),
@@ -301,5 +308,11 @@ export function makeDSL(variables: any = {}): Parser<DSLScript> {
         },
     }
 
-    return makeDSLParser({ ...CONSTANTS, ...variables })
+    const ruleList = libs.flatMap(lib => lib.rules.map(rule => [rule.name, rule.parser])) as [
+        string,
+        (r: Language) => Parser<Expression>
+    ][]
+    const rules: Rule = Object.fromEntries(ruleList)
+
+    return makeDSLParser({ ...CONSTANTS, ...variables }, rules)
 }
