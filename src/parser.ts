@@ -1,5 +1,5 @@
 import { backreference, Expression, ExpressionType, group } from "./ast"
-import Parsimmon, {
+import {
     alt,
     Parser,
     regex,
@@ -12,8 +12,6 @@ import Parsimmon, {
     seq,
     sepBy,
     sepBy1,
-    succeed,
-    fail,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
 import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
@@ -34,14 +32,11 @@ const kw = {
     except: string("except").desc("except"),
 }
 
-const DOT = string(".").desc("DOT")
-
-function debug<T>(label: string): (result: T) => Parser<T> {
-    return function (result: T) {
-        console.log(label, result)
-        return succeed(result)
-    }
+function isKeyword(word: string): boolean {
+    return Object.keys(kw).includes(word)
 }
+
+const DOT = string(".").desc("DOT")
 
 const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/).desc("statement_separator")
 const optionalStatementSeperator: Parser<string> = regex(/( *[\n\r] *)*/)
@@ -111,7 +106,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
             seq(r.preamble.skip(statementSeperator).atMost(1), r.script)
                 .trim(optionalStatementSeperator)
                 .map(([[preamble], script]) => [preamble, script]),
-        preamble: r =>
+        preamble: () =>
             alt(
                 string("at beginning of input").map(() => PositionInInput.BEGINNING),
                 string("at end of input").map(() => PositionInInput.END),
@@ -201,7 +196,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                     (exps: Expression[]) => builders.alternative(...exps)
                 )
             ).map(({ content }) => content),
-        characterClassList: r =>
+        characterClassList: () =>
             sepBy(
                 alt(
                     seq(letter, seq(_, kw.to, _), letter).map(([lower, _ws, upper]) => [
@@ -212,7 +207,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 ),
                 regex(/ *, */).desc("list_separator")
             ),
-        characterClassHeader: r => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
+        characterClassHeader: () => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
         characterClass: r =>
             lineOrBlock(
                 r.characterClassHeader,
@@ -292,8 +287,4 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
             return new DSLScript(expression, settings)
         }
     })
-}
-
-function isKeyword(word: string): boolean {
-    return Object.keys(kw).includes(word)
 }

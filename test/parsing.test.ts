@@ -123,7 +123,7 @@ describe("settings", () => {
     })
 })
 
-describe.only("macros", () => {
+describe("macros", () => {
     test("simple macro", () => {
         let parser = makeDSLParser({
             myMacros: {
