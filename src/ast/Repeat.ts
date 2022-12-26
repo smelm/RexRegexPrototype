@@ -5,12 +5,12 @@ import { WrappingExpression } from "./WrappingExpression"
 // TODO support "0 to many"
 // TODO support "maybe many of", or not?
 export class Repeat extends WrappingExpression {
-    constructor(private value: Expression, public lower: number, public upper?: number) {
+    constructor(private child: Expression, public lower: number, public upper?: number) {
         super(ExpressionType.REPEAT)
     }
 
     contentToString(): string {
-        return `${this.value.toString()}, ${this.lower}-${this.upper}`
+        return `${this.child.toString()}, ${this.lower}-${this.upper}`
     }
 
     /**
@@ -22,7 +22,7 @@ export class Repeat extends WrappingExpression {
     }
 
     generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        const childStrings: string[] = this.value.generateValid(tree, rng)
+        const childStrings: string[] = this.child.generateValid(tree, rng)
 
         if (this.lower === this.upper) {
             return childStrings.map(s => s.repeat(this.lower))
@@ -34,8 +34,8 @@ export class Repeat extends WrappingExpression {
     }
 
     generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        const validChildStr: string[] = this.value.generateValid(tree, rng)
-        const invalidChildStr: string[] = this.value.generateInvalid(tree, rng)
+        const validChildStr: string[] = this.child.generateValid(tree, rng)
+        const invalidChildStr: string[] = this.child.generateInvalid(tree, rng)
 
         let result: string[] = []
 
@@ -93,6 +93,6 @@ export class Repeat extends WrappingExpression {
     }
 
     toRegex(): string {
-        return `${this.value.toRegex()}${this.compileRepeatOperator()}`
+        return `${this.child.toRegex()}${this.compileRepeatOperator()}`
     }
 }

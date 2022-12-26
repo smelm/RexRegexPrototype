@@ -4,23 +4,23 @@ import { ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Group extends WrappingExpression {
-    constructor(private name: string, private content: Expression) {
+    constructor(private name: string, private child: Expression) {
         super(ExpressionType.GROUP)
     }
 
     toRegex(): string {
-        return `(?<${this.name}>${this.content.toRegex()})`
+        return `(?<${this.name}>${this.child.toRegex()})`
     }
 
     contentToString(): string {
-        return `${this.name}, ${this.content.toString()}`
+        return `${this.name}, ${this.child.toString()}`
     }
 
     generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.content.generateValid(tree, rng)
+        return this.child.generateValid(tree, rng)
     }
 
     generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.content.generateInvalid(tree, rng)
+        return this.child.generateInvalid(tree, rng)
     }
 }

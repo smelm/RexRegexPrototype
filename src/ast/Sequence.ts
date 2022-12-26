@@ -5,12 +5,12 @@ import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Sequence extends WrappingExpression {
-    constructor(private value: Expression[]) {
+    constructor(private children: Expression[]) {
         super(ExpressionType.SEQUENCE)
     }
 
     contentToString(): string {
-        return this.value.map((v: Expression) => v.toString()).join(", ")
+        return this.children.map((v: Expression) => v.toString()).join(", ")
     }
 
     private combinations(examplesPerElement: string[][]): string[] {
@@ -28,7 +28,7 @@ export class Sequence extends WrappingExpression {
         valid: boolean,
         rng: RandomGenerator
     ): string[][] {
-        return this.value.map((child: Expression) => {
+        return this.children.map((child: Expression) => {
             let examples = valid ? child.generateValid(tree, rng) : child.generateInvalid(tree, rng)
             shuffle(examples, { rng: rng.random })
             return examples
@@ -62,6 +62,6 @@ export class Sequence extends WrappingExpression {
     }
 
     toRegex(): string {
-        return `(?:${this.value.map((v: Expression) => v.toRegex()).join("")})`
+        return `(?:${this.children.map((v: Expression) => v.toRegex()).join("")})`
     }
 }

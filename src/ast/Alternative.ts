@@ -3,20 +3,20 @@ import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Alternative extends WrappingExpression {
-    constructor(private alternatives: Expression[]) {
+    constructor(private children: Expression[]) {
         super(ExpressionType.ALTERNATIVE)
     }
 
     toRegex(): string {
-        return this.alternatives.map((e: Expression) => e.toRegex()).join("|")
+        return this.children.map((e: Expression) => e.toRegex()).join("|")
     }
 
     contentToString(): string {
-        return this.alternatives.map(a => a.toString()).join(", ")
+        return this.children.map(a => a.toString()).join(", ")
     }
 
     private matchedByAlternative(input: string): boolean {
-        for (let alt of this.alternatives) {
+        for (let alt of this.children) {
             if (new RegExp(alt.toRegex()).test(input)) {
                 return true
             }
@@ -26,11 +26,11 @@ export class Alternative extends WrappingExpression {
     }
 
     generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.alternatives.flatMap((e: Expression) => e.generateValid(tree, rng))
+        return this.children.flatMap((e: Expression) => e.generateValid(tree, rng))
     }
 
     generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.alternatives.flatMap((e: Expression) => {
+        return this.children.flatMap((e: Expression) => {
             const invalidSamples = e.generateInvalid(tree, rng)
 
             let wronglyValidIndices: number[] = []
