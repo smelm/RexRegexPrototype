@@ -79,7 +79,7 @@ const MULTI_LINE_CASES = [
     ['# this is a comment\n"abc"', literal("abc")],
     ['# this is a comment\n# this is another\n"abc"\n# and another', literal("abc")],
     [
-        'begin symbol\n"#"\nend\n\n"foo"\nrepeat symbol',
+        'begin symbol\n"#"\nend\n\n"foo"\nsame as symbol',
         sequence(group("symbol", literal("#")), literal("foo"), backreference("symbol")),
     ],
 ].map(generateTestNames)

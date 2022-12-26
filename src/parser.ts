@@ -29,7 +29,8 @@ const kw = Object.fromEntries(
         "either",
         "or",
         "define",
-        "repeat",
+        "same",
+        "as",
         "except",
     ].map(ident => [ident, string(ident).desc(ident)])
 )
@@ -185,7 +186,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 r.expressionSequence
             ).map(({ header, content }) => group(header, content)),
         backreference: r =>
-            line(kw.repeat, r.identifierName).map(({ content: groupName }) =>
+            line(seq(kw.same, _, kw.as), r.identifierName).map(({ content: groupName }) =>
                 backreference(groupName)
             ),
         alternative: r =>
