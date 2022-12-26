@@ -292,12 +292,14 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
     })
 }
 
-export function makeDSL(): Parser<DSLScript> {
-    return makeDSLParser({
+export function makeDSL(variables: any = {}): Parser<DSLScript> {
+    const CONSTANTS = {
         CHAR: {
             QUOTE: builders.literal('"'),
             COMMA: builders.literal(","),
             DOT: builders.literal("."),
         },
-    })
+    }
+
+    return makeDSLParser({ ...CONSTANTS, ...variables })
 }
