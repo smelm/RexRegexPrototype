@@ -122,3 +122,20 @@ describe("settings", () => {
         expect(settings.positionInInput).toEqual(PositionInInput.BEGINNING)
     })
 })
+
+describe.only("macros", () => {
+    test("simple macro", () => {
+        let parser = makeDSLParser({
+            myMacros: {
+                pet: (isDogPerson: string) =>
+                    isDogPerson === "true" ? literal("dog") : literal("cat"),
+            },
+        })
+
+        let result = parser.tryParse("myMacros.pet(true)").child
+        expect(result).toEqual(literal("dog"))
+
+        result = parser.tryParse("myMacros.pet(false)").child
+        expect(result).toEqual(literal("cat"))
+    })
+})

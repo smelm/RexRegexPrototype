@@ -139,6 +139,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 r.variableDefinition,
                 r.characterClass,
                 r.any,
+                r.functionCall,
                 r.variable,
                 r.backreference
             ).desc("expression"),
@@ -196,6 +197,39 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                     (exps: Expression[]) => builders.alternative(...exps)
                 )
             ).map(({ content }) => content),
+        characterClassList: r =>
+            sepBy(
+                alt(
+                    seq(letter, seq(_, kw.to, _), letter).map(([lower, _ws, upper]) => [
+                        lower,
+                        upper,
+                    ]),
+                    letter
+                ),
+                regex(/ *, */).desc("list_separator")
+            ),
+        characterClassHeader: r => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
+        characterClass: r =>
+            lineOrBlock(
+                r.characterClassHeader,
+                r.characterClassList,
+                sepBy(r.characterClassList, statementSeperator.notFollowedBy(kw.end))
+            ).map(({ content, header, type }) => {
+                let chars
+                if (type === "block") {
+                    //unwrap from list
+                    chars = content.flat()
+                } else {
+                    chars = content
+                }
+
+                // needs to be flatten twice
+                if (header.flat().flat().includes("except")) {
+                    return builders.anyExcept(...chars)
+                } else {
+                    return builders.characterClass(...chars)
+                }
+            }),
         variableDefinition: r =>
             lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence)
                 .assert(
@@ -232,38 +266,11 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
 
                 return position
             }),
-        characterClassList: r =>
-            sepBy(
-                alt(
-                    seq(letter, seq(_, kw.to, _), letter).map(([lower, _ws, upper]) => [
-                        lower,
-                        upper,
-                    ]),
-                    letter
-                ),
-                regex(/ *, */).desc("list_separator")
-            ),
-        characterClassHeader: r => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
-        characterClass: r =>
-            lineOrBlock(
-                r.characterClassHeader,
-                r.characterClassList,
-                sepBy(r.characterClassList, statementSeperator.notFollowedBy(kw.end))
-            ).map(({ content, header, type }) => {
-                let chars
-                if (type === "block") {
-                    //unwrap from list
-                    chars = content.flat()
-                } else {
-                    chars = content
-                }
-
-                // needs to be flatten twice
-                if (header.flat().flat().includes("except")) {
-                    return builders.anyExcept(...chars)
-                } else {
-                    return builders.characterClass(...chars)
-                }
+        functionCall: r =>
+            seq(r.variable, regex(/\([^)]*\)/).desc("args")).map(([func, argString]) => {
+                argString = argString.substring(1, argString.length - 1)
+                let args = argString.split(",").map(s => s.trim())
+                return func(...args)
             }),
         identifier: r =>
             sepBy1(r.identifierName, DOT).assert(
