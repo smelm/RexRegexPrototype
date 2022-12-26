@@ -1,17 +1,48 @@
 import { RandomGenerator } from "../RandomGenerator"
+import { randomIntBetween } from "../utils"
 import { Expression, ExpressionType } from "./Expression"
+import { Group } from "./Group"
+import { findInAST } from "./utils"
 
 export class Backreference extends Expression {
     constructor(private groupName: string) {
         super(ExpressionType.BACKREFERENCE)
     }
 
-    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
-        throw new Error("Method not implemented.")
+    isCorrespondingGroup(exp: Expression): boolean {
+        return exp.type === ExpressionType.GROUP && (exp as Group).name === this.groupName
     }
 
-    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
-        throw new Error("Method not implemented.")
+    findCorrespondingGroup(tree: Expression): Group {
+        let results = findInAST(tree, this.isCorrespondingGroup.bind(this))
+
+        if (results.length > 1) {
+            throw new Error(`multiple definitions of group ${this.groupName}`)
+        } else if (results.length === 0) {
+            throw new Error(`group ${this.groupName} is not defined`)
+        } else {
+            return results[0] as Group
+        }
+    }
+
+    generateValid(tree: Expression, _rng: RandomGenerator): string[] {
+        const group = this.findCorrespondingGroup(tree)
+        return group.context.valid
+    }
+
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+        const group = this.findCorrespondingGroup(tree)
+        const valid = group.context.valid
+
+        if (valid.length < 2) {
+            return group.generateInvalid(tree, rng)
+        } else {
+            // this is the simplest possible derangement (permutation without trivial cycles)
+            // this assumes that that there are no duplicate elements
+            let shift = randomIntBetween(1, valid.length - 1, rng)
+            // rotate the array by shift
+            return [...valid.slice(shift), ...valid.slice(0, shift)]
+        }
     }
 
     toRegex(): string {
@@ -21,22 +52,4 @@ export class Backreference extends Expression {
     toString(): string {
         return `${this.type}(${this.groupName})`
     }
-}
-
-export function findInAST(tree: Expression, condition: Function): Expression[] {
-    if (condition(tree)) {
-        return [tree]
-    }
-
-    let treeCopy = tree as any
-
-    if ("child" in treeCopy) {
-        return findInAST(treeCopy.child, condition)
-    }
-
-    if ("children" in treeCopy) {
-        return treeCopy.children.flatMap(findInAST)
-    }
-
-    return []
 }

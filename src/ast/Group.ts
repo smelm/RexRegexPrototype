@@ -4,7 +4,9 @@ import { ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Group extends WrappingExpression {
-    constructor(private name: string, private child: Expression) {
+    public context: Record<"valid" | "invalid", string[]> = { valid: [], invalid: [] }
+
+    constructor(public readonly name: string, private child: Expression) {
         super(ExpressionType.GROUP)
     }
 
@@ -17,10 +19,14 @@ export class Group extends WrappingExpression {
     }
 
     generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.child.generateValid(tree, rng)
+        let valid = this.child.generateValid(tree, rng)
+        this.context["valid"] = valid
+        return valid
     }
 
     generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.child.generateInvalid(tree, rng)
+        let invalid = this.child.generateInvalid(tree, rng)
+        this.context["invalid"] = invalid
+        return invalid
     }
 }
