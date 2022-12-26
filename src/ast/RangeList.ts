@@ -1,6 +1,6 @@
 import { CharRange } from "./CharRange"
 import { cummulativeSum, randomInt } from "../utils"
-import { RandomSeed } from "random-seed"
+import { RandomGenerator } from "../RandomGenerator"
 
 export class RangeList {
     /*
@@ -43,7 +43,7 @@ export class RangeList {
         return this.ranges.map(func)
     }
 
-    sample(n: number, rng: RandomSeed): string[] {
+    sample(n: number, rng: RandomGenerator): string[] {
         const size = this.size()
         const samples = []
         const wasGenerated: boolean[][] = this.ranges.map(r => new Array(r.length()).fill(false))

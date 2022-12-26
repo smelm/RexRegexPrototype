@@ -1,4 +1,4 @@
-import { RandomSeed } from "random-seed"
+import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
@@ -25,13 +25,13 @@ export class Alternative extends WrappingExpression {
         return false
     }
 
-    generateValid(rng: RandomSeed): string[] {
-        return this.alternatives.flatMap((e: Expression) => e.generateValid(rng))
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+        return this.alternatives.flatMap((e: Expression) => e.generateValid(tree, rng))
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
         return this.alternatives.flatMap((e: Expression) => {
-            const invalidSamples = e.generateInvalid(rng)
+            const invalidSamples = e.generateInvalid(tree, rng)
 
             let wronglyValidIndices: number[] = []
             for (let num = 0; num < 3; num++) {
@@ -45,7 +45,7 @@ export class Alternative extends WrappingExpression {
                     return invalidSamples
                 }
 
-                const newInvalid = e.generateInvalid(rng)
+                const newInvalid = e.generateInvalid(tree, rng)
                 for (let idx of wronglyValidIndices) {
                     invalidSamples[idx] = newInvalid[idx]
                 }

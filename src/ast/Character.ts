@@ -1,7 +1,6 @@
 import { RandomGenerator } from "../RandomGenerator"
-import { RandomSeed } from "random-seed"
 
-import { ExpressionType } from "./Expression"
+import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Character extends WrappingExpression {
@@ -13,18 +12,18 @@ export class Character extends WrappingExpression {
         return this.value
     }
 
-    generateValid(rng: RandomSeed): string[] {
+    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
         return [this.value]
     }
 
-    generateInvalid(generator: RandomGenerator): string[] {
+    generateInvalid(_tree: Expression, rng: RandomGenerator): string[] {
         //TODO: this is not good
         //TODO: make this work with unicode
         //TODO: this could cause problems with greedy repetition before
         let char
 
         do {
-            char = randomCharacter(generator)
+            char = randomCharacter(rng)
         } while (char === this.value)
 
         return [char]

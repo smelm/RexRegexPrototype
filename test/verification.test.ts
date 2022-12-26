@@ -71,7 +71,9 @@ function makeTestCases(): TestCase[] {
     for (let [ast, groups] of asts) {
         ast = ast as Expression
         for (let matches of [true, false]) {
-            let strs = matches ? ast.generateValid(generator) : ast.generateInvalid(generator)
+            let strs = matches
+                ? ast.generateValid(ast, generator)
+                : ast.generateInvalid(ast, generator)
 
             for (let str of strs) {
                 cases.push({

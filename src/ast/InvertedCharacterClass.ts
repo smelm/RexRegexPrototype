@@ -1,5 +1,6 @@
-import { RandomSeed } from "random-seed"
+import { RandomGenerator } from "../RandomGenerator"
 import { CharacterClass } from "./CharacterClass"
+import { Expression } from "./Expression"
 
 export class InvertedCharacterClass extends CharacterClass {
     constructor(
@@ -11,11 +12,11 @@ export class InvertedCharacterClass extends CharacterClass {
         super(members, ranges, true, numSamplesToGenerate)
     }
 
-    generateValid(rng: RandomSeed): string[] {
-        return super.generateInvalid(rng)
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+        return super.generateInvalid(tree, rng)
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
-        return super.generateValid(rng)
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+        return super.generateValid(tree, rng)
     }
 }

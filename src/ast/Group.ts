@@ -1,4 +1,4 @@
-import { RandomSeed } from "random-seed"
+import { RandomGenerator } from "../RandomGenerator"
 import { Expression } from "./Expression"
 import { ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
@@ -16,11 +16,11 @@ export class Group extends WrappingExpression {
         return `${this.name}, ${this.content.toString()}`
     }
 
-    generateValid(rng: RandomSeed): string[] {
-        return this.content.generateValid(rng)
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+        return this.content.generateValid(tree, rng)
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
-        return this.content.generateInvalid(rng)
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+        return this.content.generateInvalid(tree, rng)
     }
 }

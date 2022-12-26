@@ -1,4 +1,3 @@
-import { InputGenerator } from "../Generator"
 import { RandomGenerator } from "../RandomGenerator"
 
 export enum ExpressionType {
@@ -15,11 +14,11 @@ export enum ExpressionType {
     BACKREFERENCE = "backreference",
 }
 
-export abstract class Expression implements InputGenerator {
+export abstract class Expression {
     constructor(public type: ExpressionType) {}
 
-    abstract generateValid(rng: RandomGenerator): string[]
-    abstract generateInvalid(rng: RandomGenerator): string[]
+    abstract generateValid(ast: Expression, rng: RandomGenerator): string[]
+    abstract generateInvalid(ast: Expression, rng: RandomGenerator): string[]
     abstract toRegex(): string
     abstract toString(): string
 }

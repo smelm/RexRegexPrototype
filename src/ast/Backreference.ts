@@ -1,4 +1,4 @@
-import { RandomSeed } from "random-seed"
+import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 
 export class Backreference extends Expression {
@@ -6,11 +6,11 @@ export class Backreference extends Expression {
         super(ExpressionType.BACKREFERENCE)
     }
 
-    generateValid(rng: RandomSeed): string[] {
+    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
         throw new Error("Method not implemented.")
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
+    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
         throw new Error("Method not implemented.")
     }
 

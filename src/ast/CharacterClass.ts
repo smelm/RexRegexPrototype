@@ -1,7 +1,7 @@
-import { RandomSeed } from "random-seed"
-import { ExpressionType } from "./Expression"
+import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 import { RangeList } from "./RangeList"
+import { RandomGenerator } from "../RandomGenerator"
 
 export class CharacterClass extends WrappingExpression {
     private ranges: RangeList
@@ -31,11 +31,11 @@ export class CharacterClass extends WrappingExpression {
         return this.ranges.map<string>(r => r.toString()).join(", ")
     }
 
-    generateValid(rng: RandomSeed): string[] {
+    generateValid(_tree: Expression, rng: RandomGenerator): string[] {
         return this.ranges.sample(this.numSamplesToGenerate, rng)
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
+    generateInvalid(_tree: Expression, rng: RandomGenerator): string[] {
         return this.ranges.invert().sample(this.numSamplesToGenerate, rng)
     }
 

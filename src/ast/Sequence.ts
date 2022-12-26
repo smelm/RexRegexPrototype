@@ -23,21 +23,25 @@ export class Sequence extends WrappingExpression {
             )
     }
 
-    private examplesFromChildren(valid: boolean, rng: RandomGenerator): string[][] {
+    private examplesFromChildren(
+        tree: Expression,
+        valid: boolean,
+        rng: RandomGenerator
+    ): string[][] {
         return this.value.map((child: Expression) => {
-            let examples = valid ? child.generateValid(rng) : child.generateInvalid(rng)
+            let examples = valid ? child.generateValid(tree, rng) : child.generateInvalid(tree, rng)
             shuffle(examples, { rng: rng.random })
             return examples
         })
     }
 
-    generateValid(rng: RandomGenerator): string[] {
-        return this.combinations(this.examplesFromChildren(true, rng))
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+        return this.combinations(this.examplesFromChildren(tree, true, rng))
     }
 
-    generateInvalid(rng: RandomGenerator): string[] {
-        const validExamples = this.examplesFromChildren(true, rng)
-        const invalidExamples = this.examplesFromChildren(false, rng)
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+        const validExamples = this.examplesFromChildren(tree, true, rng)
+        const invalidExamples = this.examplesFromChildren(tree, false, rng)
 
         let result: string[] = []
 

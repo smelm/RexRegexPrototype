@@ -1,4 +1,4 @@
-import { RandomSeed } from "random-seed"
+import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
@@ -26,12 +26,12 @@ export class DSLScript extends WrappingExpression {
         return this.child.toString()
     }
 
-    generateValid(rng: RandomSeed): string[] {
-        return this.child.generateValid(rng)
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+        return this.child.generateValid(tree, rng)
     }
 
-    generateInvalid(rng: RandomSeed): string[] {
-        return this.child.generateInvalid(rng)
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+        return this.child.generateInvalid(tree, rng)
     }
 
     toRegex(): string {

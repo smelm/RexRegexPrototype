@@ -16,8 +16,8 @@ import Parsimmon, {
     fail,
 } from "parsimmon"
 import * as builders from "./ast/astBuilders"
-import { RandomSeed } from "random-seed"
 import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
+import { RandomGenerator } from "./RandomGenerator"
 
 const kw = {
     any: string("any").desc("any"),
@@ -79,15 +79,19 @@ class Dummy extends Expression {
     constructor() {
         super(ExpressionType.DUMMY)
     }
-    generateValid(_rng: RandomSeed): string[] {
+
+    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
         throw new Error("Method not implemented.")
     }
-    generateInvalid(_rng: RandomSeed): string[] {
+
+    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
         throw new Error("Method not implemented.")
     }
+
     toRegex(): string {
         throw new Error("Method not implemented.")
     }
+
     toString(): string {
         throw new Error("Method not implemented.")
     }

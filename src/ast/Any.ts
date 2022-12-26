@@ -12,11 +12,11 @@ export class Any extends Expression {
         return this.type.toString()
     }
 
-    generateValid(rng: RandomGenerator): string[] {
+    generateValid(_tree: Expression, rng: RandomGenerator): string[] {
         return [randomCharacter(rng)]
     }
 
-    generateInvalid(_rng: RandomGenerator): string[] {
+    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
         //TODO: handle dotall mode here
         return []
     }

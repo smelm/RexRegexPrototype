@@ -21,8 +21,8 @@ export class Repeat extends WrappingExpression {
         return this.upper || rng.intBetween(this.lower, this.lower + 5)
     }
 
-    generateValid(rng: RandomGenerator): string[] {
-        const childStrings: string[] = this.value.generateValid(rng)
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+        const childStrings: string[] = this.value.generateValid(tree, rng)
 
         if (this.lower === this.upper) {
             return childStrings.map(s => s.repeat(this.lower))
@@ -33,9 +33,9 @@ export class Repeat extends WrappingExpression {
         }
     }
 
-    generateInvalid(rng: RandomGenerator): string[] {
-        const validChildStr: string[] = this.value.generateValid(rng)
-        const invalidChildStr: string[] = this.value.generateInvalid(rng)
+    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+        const validChildStr: string[] = this.value.generateValid(tree, rng)
+        const invalidChildStr: string[] = this.value.generateInvalid(tree, rng)
 
         let result: string[] = []
 
