@@ -17,20 +17,22 @@ import * as builders from "./ast/astBuilders"
 import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
 import { RandomGenerator } from "./RandomGenerator"
 
-const kw = {
-    any: string("any").desc("any"),
-    maybe: string("maybe").desc("maybe"),
-    many: string("many").desc("many"),
-    of: string("of").desc("of"),
-    to: string("to").desc("to"),
-    end: string("end").desc("end"),
-    begin: string("begin").desc("begin"),
-    either: string("either").desc("either"),
-    or: string("or").desc("or"),
-    define: string("define").desc("define"),
-    repeat: string("repeat").desc("repeat"),
-    except: string("except").desc("except"),
-}
+const kw = Object.fromEntries(
+    [
+        "any",
+        "maybe",
+        "many",
+        "of",
+        "to",
+        "end",
+        "begin",
+        "either",
+        "or",
+        "define",
+        "repeat",
+        "except",
+    ].map(ident => [ident, string(ident).desc(ident)])
+)
 
 function isKeyword(word: string): boolean {
     return Object.keys(kw).includes(word)
