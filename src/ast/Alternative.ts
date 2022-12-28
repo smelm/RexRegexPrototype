@@ -59,4 +59,12 @@ export class Alternative extends WrappingExpression {
             return invalidSamples
         })
     }
+
+    toDSL(indentLevel: number): string {
+        return [
+            this.indent("either", indentLevel),
+            ...this.children.map(c => c.toDSL(indentLevel + 1)),
+            this.indent("end", indentLevel),
+        ].join("\n")
+    }
 }

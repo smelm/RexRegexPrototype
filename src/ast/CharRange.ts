@@ -45,4 +45,12 @@ export class CharRange {
             return `${String.fromCharCode(this.lower)}-${String.fromCharCode(this.upper)}`
         }
     }
+
+    toDSL(): string {
+        if (this.lower === this.upper) {
+            return String.fromCharCode(this.lower)
+        } else {
+            return `${String.fromCharCode(this.lower)} to ${String.fromCharCode(this.upper)}`
+        }
+    }
 }

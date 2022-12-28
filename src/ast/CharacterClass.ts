@@ -9,8 +9,9 @@ export class CharacterClass extends WrappingExpression {
     constructor(
         members: string[],
         ranges: [string, string][],
-        inverted: boolean = false,
-        private numSamplesToGenerate: number = 5
+        private inverted: boolean = false,
+        public readonly isPredefined: boolean = false,
+        private readonly numSamplesToGenerate: number = 5
     ) {
         super(ExpressionType.CHARACTER_CLASS)
 
@@ -47,5 +48,12 @@ export class CharacterClass extends WrappingExpression {
                     : String.fromCharCode(range.lower) + "-" + String.fromCharCode(range.upper)
             )
             .join("")}]`
+    }
+
+    toDSL(indentLevel: number): string {
+        const indent = " ".repeat(4 * indentLevel)
+        return `${indent}any{this.inverted? " except" : ""} of\n${this.ranges
+            .map(range => range.toDSL())
+            .join("\n" + indent + "    ")}`
     }
 }

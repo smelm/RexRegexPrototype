@@ -24,4 +24,8 @@ export class Any extends Expression {
     toRegex(): string {
         return "."
     }
+
+    toDSL(indentLevel: number): string {
+        return this.indent("any", indentLevel)
+    }
 }

@@ -9,7 +9,7 @@ export class InvertedCharacterClass extends CharacterClass {
         inverted: boolean = false,
         numSamplesToGenerate: number = 5
     ) {
-        super(members, ranges, true, numSamplesToGenerate)
+        super(members, ranges, true, false, numSamplesToGenerate)
     }
 
     generateValid(tree: Expression, rng: RandomGenerator): string[] {

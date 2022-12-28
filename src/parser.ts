@@ -93,6 +93,10 @@ class Dummy extends Expression {
     toString(): string {
         throw new Error("Method not implemented.")
     }
+
+    toDSL(level: number): string {
+        throw new Error("Method not implemented.")
+    }
 }
 
 const DUMMY = new Dummy()

@@ -29,16 +29,15 @@ export class RexRegex {
     }
 
     private static fromJSON(obj: any): Expression {
-        console.log(obj)
         switch (obj.type as string) {
             case "literal":
                 if (obj.value === "\\w") {
                     return letter()
                 } else if (obj.value === "\\d") {
                     return digit()
+                } else {
+                    return literal(obj.value)
                 }
-
-                return literal(obj.value)
             case ExpressionType.ANY:
                 return any()
             case ExpressionType.REPEAT:
@@ -62,14 +61,9 @@ export class RexRegex {
         }
     }
 
-    // TODO return DSLScript
     static importFromFile(fileName: string) {
         const jsonContent = readFileSync(fileName).toString()
         const obj = JSON.parse(jsonContent)
         return this.fromCode(this.fromJSON(obj))
     }
 }
-
-let dsl = RexRegex.importFromFile("src/generated.json")
-console.log(dsl)
-console.log(dsl.toRegex())

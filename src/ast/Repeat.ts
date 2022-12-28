@@ -1,5 +1,7 @@
 import { RandomGenerator } from "../RandomGenerator"
+import { CharacterClass } from "./CharacterClass"
 import { Expression, ExpressionType } from "./Expression"
+import { Group } from "./Group"
 import { WrappingExpression } from "./WrappingExpression"
 
 // TODO support "0 to many"
@@ -109,5 +111,33 @@ export class Repeat extends WrappingExpression {
 
     toRegex(): string {
         return `${this.child.toRegex()}${this.compileRepeatOperator()}`
+    }
+
+    toDSL(indentLevel: number): string {
+        let operator
+
+        if (this.lower === 0 && this.upper === 1) {
+            operator = `maybe`
+        } else if (this.noUpperBound()) {
+            operator = `${this.lower} to many of`
+        } else {
+            operator = `${this.lower} to ${this.upper} of`
+        }
+
+        const formatAsLine =
+            this.child.type === ExpressionType.CHARACTER ||
+            this.child.type === ExpressionType.ANY ||
+            (this.child.type === ExpressionType.CHARACTER_CLASS &&
+                (this.child as CharacterClass).isPredefined)
+
+        if (formatAsLine) {
+            return this.indent(`${operator} ${this.child.toDSL(0)}`, indentLevel)
+        } else {
+            return [
+                this.indent(operator, indentLevel),
+                this.child.toDSL(indentLevel + 1),
+                this.indent("end", indentLevel),
+            ].join("\n")
+        }
     }
 }

@@ -29,4 +29,10 @@ export class Group extends WrappingExpression {
         this.context["invalid"] = invalid
         return invalid
     }
+
+    toDSL(indentLevel: number): string {
+        return [`begin ${this.name}`, this.child.toDSL(indentLevel + 1), `end`]
+            .map(s => this.indent(s, indentLevel))
+            .join("\n")
+    }
 }

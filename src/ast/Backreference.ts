@@ -52,4 +52,8 @@ export class Backreference extends Expression {
     toString(): string {
         return `${this.type}(${this.groupName})`
     }
+
+    toDSL(_indentLevel: number): string {
+        return `same as ${this.groupName}`
+    }
 }

@@ -53,4 +53,8 @@ export class DSLScript extends WrappingExpression {
 
         return `${prefix}${pattern}${suffix}`
     }
+
+    toDSL(_indentLevel: number = 0): string {
+        return this.child.toDSL(0)
+    }
 }

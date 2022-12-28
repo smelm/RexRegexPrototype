@@ -33,6 +33,10 @@ export class Character extends WrappingExpression {
     toRegex(): string {
         return this.value
     }
+
+    toDSL(indentLevel: number): string {
+        return this.indent(`"${this.value}"`, indentLevel)
+    }
 }
 
 //TODO: this is terrible

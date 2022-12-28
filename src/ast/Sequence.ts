@@ -78,4 +78,8 @@ export class Sequence extends WrappingExpression {
     toRegex(): string {
         return `(?:${this.children.map((c: Expression) => c.toRegex()).join("")})`
     }
+
+    toDSL(indentLevel: number): string {
+        return this.children.map(child => child.toDSL(indentLevel)).join("\n")
+    }
 }

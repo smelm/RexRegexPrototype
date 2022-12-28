@@ -21,4 +21,10 @@ export abstract class Expression {
     abstract generateInvalid(ast: Expression, rng: RandomGenerator): string[]
     abstract toRegex(): string
     abstract toString(): string
+    abstract toDSL(identLevel: number): string
+
+    indent(text: string, indentLevel: number): string {
+        const tab = " ".repeat(4 * indentLevel)
+        return tab + text
+    }
 }
