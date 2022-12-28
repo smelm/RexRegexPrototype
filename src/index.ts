@@ -6,9 +6,9 @@ import {
     characterClass,
     Expression,
     ExpressionType,
+    Group,
     group,
     literal,
-    maybe,
     repeat,
     sequence,
 } from "./ast"
@@ -36,19 +36,20 @@ export class RexRegex {
             case ExpressionType.ANY:
                 return any()
             case ExpressionType.REPEAT:
-                return repeat(RexRegex.fromJSON(obj.child), obj.lower, obj.upper, obj.lazy)
+                return repeat(this.fromJSON(obj.child), obj.lower, obj.upper, obj.lazy)
             case ExpressionType.SEQUENCE:
-                return sequence(...obj.children.map(RexRegex.fromJSON))
+                return sequence(...obj.children.map(this.fromJSON.bind(this)))
             case ExpressionType.CHARACTER:
                 return character(obj.value)
-            case ExpressionType.GROUP:
-                return group(obj.name, RexRegex.fromJSON(obj.child))
             case ExpressionType.ALTERNATIVE:
-                return alternative(...obj.children.map(RexRegex.fromJSON))
+                return alternative(...obj.children.map(this.fromJSON.bind(this)))
             case ExpressionType.CHARACTER_CLASS:
                 return characterClass(obj.members)
             case ExpressionType.BACKREFERENCE:
                 return backreference(obj.groupName)
+            case ExpressionType.GROUP:
+                // groups from the regex generator are never relevant since they are only ever used for operator precedence
+                return this.fromJSON(obj.child)
             default:
                 console.log(obj)
                 throw new Error("could not convert value into an expression")
@@ -65,5 +66,5 @@ export class RexRegex {
 
 let dsl = RexRegex.importFromFile("src/generated.json")
 console.log(dsl)
-console.log(dsl.toString())
+console.log(dsl.toString().replace(/\(/g, "(\n"))
 console.log(dsl.toRegex())
