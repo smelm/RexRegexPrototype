@@ -36,6 +36,7 @@ export class DSLScript extends WrappingExpression {
 
     toRegex(): string {
         const pattern = this.child.toRegex()
+        console.log(pattern)
 
         let [prefix, suffix] = (() => {
             switch (this.settings.positionInInput) {
@@ -51,6 +52,6 @@ export class DSLScript extends WrappingExpression {
             }
         })()
 
-        return `${prefix}(:?${pattern})$${suffix}`
+        return `${prefix}${pattern}${suffix}`
     }
 }

@@ -13,8 +13,11 @@ export function generateRandomSeed(): string {
 }
 
 export function newRandomGenerator(seed: string = ""): RandomGenerator {
-    if(seed === ""){
+    if (seed === "") {
         seed = generateRandomSeed()
     }
+
+    console.log("random seed", seed)
+
     return gen.create(seed)
 }
