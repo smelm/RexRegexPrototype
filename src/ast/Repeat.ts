@@ -5,7 +5,12 @@ import { WrappingExpression } from "./WrappingExpression"
 // TODO support "0 to many"
 // TODO support "maybe many of", or not?
 export class Repeat extends WrappingExpression {
-    constructor(private child: Expression, public lower: number, public upper?: number) {
+    constructor(
+        private child: Expression,
+        public lower: number,
+        public upper?: number,
+        public lazy: boolean = false
+    ) {
         super(ExpressionType.REPEAT)
     }
 
@@ -65,7 +70,7 @@ export class Repeat extends WrappingExpression {
     }
 
     //TODO make sure that each branch is tested
-    private compileRepeatOperator() {
+    private compileGreedyRepeatOperator(): string {
         if (this.lower == null) {
             throw new Error(
                 "to avoid ambiguity between 0 or 1 repetitions, the lower bound of the repeat operator may not be undefined"
@@ -89,6 +94,16 @@ export class Repeat extends WrappingExpression {
             } else {
                 return `{${this.lower},${this.upper}}`
             }
+        }
+    }
+
+    compileRepeatOperator(): string {
+        const operator = this.compileGreedyRepeatOperator()
+
+        if (this.lazy) {
+            return `${operator}?`
+        } else {
+            return operator
         }
     }
 

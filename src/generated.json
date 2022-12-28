@@ -1,0 +1,54 @@
+{
+  "type": "sequence",
+  "children": [
+    {
+      "type": "sequence",
+      "children": [
+        {
+          "type": "literal",
+          "value": "\\d"
+        },
+        {
+          "type": "repeat",
+          "lower": 1,
+          "child": {
+            "type": "group",
+            "name": "unnamed_group",
+            "child": {
+              "type": "sequence",
+              "children": [
+                {
+                  "type": "repeat",
+                  "lower": 0,
+                  "child": {
+                    "type": "literal",
+                    "value": "\\w"
+                  },
+                  "lazy": true
+                },
+                {
+                  "type": "literal",
+                  "value": ":"
+                }
+              ]
+            }
+          },
+          "lazy": true
+        }
+      ]
+    },
+    {
+      "type": "sequence",
+      "children": [
+        {
+          "type": "literal",
+          "value": "\\d"
+        },
+        {
+          "type": "literal",
+          "value": "\\w"
+        }
+      ]
+    }
+  ]
+}
