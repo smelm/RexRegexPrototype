@@ -5,8 +5,22 @@ import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Sequence extends WrappingExpression {
-    constructor(private children: Expression[]) {
+    private children: Expression[]
+
+    constructor(children: Expression[]) {
         super(ExpressionType.SEQUENCE)
+        this.children = this.unnestSequences(children)
+    }
+
+    // turns seq(a, seq(b, c)) into seq(a, b, c)
+    unnestSequences(children: Expression[]): Expression[] {
+        return children.flatMap((child): Expression[] => {
+            if (child.type === ExpressionType.SEQUENCE) {
+                return (child as Sequence).children
+            } else {
+                return [child]
+            }
+        })
     }
 
     contentToString(): string {
