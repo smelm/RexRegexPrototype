@@ -10,7 +10,7 @@ export class RexRegex {
         return makeDSL(variables).tryParse(code)
     }
 
-    static fromCode(expression: Expression, settings: ScriptSettings): DSLScript {
+    static fromCode(expression: Expression, settings?: ScriptSettings): DSLScript {
         return new DSLScript(expression, settings)
     }
 }

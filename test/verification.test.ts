@@ -12,9 +12,10 @@ import {
     alternative,
     characterClass,
     backreference,
+    RexRegex,
 } from "../src"
 import { spawnSync } from "child_process"
-import { newRandomGenerator, generateRandomSeed } from "../src/RandomGenerator"
+import { newRandomGenerator } from "../src/RandomGenerator"
 
 interface MatchResult {
     matches: boolean
@@ -46,8 +47,7 @@ interface TestCase {
     groups?: Record<string, string>
 }
 
-const randomSeed = generateRandomSeed()
-const generator = newRandomGenerator(randomSeed)
+const generator = newRandomGenerator("ifh8i9ze5lg")
 
 function makeTestCases(): TestCase[] {
     const asts = [
@@ -69,7 +69,7 @@ function makeTestCases(): TestCase[] {
     const cases = []
 
     for (let [ast, groups] of asts) {
-        ast = ast as Expression
+        ast = RexRegex.fromCode(ast as Expression)
         for (let matches of [true, false]) {
             let strs = matches
                 ? ast.generateValid(ast, generator)
@@ -93,8 +93,6 @@ function makeTestCases(): TestCase[] {
 const TEST_CASES: [string, TestCase][] = makeTestCases().map(c => {
     return [`${c.pattern} should${c.matches ? "" : "n't"} match ${c.input}`, c]
 })
-
-beforeAll(() => console.log("random seed", randomSeed))
 
 describe.each(ENGINES)("%s regex", (_engineName, engine) => {
     test.each(TEST_CASES)("%s", async (_name, { pattern, input, groups, matches }) => {
