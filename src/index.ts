@@ -40,7 +40,7 @@ export class RexRegex {
             case ExpressionType.MAYBE:
                 return maybe(RexRegex.fromJSON(obj.child))
             case ExpressionType.SEQUENCE:
-                return sequence(obj.children.map(RexRegex.fromJSON))
+                return sequence(...obj.children.map(RexRegex.fromJSON))
             case ExpressionType.CHARACTER:
                 return character(obj.value)
             case ExpressionType.GROUP:
@@ -65,6 +65,6 @@ export class RexRegex {
     }
 }
 
-let dsl = RexRegex.importFromFile("generated.json")
-console.log(dsl)
+let dsl = RexRegex.importFromFile("src/generated.json")
+// console.log(dsl)
 console.log(dsl.toRegex())

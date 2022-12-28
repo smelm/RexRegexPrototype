@@ -62,6 +62,6 @@ export class Sequence extends WrappingExpression {
     }
 
     toRegex(): string {
-        return `(?:${this.children.map((v: Expression) => v.toRegex()).join("")})`
+        return `(?:${this.children.map((c: Expression) => c.toRegex()).join("")})`
     }
 }
