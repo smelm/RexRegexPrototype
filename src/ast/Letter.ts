@@ -1,6 +1,5 @@
 import { CharacterClass } from "./CharacterClass"
-
-type Language = "EN" | "DE"
+import { Language } from "./Language"
 
 export class Letter extends CharacterClass {
     constructor(language: Language = "EN") {

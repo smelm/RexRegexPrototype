@@ -8,6 +8,9 @@ import { Alternative } from "./Alternative"
 import { CharacterClass } from "./CharacterClass"
 import { InvertedCharacterClass } from "./InvertedCharacterClass"
 import { Backreference } from "./Backreference"
+import { Letter } from "./Letter"
+import { Language } from "./Language"
+import { Digit } from "./Digit"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -84,4 +87,12 @@ export function characterClass(...members: Member[]): Expression {
 export function anyExcept(...members: Member[]): InvertedCharacterClass {
     const [characters, ranges] = splitCharactersAndRanges(members)
     return new InvertedCharacterClass(characters, ranges)
+}
+
+export function letter(language: Language = "EN"): Expression {
+    return new Letter(language)
+}
+
+export function digit(): Expression {
+    return new Digit()
 }

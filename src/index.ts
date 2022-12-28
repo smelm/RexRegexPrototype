@@ -4,10 +4,10 @@ import {
     backreference,
     character,
     characterClass,
+    digit,
     Expression,
     ExpressionType,
-    Group,
-    group,
+    letter,
     literal,
     repeat,
     sequence,
@@ -32,6 +32,12 @@ export class RexRegex {
         console.log(obj)
         switch (obj.type as string) {
             case "literal":
+                if (obj.value === "\\w") {
+                    return letter()
+                } else if (obj.value === "\\d") {
+                    return digit()
+                }
+
                 return literal(obj.value)
             case ExpressionType.ANY:
                 return any()
@@ -66,5 +72,4 @@ export class RexRegex {
 
 let dsl = RexRegex.importFromFile("src/generated.json")
 console.log(dsl)
-console.log(dsl.toString().replace(/\(/g, "(\n"))
 console.log(dsl.toRegex())
