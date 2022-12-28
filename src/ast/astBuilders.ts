@@ -37,32 +37,32 @@ export function repeat(
     return new Repeat(value, lower, upper, lazy)
 }
 
-export function maybe(value: any): Expression {
-    return new Repeat(value, 0, 1)
+export function maybe(child: any): Expression {
+    return new Repeat(child, 0, 1)
 }
 
-export function sequence(...value: Expression[]): Expression {
-    return new Sequence(value)
+export function sequence(...children: Expression[]): Expression {
+    return new Sequence(children)
 }
 
-export function manyOf(value: Expression): Expression {
-    return new Repeat(value, 1, undefined)
+export function manyOf(child: Expression): Expression {
+    return new Repeat(child, 1, undefined)
 }
 
 export function literal(str: string): Expression {
     return sequence(...str.split("").map(c => new Character(c)))
 }
 
-export function group(name: string, content: Expression): Expression {
-    return new Group(name, content)
+export function group(name: string, child: Expression): Expression {
+    return new Group(name, child)
 }
 
 export function backreference(groupName: string): Expression {
     return new Backreference(groupName)
 }
 
-export function alternative(...alternatives: Expression[]): Expression {
-    return new Alternative(alternatives)
+export function alternative(...children: Expression[]): Expression {
+    return new Alternative(children)
 }
 
 type RawRange = [string, string]
