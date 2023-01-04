@@ -8,10 +8,10 @@ import { WrappingExpression } from "./WrappingExpression"
 // TODO support "maybe many of", or not?
 export class Repeat extends WrappingExpression {
     constructor(
-        private child: Expression,
-        public lower: number,
-        public upper?: number,
-        public lazy: boolean = false
+        public readonly child: Expression,
+        public readonly lower: number,
+        public readonly upper?: number,
+        public readonly lazy: boolean = false
     ) {
         super(ExpressionType.REPEAT)
     }

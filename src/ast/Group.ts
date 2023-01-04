@@ -6,7 +6,7 @@ import { WrappingExpression } from "./WrappingExpression"
 export class Group extends WrappingExpression {
     public context: Record<"valid" | "invalid", string[]> = { valid: [], invalid: [] }
 
-    constructor(public readonly name: string, private child: Expression) {
+    constructor(public readonly name: string, public readonly child: Expression) {
         super(ExpressionType.GROUP)
     }
 

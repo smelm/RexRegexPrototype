@@ -109,16 +109,24 @@ describe("special cases", () => {
         literal("foo"),
         backreference("symbol")
     )
-    const pattern = expressionWithBackreference.toRegex()
 
     test("matching backreference", () => {
+        const pattern = expressionWithBackreference.toRegex()
         const result = NODEJS.match(pattern, "#foo#")
         expect(result.matches).toEqual(true)
     })
 
     test("not matching backreference", () => {
+        const pattern = expressionWithBackreference.toRegex()
         const result = NODEJS.match(pattern, "#foo+")
         expect(result.matches).toEqual(false)
+    })
+
+    test("alternative matches longest possible", () => {
+        const pattern = RexRegex.fromCode(alternative(literal("hell"), literal("hello"))).toRegex()
+        const match = new RegExp(pattern).exec("hello")
+
+        expect(match[0]).toEqual("hello")
     })
 })
 
