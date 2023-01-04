@@ -210,7 +210,10 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 (obj: any) => [obj.lower, obj.upper]
             ),
         charClassList: r =>
-            sepBy(alt(r.charRange, r.rawLiteral), regex(/ *, */).desc("list_separator")),
+            sepBy(
+                alt(r.charRange, r.rawLiteral, r.variable),
+                regex(/ *, */).desc("list_separator")
+            ),
         charClassHeader: () => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
         charClass: r =>
             lineOrBlock(
@@ -300,11 +303,11 @@ export function makeDSL(variables: any = {}): Parser<DSLScript> {
             COMMA: builders.literal(","),
             DOT: builders.literal("."),
         },
-        // DIGIT: builders.digit(),
-        // LETTER: {
-        //     EN: builders.letter("EN"),
-        //     DE: builders.letter("DE"),
-        // },
+        DIGIT: builders.digit(),
+        LETTER: {
+            EN: builders.letter("EN"),
+            DE: builders.letter("DE"),
+        },
     }
 
     return makeDSLParser({ ...CONSTANTS, ...variables })

@@ -12,7 +12,10 @@ import {
     anyOf,
     backreference,
     anyExcept,
+    letter,
+    digit,
 } from "../src/ast"
+import { CharacterClass } from "../src/ast/CharacterClass"
 import { PositionInInput } from "../src/ast/DSLScript"
 import { makeDSL } from "../src/parser"
 
@@ -36,6 +39,7 @@ const SINGLE_LINE_CASES = [
     ['any of "a", "b", "c"', anyOf("a", "b", "c")],
     ['any of "a" to "c", "x" to "z"', anyOf(["a", "c"], ["x", "z"])],
     ['any of "a", "b", "c", "x" to "z"', anyOf("a", "b", "c", ["x", "z"])],
+    ["any of LETTER.EN, DIGIT", anyOf(letter("EN") as CharacterClass, digit() as CharacterClass)],
     ['any except of "a", "b", "c"', anyExcept("a", "b", "c")],
     ['"abc" # this is a comment', literal("abc")],
 ].map(generateTestNames)

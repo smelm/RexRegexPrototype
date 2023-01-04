@@ -9,8 +9,13 @@ export class RangeList {
      *          [  2  3  5  6 ]
      */
     private endIndices: number[]
+    private ranges: CharRange[]
 
-    constructor(private ranges: CharRange[]) {
+    constructor(ranges: CharRange[]) {
+        ranges = [...ranges].sort((a, b) => a.lower - b.lower)
+        RangeList.pruneOverlaps(ranges)
+
+        this.ranges = ranges
         this.endIndices = this.generateEndIndices()
     }
 
@@ -20,10 +25,6 @@ export class RangeList {
 
     static fromStringList(ranges: [string, string][]): RangeList {
         let charRanges = ranges.map(([lower, upper]) => CharRange.fromStrings(lower, upper))
-
-        charRanges.sort((a, b) => a.lower - b.lower)
-        this.pruneOverlaps(charRanges)
-
         return new RangeList(charRanges)
     }
 
