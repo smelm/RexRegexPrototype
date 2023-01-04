@@ -17,9 +17,6 @@ export class Character extends WrappingExpression {
     }
 
     generateInvalid(_tree: Expression, rng: RandomGenerator): string[] {
-        //TODO: this is not good
-        //TODO: make this work with unicode
-        //TODO: this could cause problems with greedy repetition before
         let char
 
         do {
@@ -29,9 +26,15 @@ export class Character extends WrappingExpression {
         return [char]
     }
 
-    //TODO handle escaping
     toRegex(): string {
+        if (this.mustBeEscaped()) {
+            return `\\${this.value}`
+        }
         return this.value
+    }
+
+    mustBeEscaped(): boolean {
+        return /[\\.\[\](){}+?*]/.test(this.value)
     }
 
     toDSL(indentLevel: number): string {
