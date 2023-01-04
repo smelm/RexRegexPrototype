@@ -2,30 +2,24 @@ import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 import { RangeList } from "./RangeList"
 import { RandomGenerator } from "../RandomGenerator"
+import { CharRange } from "./CharRange"
 
 export class CharacterClass extends WrappingExpression {
     private ranges: RangeList
 
     constructor(
-        members: string[],
-        ranges: [string, string][],
-        private inverted: boolean = false,
+        ranges: CharRange[],
+        public readonly inverted: boolean = false,
         public readonly isPredefined: boolean = false,
         private readonly numSamplesToGenerate: number = 5
     ) {
         super(ExpressionType.CHARACTER_CLASS)
 
-        this.ranges = this.generateRanges(members, ranges)
+        this.ranges = new RangeList(ranges)
 
         if (this.numSamplesToGenerate > this.ranges.size()) {
             this.numSamplesToGenerate = this.ranges.size()
         }
-    }
-
-    private generateRanges(members: string[], ranges: [string, string][]): RangeList {
-        ranges = [...ranges, ...(members.map(m => [m, m]) as [string, string][])]
-
-        return RangeList.fromStringList(ranges)
     }
 
     contentToString(): string {
@@ -55,5 +49,9 @@ export class CharacterClass extends WrappingExpression {
         return `${indent}any{this.inverted? " except" : ""} of\n${this.ranges
             .map(range => range.toDSL())
             .join("\n" + indent + "    ")}`
+    }
+
+    getRawRanges(): CharRange[] {
+        return this.ranges.getRanges()
     }
 }

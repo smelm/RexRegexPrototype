@@ -1,8 +1,9 @@
 import { CharacterClass } from "./CharacterClass"
+import { CharRange } from "./CharRange"
 
 export class Digit extends CharacterClass {
     constructor() {
-        super([], [["0", "9"]], false, true)
+        super([CharRange.fromStrings("0", "9")], false, true)
     }
 
     toString(): string {

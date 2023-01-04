@@ -90,4 +90,8 @@ export class RangeList {
 
         return new RangeList(invertedRanges)
     }
+
+    getRanges() {
+        return this.ranges
+    }
 }

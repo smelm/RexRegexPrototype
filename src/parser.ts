@@ -143,7 +143,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 r.alternative,
                 r.group,
                 r.variableDefinition,
-                r.characterClass,
+                r.charClass,
                 r.any,
                 r.functionCall,
                 r.variable,
@@ -204,26 +204,19 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                     (exps: Expression[]) => builders.alternative(...exps)
                 )
             ).map(({ content }) => content),
-        characterClassList: r =>
-            sepBy(
-                alt(
-                    seqObj(["lower" as any, r.rawLiteral], _, kw.to, _, [
-                        "upper",
-                        r.rawLiteral,
-                    ]).map((obj: any) => {
-                        console.log(obj)
-                        return [obj.lower, obj.upper]
-                    }),
-                    r.rawLiteral
-                ),
-                regex(/ *, */).desc("list_separator") // TODO extract
+        charRange: r =>
+            //@ts-ignore
+            seqObj(["lower", r.rawLiteral], _, kw.to, _, ["upper", r.rawLiteral]).map(
+                (obj: any) => [obj.lower, obj.upper]
             ),
-        characterClassHeader: () => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
-        characterClass: r =>
+        charClassList: r =>
+            sepBy(alt(r.charRange, r.rawLiteral), regex(/ *, */).desc("list_separator")),
+        charClassHeader: () => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
+        charClass: r =>
             lineOrBlock(
-                r.characterClassHeader,
-                r.characterClassList,
-                sepBy(r.characterClassList, statementSeperator.notFollowedBy(kw.end))
+                r.charClassHeader,
+                r.charClassList,
+                sepBy(r.charClassList, statementSeperator.notFollowedBy(kw.end))
             ).map(({ content, header, type }) => {
                 let chars
                 if (type === "block") {
@@ -307,6 +300,11 @@ export function makeDSL(variables: any = {}): Parser<DSLScript> {
             COMMA: builders.literal(","),
             DOT: builders.literal("."),
         },
+        // DIGIT: builders.digit(),
+        // LETTER: {
+        //     EN: builders.letter("EN"),
+        //     DE: builders.letter("DE"),
+        // },
     }
 
     return makeDSLParser({ ...CONSTANTS, ...variables })

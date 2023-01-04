@@ -1,25 +1,25 @@
 import { CharacterClass } from "./CharacterClass"
+import { CharRange } from "./CharRange"
 import { Language } from "./Language"
 
 export class Letter extends CharacterClass {
     constructor(private language: Language = "EN") {
-        let members: string[] = []
-        let ranges: [string, string][] = [
-            ["a", "z"],
-            ["A", "Z"],
-        ]
+        let ranges: CharRange[] = [CharRange.fromStrings("a", "z"), CharRange.fromStrings("A", "Z")]
 
         switch (language) {
             case "EN":
                 break
             case "DE":
-                members = [...members, "ß", "ü", "ö", "ä", "Ü", "Ö", "Ä"]
+                ranges = [
+                    ...ranges,
+                    ...["ß", "ü", "ö", "ä", "Ü", "Ö", "Ä"].map(char => CharRange.fromChar(char)),
+                ]
                 break
             default:
                 throw new Error(`unknown language ${language}`)
         }
 
-        super(members, ranges, false, true)
+        super(ranges, false, true)
     }
 
     toDSL(indentLevel: number): string {

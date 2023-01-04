@@ -12,6 +12,9 @@ import { Letter } from "./Letter"
 import { Language } from "./Language"
 import { Digit } from "./Digit"
 
+import { RawCharRange, RawClassMember } from "./types"
+import { CharRange } from "./CharRange"
+
 export function character(char: string): Expression {
     return new Character(char)
 }
@@ -68,25 +71,30 @@ export function alternative(...children: Expression[]): Expression {
     return new Alternative(children)
 }
 
-type RawRange = [string, string]
-type Member = string | RawRange
+function convertToCharRanges(members: RawClassMember[]): CharRange[] {
+    const ranges: CharRange[] = []
 
-function splitCharactersAndRanges(members: Member[]): [string[], RawRange[]] {
-    return [
-        members.filter(m => typeof m === "string") as string[],
-        members.filter(m => typeof m !== "string") as [string, string][],
-    ]
+    for (let member of members) {
+        if (typeof member === "string") {
+            ranges.push(CharRange.fromStrings(member, member))
+        } else if (member instanceof CharacterClass) {
+            ranges.push(...member.getRawRanges())
+        } else {
+            ranges.push(CharRange.fromStrings(...member))
+        }
+    }
+
+    return ranges
 }
 
-export function anyOf(...members: Member[]): Expression {
-    const [characters, ranges] = splitCharactersAndRanges(members)
-
-    return new CharacterClass(characters, ranges)
+export function anyOf(...members: RawClassMember[]): Expression {
+    const ranges = convertToCharRanges(members)
+    return new CharacterClass(ranges)
 }
 
-export function anyExcept(...members: Member[]): InvertedCharacterClass {
-    const [characters, ranges] = splitCharactersAndRanges(members)
-    return new InvertedCharacterClass(characters, ranges)
+export function anyExcept(...members: RawClassMember[]): InvertedCharacterClass {
+    const ranges = convertToCharRanges(members)
+    return new InvertedCharacterClass(ranges)
 }
 
 export function letter(language: Language = "EN"): Expression {

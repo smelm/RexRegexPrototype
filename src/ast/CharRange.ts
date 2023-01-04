@@ -7,6 +7,10 @@ export class CharRange {
         }
     }
 
+    static fromChar(lower: string): CharRange {
+        return this.fromStrings(lower, lower)
+    }
+
     static fromStrings(lower: string, upper: string): CharRange {
         if (lower.length !== 1 || upper.length !== 1) {
             throw new Error(`expected single character got ${lower} - ${upper}`)
