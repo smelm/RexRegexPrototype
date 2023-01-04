@@ -3,7 +3,7 @@ import {
     any,
     backreference,
     character,
-    characterClass,
+    anyOf,
     digit,
     Expression,
     ExpressionType,
@@ -49,7 +49,7 @@ export class RexRegex {
             case ExpressionType.ALTERNATIVE:
                 return alternative(...obj.children.map(this.fromJSON.bind(this)))
             case ExpressionType.CHARACTER_CLASS:
-                return characterClass(obj.members)
+                return anyOf(obj.members)
             case ExpressionType.BACKREFERENCE:
                 return backreference(obj.groupName)
             case ExpressionType.GROUP:

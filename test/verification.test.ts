@@ -10,7 +10,7 @@ import {
     maybe,
     sequence,
     alternative,
-    characterClass,
+    anyOf,
     backreference,
     RexRegex,
 } from "../src"
@@ -62,9 +62,9 @@ function makeTestCases(): TestCase[] {
         [group("foo", sequence(literal("abc"))), { foo: "abc" }],
         [alternative(literal("foo"), literal("bar"))],
         [alternative(literal("foo"), any())],
-        [characterClass("a", "b", "c")],
-        [characterClass(["x", "z"])],
-        [characterClass("a", "b", ["x", "z"])],
+        [anyOf("a", "b", "c")],
+        [anyOf(["x", "z"])],
+        [anyOf("a", "b", ["x", "z"])],
     ]
     const cases = []
 
@@ -105,7 +105,7 @@ describe.each(ENGINES)("%s regex", (_engineName, engine) => {
 
 describe("special cases", () => {
     const expressionWithBackreference = sequence(
-        group("symbol", characterClass("+", "#", "|")),
+        group("symbol", anyOf("+", "#", "|")),
         literal("foo"),
         backreference("symbol")
     )

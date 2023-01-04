@@ -78,7 +78,7 @@ function splitCharactersAndRanges(members: Member[]): [string[], RawRange[]] {
     ]
 }
 
-export function characterClass(...members: Member[]): Expression {
+export function anyOf(...members: Member[]): Expression {
     const [characters, ranges] = splitCharactersAndRanges(members)
 
     return new CharacterClass(characters, ranges)

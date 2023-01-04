@@ -233,7 +233,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 if (header.flat().flat().includes("except")) {
                     return builders.anyExcept(...chars)
                 } else {
-                    return builders.characterClass(...chars)
+                    return builders.anyOf(...chars)
                 }
             }),
         variableDefinition: r =>
