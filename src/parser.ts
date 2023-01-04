@@ -151,7 +151,8 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
             ).desc("expression"),
         comment: () => seq(string("#"), regex(/.*/)).result(DUMMY),
         any: () => kw.any.map(builders.any),
-        literal: () => regex(/[^"]+/).wrap(QUOTE, QUOTE).map(builders.literal),
+        rawLiteral: () => regex(/[^"]+/).wrap(QUOTE, QUOTE),
+        literal: r => r.rawLiteral.map(builders.literal),
         upperBound: r =>
             seq(_, kw.to, _)
                 .then(alt(r.number, string("many")))
@@ -203,16 +204,19 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                     (exps: Expression[]) => builders.alternative(...exps)
                 )
             ).map(({ content }) => content),
-        characterClassList: () =>
+        characterClassList: r =>
             sepBy(
                 alt(
-                    seq(letter, seq(_, kw.to, _), letter).map(([lower, _ws, upper]) => [
-                        lower,
-                        upper,
-                    ]),
-                    letter
+                    seqObj(["lower" as any, r.rawLiteral], _, kw.to, _, [
+                        "upper",
+                        r.rawLiteral,
+                    ]).map((obj: any) => {
+                        console.log(obj)
+                        return [obj.lower, obj.upper]
+                    }),
+                    r.rawLiteral
                 ),
-                regex(/ *, */).desc("list_separator")
+                regex(/ *, */).desc("list_separator") // TODO extract
             ),
         characterClassHeader: () => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
         characterClass: r =>
