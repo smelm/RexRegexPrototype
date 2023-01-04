@@ -71,30 +71,12 @@ export function alternative(...children: Expression[]): Expression {
     return new Alternative(children)
 }
 
-function convertToCharRanges(members: RawClassMember[]): CharRange[] {
-    const ranges: CharRange[] = []
-
-    for (let member of members) {
-        if (typeof member === "string") {
-            ranges.push(CharRange.fromStrings(member, member))
-        } else if (member instanceof CharacterClass) {
-            ranges.push(...member.getRawRanges())
-        } else {
-            ranges.push(CharRange.fromStrings(...member))
-        }
-    }
-
-    return ranges
-}
-
-export function anyOf(...members: RawClassMember[]): Expression {
-    const ranges = convertToCharRanges(members)
-    return new CharacterClass(ranges)
+export function anyOf(...members: RawClassMember[]): CharacterClass {
+    return CharacterClass.fromMemberList(members)
 }
 
 export function anyExcept(...members: RawClassMember[]): InvertedCharacterClass {
-    const ranges = convertToCharRanges(members)
-    return new InvertedCharacterClass(ranges)
+    return InvertedCharacterClass.fromMemberList(members)
 }
 
 export function letter(language: Language = "EN"): Expression {

@@ -77,6 +77,7 @@ function makeTestCases(): TestCase[] {
         [anyOf("a", "b", "c")],
         [anyOf(["x", "z"])],
         [anyOf("a", "b", ["x", "z"])],
+        [anyOf(["a", "f"]).exceptOf("e")],
     ]
     const cases = []
 

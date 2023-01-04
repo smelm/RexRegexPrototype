@@ -12,6 +12,7 @@ export enum ExpressionType {
     DUMMY = "dummy",
     SCRIPT = "script",
     BACKREFERENCE = "backreference",
+    CUSTOM = "custom",
 }
 
 export abstract class Expression {

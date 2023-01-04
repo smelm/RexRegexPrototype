@@ -1,11 +1,11 @@
 import { Expression, ExpressionType } from "./Expression"
-import { WrappingExpression } from "./WrappingExpression"
 import { RangeList } from "./RangeList"
 import { RandomGenerator } from "../RandomGenerator"
 import { CharRange } from "./CharRange"
+import { RawClassMember } from "./types"
 
-export class CharacterClass extends WrappingExpression {
-    private ranges: RangeList
+export class CharacterClass extends Expression {
+    public readonly ranges: RangeList
 
     constructor(
         ranges: CharRange[],
@@ -22,8 +22,9 @@ export class CharacterClass extends WrappingExpression {
         }
     }
 
-    contentToString(): string {
-        return this.ranges.map<string>(r => r.toString()).join(", ")
+    toString(): string {
+        const rangesString = this.ranges.map(r => r.toString()).join(", ")
+        return `anyOf(${rangesString})`
     }
 
     generateValid(_tree: Expression, rng: RandomGenerator): string[] {
@@ -51,7 +52,33 @@ export class CharacterClass extends WrappingExpression {
             .join("\n" + indent + "    ")}`
     }
 
+    static convertToCharRanges(members: RawClassMember[]): CharRange[] {
+        const ranges: CharRange[] = []
+
+        for (let member of members) {
+            if (typeof member === "string") {
+                ranges.push(CharRange.fromStrings(member, member))
+            } else if (member instanceof CharacterClass) {
+                ranges.push(...member.getRawRanges())
+            } else {
+                ranges.push(CharRange.fromStrings(...member))
+            }
+        }
+
+        return ranges
+    }
+
+    static fromMemberList(members: RawClassMember[]): CharacterClass {
+        const ranges = CharacterClass.convertToCharRanges(members)
+        return new CharacterClass(ranges)
+    }
+
     getRawRanges(): CharRange[] {
         return this.ranges.getRanges()
+    }
+
+    exceptOf(...members: RawClassMember[]): CharacterClass {
+        const classToRemove = CharacterClass.fromMemberList(members)
+        return new CharacterClass(this.ranges.remove(classToRemove.ranges).ranges)
     }
 }

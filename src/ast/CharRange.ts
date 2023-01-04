@@ -57,4 +57,16 @@ export class CharRange {
             return `${String.fromCharCode(this.lower)} to ${String.fromCharCode(this.upper)}`
         }
     }
+
+    public remove(other: CharRange): CharRange[] {
+        if (this.upper < other.lower || this.lower > other.upper) {
+            console.log(`no intersection ${this} ${other}`)
+            return [new CharRange(this.lower, this.upper)]
+        }
+
+        const lowerRange = new CharRange(this.lower, other.lower - 1)
+        const upperRange = new CharRange(other.upper + 1, this.upper)
+
+        return [lowerRange, upperRange].filter(r => r.length() > 0)
+    }
 }

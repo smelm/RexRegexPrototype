@@ -8,15 +8,13 @@ export class RangeList {
      * example: [ a-b d e-f x ]
      *          [  2  3  5  6 ]
      */
-    private endIndices: number[]
-    private ranges: CharRange[]
+    public readonly ranges: CharRange[]
 
     constructor(ranges: CharRange[]) {
         ranges = [...ranges].sort((a, b) => a.lower - b.lower)
         RangeList.pruneOverlaps(ranges)
 
         this.ranges = ranges
-        this.endIndices = this.generateEndIndices()
     }
 
     private generateEndIndices(): number[] {
@@ -45,17 +43,18 @@ export class RangeList {
     }
 
     sample(n: number, rng: RandomGenerator): string[] {
+        const endIndices = this.generateEndIndices()
         const size = this.size()
         const samples = []
         const wasGenerated: boolean[][] = this.ranges.map(r => new Array(r.length()).fill(false))
 
         for (let i = 0; i < n; i++) {
             const ind = randomInt(size, rng)
-            const rangeIndex = this.endIndices.findIndex(end => ind < end)!
+            const rangeIndex = endIndices.findIndex(end => ind < end)!
 
             // calculate total offset where previous range did end
             // for the first range offset is zero
-            const offset = rangeIndex && this.endIndices[rangeIndex - 1]
+            const offset = rangeIndex && endIndices[rangeIndex - 1]
             const charIndex = ind - offset
 
             if (wasGenerated[rangeIndex][charIndex]) {
@@ -94,5 +93,14 @@ export class RangeList {
 
     getRanges() {
         return this.ranges
+    }
+
+    remove(rangesToRemove: RangeList): RangeList {
+        let result = [...this.ranges]
+
+        for (let rangeToRemove of rangesToRemove.ranges) {
+            result = result.flatMap(range => range.remove(rangeToRemove))
+        }
+        return new RangeList(result)
     }
 }
