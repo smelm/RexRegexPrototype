@@ -46,10 +46,12 @@ export class CharacterClass extends Expression {
     }
 
     toDSL(indentLevel: number): string {
-        const indent = " ".repeat(4 * indentLevel)
-        return `${indent}any{this.inverted? " except" : ""} of\n${this.ranges
-            .map(range => range.toDSL())
-            .join("\n" + indent + "    ")}`
+        const operator = this.inverted ? "any except of" : "any of"
+        return [
+            this.indent(operator, indentLevel),
+            ...this.ranges.map(range => this.indent(range.toDSL(), indentLevel + 1)),
+            this.indent("end", indentLevel),
+        ].join("\n")
     }
 
     static convertToCharRanges(members: RawClassMember[]): CharRange[] {
