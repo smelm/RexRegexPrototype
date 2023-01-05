@@ -1,8 +1,10 @@
 export class CharRange {
-    constructor(public lower: number, public upper: number) {
-        if (lower > upper) {
+    constructor(public lower: number, public upper: number, allowInvalid: boolean = false) {
+        if (lower > upper && !allowInvalid) {
             throw new Error(
-                `invalid range (${lower} - ${upper}): upper bound smaller than lower bound`
+                `invalid range (${String.fromCharCode(lower)} - ${String.fromCharCode(
+                    upper
+                )}): upper bound smaller than lower bound`
             )
         }
     }
@@ -64,8 +66,8 @@ export class CharRange {
             return [new CharRange(this.lower, this.upper)]
         }
 
-        const lowerRange = new CharRange(this.lower, other.lower - 1)
-        const upperRange = new CharRange(other.upper + 1, this.upper)
+        const lowerRange = new CharRange(this.lower, other.lower - 1, true)
+        const upperRange = new CharRange(other.upper + 1, this.upper, true)
 
         return [lowerRange, upperRange].filter(r => r.length() > 0)
     }
