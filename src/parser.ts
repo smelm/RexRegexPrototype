@@ -296,10 +296,9 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
 
                 return position
             }),
+        funcArgs: r => sepBy1(r.rawLiteral, opt(_).then(string(","))).desc("args"),
         functionCall: r =>
-            seq(r.variable, regex(/\([^)]*\)/).desc("args")).map(([func, argString]) => {
-                argString = argString.substring(1, argString.length - 1)
-                let args = argString.split(",").map(s => s.trim())
+            seq(r.variable, r.funcArgs.wrap(string("("), string(")"))).map(([func, args]) => {
                 return func(...args)
             }),
         identifier: r =>

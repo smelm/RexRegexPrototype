@@ -144,10 +144,10 @@ describe("macros", () => {
             },
         })
 
-        let result = dsl.tryParse("myMacros.pet(true)").child
+        let result = dsl.tryParse('myMacros.pet("true")').child
         expect(result).toEqual(literal("dog"))
 
-        result = dsl.tryParse("myMacros.pet(false)").child
+        result = dsl.tryParse('myMacros.pet("false")').child
         expect(result).toEqual(literal("cat"))
     })
 })
