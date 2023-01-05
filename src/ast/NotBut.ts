@@ -30,7 +30,6 @@ export class NotBut extends Expression {
             this.child.toDSL(indentLevel + 1),
             this.indent("but", indentLevel),
             this.exception.toDSL(indentLevel + 1),
-            this.indent("", indentLevel + 1),
             this.indent("end", indentLevel),
         ].join("\n")
     }

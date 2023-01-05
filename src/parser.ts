@@ -32,6 +32,8 @@ const kw = Object.fromEntries(
         "same",
         "as",
         "except",
+        "not",
+        "but",
     ].map(ident => [ident, string(ident).desc(ident)])
 )
 
@@ -148,6 +150,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 r.group,
                 r.variableDefinition,
                 r.charClass,
+                r.notBut,
                 r.any,
                 r.functionCall,
                 r.variable,
@@ -259,6 +262,15 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 }
 
                 return result
+            }),
+        notBut: r =>
+            seq(
+                line(kw.not, r.expression).skip(_),
+                lineOrBlock(kw.but, r.expression, r.expressionSequence)
+            ).map(x => {
+                const [not, but] = x
+                console.log(x)
+                return builders.notBut(not.content, but.content)
             }),
         variableDefinition: r =>
             lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence)

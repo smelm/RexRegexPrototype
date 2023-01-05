@@ -14,6 +14,7 @@ import {
     anyExcept,
     letter,
     digit,
+    notBut,
 } from "../src/ast"
 import { CharacterClass } from "../src/ast/CharacterClass"
 import { PositionInInput } from "../src/ast/DSLScript"
@@ -43,6 +44,7 @@ const SINGLE_LINE_CASES = [
     ['any except of "a", "b", "c"', anyExcept("a", "b", "c")],
     ['any of "a" to "z" except of "a", "b", "c"', anyOf(["a", "z"]).exceptOf(["a", "c"])],
     ['"abc" # this is a comment', literal("abc")],
+    ['not "b" but any of "a" to "d"', notBut(literal("b"), anyOf(["a", "d"]))],
 ].map(generateTestNames)
 
 describe("single line expressions", () => {
@@ -88,6 +90,7 @@ const MULTI_LINE_CASES = [
         'named symbol\n"#"\nend\n\n"foo"\nsame as symbol',
         sequence(group("symbol", literal("#")), literal("foo"), backreference("symbol")),
     ],
+    ['not\n"b"\nbut\nany of "a" to "d"\nend', notBut(literal("b"), anyOf(["a", "d"]))],
 ].map(generateTestNames)
 
 describe("multi line expressions", () => {
