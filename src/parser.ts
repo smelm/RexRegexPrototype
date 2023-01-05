@@ -39,6 +39,10 @@ function isKeyword(word: string): boolean {
     return Object.keys(kw).includes(word)
 }
 
+function opt<T>(p: Parser<T>): Parser<T> {
+    return p.atMost(1).map(x => x[0])
+}
+
 const DOT = string(".").desc("DOT")
 
 const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/).desc("statement_separator")
@@ -110,9 +114,9 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
 
     const dslParser: Language = createLanguage({
         dslScript: r =>
-            seq(r.preamble.skip(statementSeperator).atMost(1), r.script)
+            seq(opt(r.preamble.skip(statementSeperator)), r.script)
                 .trim(optionalStatementSeperator)
-                .map(([[preamble], script]) => [preamble, script]),
+                .map(([preamble, script]) => [preamble, script]),
         preamble: () =>
             alt(
                 string("at beginning of input").map(() => PositionInInput.BEGINNING),
@@ -132,7 +136,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                     }
                 })
                 .desc("expression sequence"),
-        expressionWithTrailingComment: r => r.expression.skip(seq(_, r.comment).atMost(1)),
+        expressionWithTrailingComment: r => r.expression.skip(opt(seq(_, r.comment))),
         expression: r =>
             alt(
                 r.comment,
@@ -214,22 +218,16 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 alt(r.charRange, r.rawLiteral, r.variable),
                 regex(/ *, */).desc("list_separator")
             ),
-        charClassHeader: () =>
-            seq(
-                kw.any,
-                seq(_, kw.except)
-                    .atMost(1)
-                    .map(x => (x.length === 0 ? "" : x[0].join(""))),
-                _,
-                kw.of
-            ),
+        charClassHeader: () => seq(kw.any, opt(seq(_, kw.except)), _, kw.of),
         charClass: r =>
             lineOrBlock(
                 r.charClassHeader,
                 r.charClassList,
-                sepBy(r.charClassList, statementSeperator.notFollowedBy(kw.end)).map(x => x.flat())
+                sepBy(
+                    r.charClassList,
+                    statementSeperator.notFollowedBy(alt(kw.except, kw.end))
+                ).map(x => x.flat())
             ).map(({ content, header }) => {
-                // needs to be flatten twice
                 if (header.join("").includes("except")) {
                     return builders.anyExcept(...content)
                 } else {
