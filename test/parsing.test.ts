@@ -139,9 +139,16 @@ describe("macros", () => {
     test("simple macro", () => {
         let dsl = makeDSL({
             myMacros: {
-                pet: (isDogPerson: string) =>
-                    isDogPerson === "true" ? literal("dog") : literal("cat"),
+                pet: (isDogPerson: string) => {
+                    if (isDogPerson === "true") {
+                        return literal("dog")
+                    } else {
+                        return literal("cat")
+                    }
+                },
+                wildAnimal: (animal: Expression) => animal,
             },
+            otherAnimal: literal("elephant"),
         })
 
         let result = dsl.tryParse('myMacros.pet("true")').child
@@ -149,5 +156,8 @@ describe("macros", () => {
 
         result = dsl.tryParse('myMacros.pet("false")').child
         expect(result).toEqual(literal("cat"))
+
+        result = dsl.tryParse("myMacros.wildAnimal(otherAnimal)").child
+        expect(result).toEqual(literal("elephant"))
     })
 })
