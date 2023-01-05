@@ -214,26 +214,26 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 alt(r.charRange, r.rawLiteral, r.variable),
                 regex(/ *, */).desc("list_separator")
             ),
-        charClassHeader: () => seq(kw.any, seq(_, kw.except).atMost(1), _, kw.of),
+        charClassHeader: () =>
+            seq(
+                kw.any,
+                seq(_, kw.except)
+                    .atMost(1)
+                    .map(x => (x.length === 0 ? "" : x[0].join(""))),
+                _,
+                kw.of
+            ),
         charClass: r =>
             lineOrBlock(
                 r.charClassHeader,
                 r.charClassList,
-                sepBy(r.charClassList, statementSeperator.notFollowedBy(kw.end))
-            ).map(({ content, header, type }) => {
-                let chars
-                if (type === "block") {
-                    //unwrap from list
-                    chars = content.flat()
-                } else {
-                    chars = content
-                }
-
+                sepBy(r.charClassList, statementSeperator.notFollowedBy(kw.end)).map(x => x.flat())
+            ).map(({ content, header }) => {
                 // needs to be flatten twice
-                if (header.flat().flat().includes("except")) {
-                    return builders.anyExcept(...chars)
+                if (header.join("").includes("except")) {
+                    return builders.anyExcept(...content)
                 } else {
-                    return builders.anyOf(...chars)
+                    return builders.anyOf(...content)
                 }
             }),
         variableDefinition: r =>
