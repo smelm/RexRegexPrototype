@@ -219,20 +219,46 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 regex(/ *, */).desc("list_separator")
             ),
         charClassHeader: () => seq(kw.any, opt(seq(_, kw.except)), _, kw.of),
+        charClassListMultiline: r =>
+            sepBy(r.charClassList, statementSeperator.notFollowedBy(alt(kw.except, kw.end))).map(
+                x => {
+                    return x.flat()
+                }
+            ),
         charClass: r =>
             lineOrBlock(
                 r.charClassHeader,
-                r.charClassList,
-                sepBy(
+                seq(
                     r.charClassList,
-                    statementSeperator.notFollowedBy(alt(kw.except, kw.end))
-                ).map(x => x.flat())
+                    opt(seq(_, kw.except, _, kw.of, _, r.charClassList).map(x => x[x.length - 1]))
+                ),
+                seq(
+                    r.charClassListMultiline,
+                    opt(
+                        seq(
+                            statementSeperator,
+                            kw.except,
+                            _,
+                            kw.of,
+                            statementSeperator,
+                            r.charClassListMultiline
+                        ).map(x => x[x.length - 1])
+                    )
+                )
             ).map(({ content, header }) => {
+                const [anyOf, except] = content
+                let result
                 if (header.join("").includes("except")) {
-                    return builders.anyExcept(...content)
+                    result = builders.anyExcept(...anyOf)
                 } else {
-                    return builders.anyOf(...content)
+                    result = builders.anyOf(...anyOf)
                 }
+
+                if (except) {
+                    result = result.exceptOf(...except)
+                }
+
+                return result
             }),
         variableDefinition: r =>
             lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence)

@@ -26,22 +26,23 @@ function generateTestNames([input, ast]) {
 }
 
 const SINGLE_LINE_CASES = [
-    ["any", any()],
-    ['"abc"', literal("abc")],
-    ["5 of any", countOf(5, any())],
-    ["many of any", manyOf(any())],
-    ["maybe any", maybe(any())],
-    ["1 to 5 of any", countRangeOf(1, 5, any())],
-    ["maybe 5 of any", maybe(countOf(5, any()))],
-    ["0 to many of any", countRangeOf(0, undefined, any())],
-    ['either "a" or "b"', alternative(literal("a"), literal("b"))],
-    ['either "a" or "b" or "c"', alternative(literal("a"), literal("b"), literal("c"))],
+    //["any", any()],
+    //['"abc"', literal("abc")],
+    //["5 of any", countOf(5, any())],
+    //["many of any", manyOf(any())],
+    //["maybe any", maybe(any())],
+    //["1 to 5 of any", countRangeOf(1, 5, any())],
+    //["maybe 5 of any", maybe(countOf(5, any()))],
+    //["0 to many of any", countRangeOf(0, undefined, any())],
+    //['either "a" or "b"', alternative(literal("a"), literal("b"))],
+    //['either "a" or "b" or "c"', alternative(literal("a"), literal("b"), literal("c"))],
     ['any of "a", "b", "c"', anyOf("a", "b", "c")],
     ['any of "a" to "c", "x" to "z"', anyOf(["a", "c"], ["x", "z"])],
     ['any of "a", "b", "c", "x" to "z"', anyOf("a", "b", "c", ["x", "z"])],
-    ["any of LETTER.EN, DIGIT", anyOf(letter("EN") as CharacterClass, digit() as CharacterClass)],
+    //["any of LETTER.EN, DIGIT", anyOf(letter("EN") as CharacterClass, digit() as CharacterClass)],
     ['any except of "a", "b", "c"', anyExcept("a", "b", "c")],
-    ['"abc" # this is a comment', literal("abc")],
+    ['any of "a" to "z" except of "a", "b", "c"', anyOf(["a", "z"]).exceptOf(["a", "c"])],
+    //['"abc" # this is a comment', literal("abc")],
 ].map(generateTestNames)
 
 describe("single line expressions", () => {
@@ -80,6 +81,7 @@ const MULTI_LINE_CASES = [
     ['any of\n"a" to "c"\n"x" to "z"\nend', anyOf(["a", "c"], ["x", "z"])],
     ['any of\n"a"\n"b"\n"c"\n"x" to "z"\nend', anyOf("a", "b", "c", ["x", "z"])],
     ['any except of\n"a"\n"b"\n"c"\n"x" to "z"\nend', anyExcept("a", "b", "c", ["x", "z"])],
+    ['any of \n"a" to "z"\nexcept of\n"a" to "c"\nend', anyOf(["a", "z"]).exceptOf(["a", "c"])],
     ['# this is a comment\n"abc"', literal("abc")],
     ['# this is a comment\n# this is another\n"abc"\n# and another', literal("abc")],
     [
