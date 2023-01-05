@@ -25,7 +25,7 @@ const kw = Object.fromEntries(
         "of",
         "to",
         "end",
-        "begin",
+        "named",
         "either",
         "or",
         "define",
@@ -190,7 +190,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
             ),
         group: r =>
             lineOrBlock<string, Expression>(
-                kw.begin.then(_).then(r.identifierName),
+                kw.named.then(_).then(r.identifierName),
                 r.expression,
                 r.expressionSequence
             ).map(({ header, content }) => group(header, content)),

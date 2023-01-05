@@ -26,23 +26,23 @@ function generateTestNames([input, ast]) {
 }
 
 const SINGLE_LINE_CASES = [
-    //["any", any()],
-    //['"abc"', literal("abc")],
-    //["5 of any", countOf(5, any())],
-    //["many of any", manyOf(any())],
-    //["maybe any", maybe(any())],
-    //["1 to 5 of any", countRangeOf(1, 5, any())],
-    //["maybe 5 of any", maybe(countOf(5, any()))],
-    //["0 to many of any", countRangeOf(0, undefined, any())],
-    //['either "a" or "b"', alternative(literal("a"), literal("b"))],
-    //['either "a" or "b" or "c"', alternative(literal("a"), literal("b"), literal("c"))],
+    ["any", any()],
+    ['"abc"', literal("abc")],
+    ["5 of any", countOf(5, any())],
+    ["many of any", manyOf(any())],
+    ["maybe any", maybe(any())],
+    ["1 to 5 of any", countRangeOf(1, 5, any())],
+    ["maybe 5 of any", maybe(countOf(5, any()))],
+    ["0 to many of any", countRangeOf(0, undefined, any())],
+    ['either "a" or "b"', alternative(literal("a"), literal("b"))],
+    ['either "a" or "b" or "c"', alternative(literal("a"), literal("b"), literal("c"))],
     ['any of "a", "b", "c"', anyOf("a", "b", "c")],
     ['any of "a" to "c", "x" to "z"', anyOf(["a", "c"], ["x", "z"])],
     ['any of "a", "b", "c", "x" to "z"', anyOf("a", "b", "c", ["x", "z"])],
-    //["any of LETTER.EN, DIGIT", anyOf(letter("EN") as CharacterClass, digit() as CharacterClass)],
+    ["any of LETTER.EN, DIGIT", anyOf(letter("EN") as CharacterClass, digit() as CharacterClass)],
     ['any except of "a", "b", "c"', anyExcept("a", "b", "c")],
     ['any of "a" to "z" except of "a", "b", "c"', anyOf(["a", "z"]).exceptOf(["a", "c"])],
-    //['"abc" # this is a comment', literal("abc")],
+    ['"abc" # this is a comment', literal("abc")],
 ].map(generateTestNames)
 
 describe("single line expressions", () => {
@@ -66,7 +66,7 @@ const MULTI_LINE_CASES = [
         "maybe\nany\nmaybe any\nmany of any\nend",
         maybe(sequence(any(), maybe(any()), manyOf(any()))),
     ],
-    ['begin group_name\n"abc"\nend', group("group_name", literal("abc"))],
+    ['named group_name\n"abc"\nend', group("group_name", literal("abc"))],
     ['either\n"a"\nor\n"b"\nend', alternative(literal("a"), literal("b"))],
     ['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
     ['define foo\n"bar"\nend\n"nothing"', literal("nothing")],
@@ -85,7 +85,7 @@ const MULTI_LINE_CASES = [
     ['# this is a comment\n"abc"', literal("abc")],
     ['# this is a comment\n# this is another\n"abc"\n# and another', literal("abc")],
     [
-        'begin symbol\n"#"\nend\n\n"foo"\nsame as symbol',
+        'named symbol\n"#"\nend\n\n"foo"\nsame as symbol',
         sequence(group("symbol", literal("#")), literal("foo"), backreference("symbol")),
     ],
 ].map(generateTestNames)
