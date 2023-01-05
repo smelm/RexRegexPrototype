@@ -100,7 +100,7 @@ export function numberBetween(
     return alternative(...alternatives)
 }
 
-export function zip(...arrays: any): any {
+function zip(...arrays: any): any {
     return Array.apply(null, Array(arrays[0].length)).map(function (_, i) {
         return arrays.map(function (array: any) {
             return array[i]

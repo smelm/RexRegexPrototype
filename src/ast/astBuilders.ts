@@ -11,9 +11,9 @@ import { Backreference } from "./Backreference"
 import { Letter } from "./Letter"
 import { Language } from "./Language"
 import { Digit } from "./Digit"
+import { NotBut } from "./NotBut"
 
-import { RawCharRange, RawClassMember } from "./types"
-import { CharRange } from "./CharRange"
+import { RawClassMember } from "./types"
 
 export function character(char: string): Expression {
     return new Character(char)
@@ -85,4 +85,8 @@ export function letter(language: Language = "EN"): Expression {
 
 export function digit(): Expression {
     return new Digit()
+}
+
+export function notBut(except: Expression, child: Expression): Expression {
+    return new NotBut(child, except)
 }

@@ -13,6 +13,7 @@ import {
     anyOf,
     backreference,
     RexRegex,
+    notBut,
 } from "../src"
 import { spawnSync } from "child_process"
 import { newRandomGenerator } from "../src/RandomGenerator"
@@ -78,6 +79,7 @@ function makeTestCases(): TestCase[] {
         [anyOf(["x", "z"])],
         [anyOf("a", "b", ["x", "z"])],
         [anyOf(["a", "f"]).exceptOf("e")],
+        [notBut(literal("a"), anyOf(["a", "c"]))],
     ]
     const cases = []
 
