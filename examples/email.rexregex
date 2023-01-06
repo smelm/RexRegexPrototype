@@ -1,0 +1,52 @@
+define ipAddress as
+    1 to 3 of DIGIT
+    "."
+    1 to 3 of DIGIT
+    "."
+    1 to 3 of DIGIT
+    "."
+    1 to 3 of DIGIT
+end
+
+
+define legalChar as
+    any except of
+        "<", ">", "(", ")", "[", "]"
+        "\", ".", ",", ";", ":", "@"
+        DOUBLE_QUOTE
+        SPACE
+    end
+end
+
+either
+    many of legalChar
+    0 to many of
+        "."
+        many of legalChar
+    end
+or
+    DOUBLE_QUOTE
+    many of any
+    DOUBLE_QUOTE
+end
+
+"@"
+
+
+either
+    "["
+    ipAddress
+    "]"
+or
+    many of
+        many of
+            any of
+                LETTER.EN
+                DIGIT
+                "-"
+            end
+        end
+        "."
+    end
+    2 to many of LETTER.EN
+end
