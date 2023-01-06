@@ -164,7 +164,15 @@ describe("macros", () => {
         expect(result).toEqual(literal("elephant"))
     })
 
-    test.todo("can accept blocks")
+    test("can accept blocks", () => {
+        let dsl = makeDSL({
+            zoo: (animals: Expression) => sequence(literal("my zoo"), animals),
+            elephant: literal("elephant"),
+        })
+
+        let result = dsl.tryParse("begin zoo\nmany of elephant\nend").child
+        expect(result).toEqual(sequence(literal("my zoo"), manyOf(literal("elephant"))))
+    })
 
     test("can accept arguments and blocks", () => {
         let dsl = makeDSL({

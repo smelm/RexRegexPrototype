@@ -319,7 +319,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 return func(...args)
             }),
         blockFunctionCall: r =>
-            block(kw.begin.skip(_).then(r.functionCall), r.expressionSequence).map(
+            block(kw.begin.skip(_).then(alt(r.functionCall, r.variable)), r.expressionSequence).map(
                 ({ header, content }) => {
                     return header(content)
                 }
