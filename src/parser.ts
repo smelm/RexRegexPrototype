@@ -273,7 +273,11 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 return builders.notBut(not.content, but.content)
             }),
         variableDefinition: r =>
-            lineOrBlock(kw.define.then(_).then(r.identifier), r.expression, r.expressionSequence)
+            lineOrBlock(
+                kw.define.then(_).then(r.identifier).skip(_).skip(kw.as),
+                r.expression,
+                r.expressionSequence
+            )
                 .assert(
                     ({ header: name }) => !(name in variables),
                     "duplicate identifier definition"

@@ -71,12 +71,12 @@ const MULTI_LINE_CASES = [
     ['named group_name\n"abc"\nend', group("group_name", literal("abc"))],
     ['either\n"a"\nor\n"b"\nend', alternative(literal("a"), literal("b"))],
     ['either\n"a"\nor\n"b"\nor\n"c"\nend', alternative(literal("a"), literal("b"), literal("c"))],
-    ['define foo\n"bar"\nend\n"nothing"', literal("nothing")],
-    ['define foo\n"foo"\nend\nfoo', literal("foo")],
-    ['define foo "foo"\nfoo', literal("foo")], // one-line variable definition
-    ['define foo.bar "word"\nfoo.bar', literal("word")],
+    ['define foo as\n"bar"\nend\n"nothing"', literal("nothing")],
+    ['define foo as\n"foo"\nend\nfoo', literal("foo")],
+    ['define foo as "foo"\nfoo', literal("foo")], // one-line variable definition
+    ['define foo.bar as "word"\nfoo.bar', literal("word")],
     [
-        'define one.two.this "first"\ndefine one.two.that "second"\none.two.that\none.two.this',
+        'define one.two.this as "first"\ndefine one.two.that as "second"\none.two.that\none.two.this',
         sequence(literal("second"), literal("first")),
     ],
     ['any of\n"a", "b"\n"c"\nend', anyOf("a", "b", "c")],
@@ -120,7 +120,7 @@ describe("error handling", () => {
     })
 
     test("redefinition of variable", () => {
-        expect(() => parser.tryParse("define foo\nany\nend\ndefine foo\nany\nend"))
+        expect(() => parser.tryParse("define foo as\nany\nend\ndefine foo as\nany\nend"))
     })
 })
 
