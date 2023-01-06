@@ -19,6 +19,7 @@ import {
 import { CharacterClass } from "../src/ast/CharacterClass"
 import { PositionInInput } from "../src/ast/DSLScript"
 import { makeDSL } from "../src/parser"
+import { RexRegex } from "../src"
 
 const parser = makeDSL()
 
@@ -189,5 +190,13 @@ describe("macros", () => {
 describe("standard library", () => {
     test.todo("number between")
     test.todo("surround with")
-    test.todo("separated by")
+
+    test("separated by", () => {
+        let pattern = RexRegex.fromString(
+            'begin separatedBy(".")\nany of "a", "b", "c"\nend'
+        ).toRegex()
+
+        expect(new RegExp(pattern).test("a.b.c")).toEqual(true)
+        expect(new RegExp(pattern).test("a.b.")).toEqual(false)
+    })
 })

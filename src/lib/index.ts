@@ -107,3 +107,11 @@ function zip(...arrays: any): any {
         })
     })
 }
+
+export function separatedBy(sep: string): (exp: Expression) => Expression {
+    return (exp: Expression) => sequence(exp, manyOf(sequence(literal(sep), exp)))
+}
+
+export const stdLib = {
+    separatedBy,
+}

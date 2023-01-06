@@ -16,6 +16,7 @@ import {
 import * as builders from "./ast/astBuilders"
 import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
 import { RandomGenerator } from "./RandomGenerator"
+import { stdLib } from "./lib"
 
 const kw = Object.fromEntries(
     [
@@ -352,8 +353,6 @@ export function makeDSL(variables: any = {}): Parser<DSLScript> {
             DE: builders.letter("DE"),
         },
     }
-
-    const stdLib = {}
 
     return makeDSLParser({ ...CONSTANTS, ...stdLib, ...variables })
 }
