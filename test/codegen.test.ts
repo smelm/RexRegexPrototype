@@ -75,7 +75,7 @@ function makeTestCases(): TestCase[] {
         [sequence(character("a"), manyOf(character("b")), character("c"))],
         [group("foo", sequence(literal("abc"))), { foo: "abc" }],
         [alternative(literal("foo"), literal("bar"))],
-        [alternative(literal("foo"), any())],
+        [sequence(literal("a"), alternative(literal("b"), literal("c")))],
         [anyOf("a", "b", "c")],
         [anyOf(["x", "z"])],
         [anyOf("a", "b", ["x", "z"])],

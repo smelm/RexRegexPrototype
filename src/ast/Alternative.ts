@@ -16,6 +16,10 @@ export class Alternative extends WrappingExpression {
     }
 
     toRegex(): string {
+        return `(?:${this.contentToRegex()})`
+    }
+
+    contentToRegex(): string {
         return this.children.map((e: Expression) => e.toRegex()).join("|")
     }
 
