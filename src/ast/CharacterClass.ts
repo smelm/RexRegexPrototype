@@ -43,12 +43,25 @@ export class CharacterClass extends Expression {
 
     protected contentToRegex(): string {
         return this.ranges
-            .map(range =>
-                range.lower === range.upper
-                    ? String.fromCharCode(range.lower)
-                    : String.fromCharCode(range.lower) + "-" + String.fromCharCode(range.upper)
-            )
+            .map(range => {
+                const lower = this.escapeChar(String.fromCharCode(range.lower))
+                const upper = this.escapeChar(String.fromCharCode(range.upper))
+
+                if (range.lower === range.upper) {
+                    return lower
+                } else {
+                    return lower + "-" + upper
+                }
+            })
             .join("")
+    }
+
+    escapeChar(char: string) {
+        if ("[]^\\".includes(char)) {
+            return `\\${char}`
+        } else {
+            return char
+        }
     }
 
     toDSL(indentLevel: number): string {
