@@ -1,13 +1,8 @@
 define ipAddress as
-    1 to 3 of DIGIT
-    "."
-    1 to 3 of DIGIT
-    "."
-    1 to 3 of DIGIT
-    "."
-    1 to 3 of DIGIT
+    begin separatedBy(".")
+        1 to 3 of DIGIT
+    end
 end
-
 
 define legalChar as
     any except of
@@ -19,9 +14,7 @@ define legalChar as
 end
 
 either
-    many of legalChar
-    0 to many of
-        "."
+    begin separatedBy(".", "optional")
         many of legalChar
     end
 or

@@ -108,8 +108,12 @@ function zip(...arrays: any): any {
     })
 }
 
-export function separatedBy(sep: string): (exp: Expression) => Expression {
-    return (exp: Expression) => sequence(exp, manyOf(sequence(literal(sep), exp)))
+export function separatedBy(sep: string, optional: string = ""): (exp: Expression) => Expression {
+    if (optional === "optional") {
+        return (exp: Expression) => sequence(exp, repeat(sequence(literal(sep), exp), 0))
+    } else {
+        return (exp: Expression) => sequence(exp, manyOf(sequence(literal(sep), exp)))
+    }
 }
 
 export const stdLib = {
