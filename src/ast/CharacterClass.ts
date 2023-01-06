@@ -38,13 +38,17 @@ export class CharacterClass extends Expression {
     }
 
     toRegex(): string {
-        return `[${this.ranges
+        return `[${this.contentToRegex()}]`
+    }
+
+    protected contentToRegex(): string {
+        return this.ranges
             .map(range =>
                 range.lower === range.upper
                     ? String.fromCharCode(range.lower)
                     : String.fromCharCode(range.lower) + "-" + String.fromCharCode(range.upper)
             )
-            .join("")}]`
+            .join("")
     }
 
     toDSL(indentLevel: number): string {

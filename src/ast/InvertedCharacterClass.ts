@@ -9,6 +9,10 @@ export class InvertedCharacterClass extends CharacterClass {
         super(ranges, true, false, numSamplesToGenerate)
     }
 
+    toRegex(): string {
+        return `[^${this.contentToRegex()}]`
+    }
+
     generateValid(tree: Expression, rng: RandomGenerator): string[] {
         return super.generateInvalid(tree, rng)
     }
