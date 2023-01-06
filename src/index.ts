@@ -20,7 +20,7 @@ export { makeDSLParser } from "./parser"
 export * from "./ast"
 
 export class RexRegex {
-    static fromString(code: string, variables: any): DSLScript {
+    static fromString(code: string, variables: any = {}): DSLScript {
         return makeDSL(variables).tryParse(code)
     }
 

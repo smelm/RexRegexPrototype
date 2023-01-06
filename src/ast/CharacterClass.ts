@@ -3,6 +3,8 @@ import { RangeList } from "./RangeList"
 import { RandomGenerator } from "../RandomGenerator"
 import { CharRange } from "./CharRange"
 import { RawClassMember } from "./types"
+import { Character } from "./Character"
+import { Sequence } from "./Sequence"
 
 export class CharacterClass extends Expression {
     public readonly ranges: RangeList
@@ -54,14 +56,27 @@ export class CharacterClass extends Expression {
         ].join("\n")
     }
 
-    static convertToCharRanges(members: RawClassMember[]): CharRange[] {
+    private static charMembersFromExpression(expr: Expression): CharRange[] {
+        if (expr instanceof CharacterClass) {
+            return expr.getRawRanges()
+        } else if (expr instanceof Character) {
+            return [CharRange.fromChar(expr.value)]
+        } else if (expr instanceof Sequence) {
+            return expr.children.flatMap(CharacterClass.charMembersFromExpression)
+        }
+
+        console.log(`Error: could not extract character ranges from ${expr.toString()}`)
+        return []
+    }
+
+    private static convertToCharRanges(members: RawClassMember[]): CharRange[] {
         const ranges: CharRange[] = []
 
         for (let member of members) {
             if (typeof member === "string") {
                 ranges.push(CharRange.fromStrings(member, member))
-            } else if (member instanceof CharacterClass) {
-                ranges.push(...member.getRawRanges())
+            } else if (member instanceof Expression) {
+                ranges.push(...CharacterClass.charMembersFromExpression(member))
             } else {
                 ranges.push(CharRange.fromStrings(...member))
             }

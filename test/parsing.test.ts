@@ -41,6 +41,7 @@ const SINGLE_LINE_CASES = [
     ['any of "a" to "c", "x" to "z"', anyOf(["a", "c"], ["x", "z"])],
     ['any of "a", "b", "c", "x" to "z"', anyOf("a", "b", "c", ["x", "z"])],
     ["any of LETTER.EN, DIGIT", anyOf(letter("EN") as CharacterClass, digit() as CharacterClass)],
+    ["any of LETTER.EN, DOUBLE_QUOTE", anyOf(letter("EN") as CharacterClass, literal('"'))],
     ['any except of "a", "b", "c"', anyExcept("a", "b", "c")],
     ['any of "a" to "z" except of "a", "b", "c"', anyOf(["a", "z"]).exceptOf(["a", "c"])],
     ['"abc" # this is a comment', literal("abc")],

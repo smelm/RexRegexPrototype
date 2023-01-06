@@ -269,7 +269,6 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 lineOrBlock(kw.but, r.expression, r.expressionSequence)
             ).map(x => {
                 const [not, but] = x
-                console.log(x)
                 return builders.notBut(not.content, but.content)
             }),
         variableDefinition: r =>
@@ -337,6 +336,8 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
 
 export function makeDSL(variables: any = {}): Parser<DSLScript> {
     const CONSTANTS = {
+        DOUBLE_QUOTE: builders.literal('"'),
+        SPACE: builders.whitespace(),
         CHAR: {
             QUOTE: builders.literal('"'),
             COMMA: builders.literal(","),

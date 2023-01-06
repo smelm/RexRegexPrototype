@@ -5,7 +5,7 @@ import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Sequence extends WrappingExpression {
-    private children: Expression[]
+    public readonly children: Expression[]
 
     constructor(children: Expression[]) {
         super(ExpressionType.SEQUENCE)

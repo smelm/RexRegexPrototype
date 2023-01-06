@@ -11,6 +11,7 @@ import { Backreference } from "./Backreference"
 import { Letter } from "./Letter"
 import { Language } from "./Language"
 import { Digit } from "./Digit"
+import { Whitespace } from "./Whitespace"
 import { NotBut } from "./NotBut"
 
 import { RawClassMember } from "./types"
@@ -85,6 +86,10 @@ export function letter(language: Language = "EN"): Expression {
 
 export function digit(): Expression {
     return new Digit()
+}
+
+export function whitespace(): Expression {
+    return new Whitespace()
 }
 
 export function notBut(except: Expression, child: Expression): Expression {

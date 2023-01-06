@@ -4,7 +4,7 @@ import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
 export class Character extends WrappingExpression {
-    constructor(private value: string) {
+    constructor(public readonly value: string) {
         super(ExpressionType.CHARACTER)
     }
 
