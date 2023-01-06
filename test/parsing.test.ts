@@ -133,14 +133,8 @@ describe("settings", () => {
     })
 })
 
-describe("library", () => {
-    test("simple library", () => {
-        let dsl = makeDSL()
-    })
-})
-
 describe("macros", () => {
-    test("simple macro", () => {
+    test("macro can accept string arguments", () => {
         let dsl = makeDSL({
             myMacros: {
                 pet: (isDogPerson: string) => {
@@ -155,13 +149,24 @@ describe("macros", () => {
             otherAnimal: literal("elephant"),
         })
 
-        let result = dsl.tryParse('myMacros.pet("true")').child
-        expect(result).toEqual(literal("dog"))
+        expect(dsl.tryParse('myMacros.pet("true")').child).toEqual(literal("dog"))
+        expect(dsl.tryParse('myMacros.pet("false")').child).toEqual(literal("cat"))
+    })
 
-        result = dsl.tryParse('myMacros.pet("false")').child
-        expect(result).toEqual(literal("cat"))
-
-        result = dsl.tryParse("myMacros.wildAnimal(otherAnimal)").child
+    test("macros can accept subexpressions", () => {
+        let dsl = makeDSL({
+            myMacros: {
+                wildAnimal: (animal: Expression) => animal,
+            },
+            otherAnimal: literal("elephant"),
+        })
+        let result = dsl.tryParse("myMacros.wildAnimal(otherAnimal)").child
         expect(result).toEqual(literal("elephant"))
     })
+})
+
+describe("standard library", () => {
+    test.todo("number between")
+    test.todo("surround with")
+    test.todo("separated by")
 })
