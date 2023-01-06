@@ -34,6 +34,7 @@ const kw = Object.fromEntries(
         "except",
         "not",
         "but",
+        "begin",
     ].map(ident => [ident, string(ident).desc(ident)])
 )
 
@@ -152,6 +153,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 r.charClass,
                 r.notBut,
                 r.any,
+                r.blockFunctionCall,
                 r.functionCall,
                 r.variable,
                 r.backreference
@@ -316,6 +318,12 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
             seq(r.variable, r.funcArgs.wrap(string("("), string(")"))).map(([func, args]) => {
                 return func(...args)
             }),
+        blockFunctionCall: r =>
+            block(kw.begin.skip(_).then(r.functionCall), r.expressionSequence).map(
+                ({ header, content }) => {
+                    return header(content)
+                }
+            ),
         identifier: r =>
             sepBy1(r.identifierName, DOT).assert(
                 ident => !ident.some(isKeyword),
@@ -338,11 +346,6 @@ export function makeDSL(variables: any = {}): Parser<DSLScript> {
     const CONSTANTS = {
         DOUBLE_QUOTE: builders.literal('"'),
         SPACE: builders.whitespace(),
-        CHAR: {
-            QUOTE: builders.literal('"'),
-            COMMA: builders.literal(","),
-            DOT: builders.literal("."),
-        },
         DIGIT: builders.digit(),
         LETTER: {
             EN: builders.letter("EN"),
@@ -350,5 +353,7 @@ export function makeDSL(variables: any = {}): Parser<DSLScript> {
         },
     }
 
-    return makeDSLParser({ ...CONSTANTS, ...variables })
+    const stdLib = {}
+
+    return makeDSLParser({ ...CONSTANTS, ...stdLib, ...variables })
 }

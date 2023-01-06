@@ -134,7 +134,7 @@ describe("settings", () => {
 })
 
 describe("macros", () => {
-    test("macro can accept string arguments", () => {
+    test("can accept string arguments", () => {
         let dsl = makeDSL({
             myMacros: {
                 pet: (isDogPerson: string) => {
@@ -153,7 +153,7 @@ describe("macros", () => {
         expect(dsl.tryParse('myMacros.pet("false")').child).toEqual(literal("cat"))
     })
 
-    test("macros can accept subexpressions", () => {
+    test("can accept subexpressions", () => {
         let dsl = makeDSL({
             myMacros: {
                 wildAnimal: (animal: Expression) => animal,
@@ -162,6 +162,19 @@ describe("macros", () => {
         })
         let result = dsl.tryParse("myMacros.wildAnimal(otherAnimal)").child
         expect(result).toEqual(literal("elephant"))
+    })
+
+    test.todo("can accept blocks")
+
+    test("can accept arguments and blocks", () => {
+        let dsl = makeDSL({
+            zoo: (name: string) => (animals: Expression) =>
+                sequence(literal(`my zoo: ${name}`), animals),
+            elephant: literal("elephant"),
+        })
+
+        let result = dsl.tryParse('begin zoo("paradise")\nmany of elephant\nend').child
+        expect(result).toEqual(sequence(literal("my zoo: paradise"), manyOf(literal("elephant"))))
     })
 })
 
