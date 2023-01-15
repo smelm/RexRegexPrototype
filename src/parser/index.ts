@@ -7,6 +7,7 @@ import {
     createLanguage,
     seqObj,
     Language,
+    Rule,
     whitespace as _,
     of,
     seq,
@@ -19,68 +20,35 @@ import { stdLib } from "../lib"
 import { DUMMY } from "./Dummy"
 import { preamble } from "./preamble"
 
-const kw = Object.fromEntries(
-    [
-        "any",
-        "maybe",
-        "many",
-        "of",
-        "to",
-        "end",
-        "named",
-        "either",
-        "or",
-        "define",
-        "same",
-        "as",
-        "except",
-        "not",
-        "but",
-        "begin",
-    ].map(ident => [ident, string(ident).desc(ident)])
-)
-
-function isKeyword(word: string): boolean {
-    return Object.keys(kw).includes(word)
-}
+import { kw, isKeyword } from "./keywords"
+import {
+    lineOrBlock,
+    line,
+    block,
+    statementSeperator,
+    optionalStatementSeperator,
+    BlockResult,
+    DOT,
+} from "./utils"
 
 function opt<T>(p: Parser<T>): Parser<T> {
     return p.atMost(1).map(x => x[0])
 }
 
-const DOT = string(".").desc("DOT")
-
-const statementSeperator: Parser<string> = regex(/( *[\n\r] *)+/).desc("statement_separator")
-const optionalStatementSeperator: Parser<string> = regex(/( *[\n\r] *)*/)
-
-type BlockResult<T, U> = { header: T; content: U; type: "block" | "line" }
-
-function line<T, U>(header: Parser<T>, expression: Parser<U>): Parser<BlockResult<T, U>> {
-    return seqObj<BlockResult<T, U>>(["header", header], _, ["content", expression]).map(obj => ({
-        ...obj,
-        type: "line",
-    }))
-}
-
-function block<T, U>(header: Parser<T>, content: Parser<U>): Parser<BlockResult<T, U>> {
-    return seqObj<{ header: any; content: any }>(
-        ["header", header],
-        statementSeperator,
-        ["content", content],
-        statementSeperator,
-        kw.end
-    ).map(obj => ({ ...obj, type: "block" }))
-}
-
-function lineOrBlock<T, U>(
-    header: Parser<T>,
-    content: Parser<U>,
-    contentSequence: Parser<U>
-): Parser<BlockResult<T, U>> {
-    return alt(block(header, contentSequence), line(header, content))
-}
-
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
+
+const groups: Rule = {
+    group: r =>
+        lineOrBlock<string, Expression>(
+            kw.named.then(_).then(r.identifierName),
+            r.expression,
+            r.expressionSequence
+        ).map(({ header, content }) => group(header, content)),
+    backreference: r =>
+        line(seq(kw.same, _, kw.as), r.identifierName).map(({ content: groupName }) =>
+            backreference(groupName)
+        ),
+}
 
 // TODO is there a better type for variables
 // it was Record<string, Expression>
@@ -161,16 +129,7 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
             lineOrBlock<any, Expression>(kw.maybe, r.expression, r.expressionSequence).map(
                 ({ content }) => builders.maybe(content)
             ),
-        group: r =>
-            lineOrBlock<string, Expression>(
-                kw.named.then(_).then(r.identifierName),
-                r.expression,
-                r.expressionSequence
-            ).map(({ header, content }) => group(header, content)),
-        backreference: r =>
-            line(seq(kw.same, _, kw.as), r.identifierName).map(({ content: groupName }) =>
-                backreference(groupName)
-            ),
+        ...groups,
         alternative: r =>
             lineOrBlock(
                 kw.either,
