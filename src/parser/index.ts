@@ -20,6 +20,10 @@ import { stdLib } from "../lib"
 import { DUMMY } from "./Dummy"
 import { preamble } from "./preamble"
 
+import { alternative } from "./alternative"
+import { characterClass } from "./characterClass"
+import { notBut } from "./notBut"
+
 import { kw, isKeyword } from "./keywords"
 import {
     lineOrBlock,
@@ -29,11 +33,10 @@ import {
     optionalStatementSeperator,
     BlockResult,
     DOT,
+    opt,
 } from "./utils"
 
-function opt<T>(p: Parser<T>): Parser<T> {
-    return p.atMost(1).map(x => x[0])
-}
+const QUOTE: Parser<string> = string('"')
 
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
 
@@ -50,156 +53,43 @@ const groups: Rule = {
         ),
 }
 
-// TODO is there a better type for variables
-// it was Record<string, Expression>
-// but now it is Record<Record<string, Expression>> with varying levels of depth
-export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
-    const QUOTE: Parser<string> = string('"')
+const quantifiers: Rule = {
+    upperBound: r =>
+        seq(_, kw.to, _)
+            .then(alt(r.number, string("many")))
+            .or(of("lower")),
+    rangeHeader: r => seqObj<RepeatBounds>(["lower", r.number], ["upper", r.upperBound], _, kw.of),
+    rangeTimes: r =>
+        lineOrBlock<RepeatBounds, Expression>(
+            r.rangeHeader,
+            r.expression,
+            r.expressionSequence
+        ).map(({ header, content }) => {
+            const { lower, upper } = header
+            if (upper === "lower") {
+                return builders.repeat(content, lower, lower)
+            } else if (upper === "many") {
+                return builders.repeat(content, lower, undefined)
+            } else {
+                return builders.repeat(content, lower, upper)
+            }
+        }),
+    many: r =>
+        lineOrBlock<any, Expression>(
+            seq(kw.many, _, kw.of),
+            r.expression,
+            r.expressionSequence
+        ).map(({ content }: BlockResult<any, Expression>) => builders.manyOf(content)),
+    maybe: r =>
+        lineOrBlock<any, Expression>(kw.maybe, r.expression, r.expressionSequence).map(
+            ({ content }) => builders.maybe(content)
+        ),
 
-    const dslParser: Language = createLanguage({
-        dslScript: r =>
-            seq(opt(r.preamble.skip(statementSeperator)), r.script).trim(
-                optionalStatementSeperator
-            ),
-        preamble: () => preamble,
-        script: r => r.expressionSequence,
-        expressionSequence: r =>
-            sepBy(r.expressionWithTrailingComment, statementSeperator)
-                .map((expr: Expression[]) => {
-                    expr = expr.filter(e => e.type !== ExpressionType.DUMMY)
+    number: () => regex(/[0-9]+/).map(Number),
+}
 
-                    if (expr.length === 1) {
-                        return expr[0]
-                    } else {
-                        return builders.sequence(...expr)
-                    }
-                })
-                .desc("expression sequence"),
-        expressionWithTrailingComment: r => r.expression.skip(opt(seq(_, r.comment))),
-        expression: r =>
-            alt(
-                r.comment,
-                r.literal,
-                r.rangeTimes,
-                r.many,
-                r.maybe,
-                r.alternative,
-                r.group,
-                r.variableDefinition,
-                r.charClass,
-                r.notBut,
-                r.any,
-                r.blockFunctionCall,
-                r.functionCall,
-                r.variable,
-                r.backreference
-            ).desc("expression"),
-        comment: () => seq(string("#"), regex(/.*/)).result(DUMMY),
-        any: () => kw.any.map(builders.any),
-        rawLiteral: () => regex(/[^"]+/).wrap(QUOTE, QUOTE),
-        literal: r => r.rawLiteral.map(builders.literal),
-        upperBound: r =>
-            seq(_, kw.to, _)
-                .then(alt(r.number, string("many")))
-                .or(of("lower")),
-        rangeHeader: r =>
-            seqObj<RepeatBounds>(["lower", r.number], ["upper", r.upperBound], _, kw.of),
-        rangeTimes: r =>
-            lineOrBlock<RepeatBounds, Expression>(
-                r.rangeHeader,
-                r.expression,
-                r.expressionSequence
-            ).map(({ header, content }) => {
-                const { lower, upper } = header
-                if (upper === "lower") {
-                    return builders.repeat(content, lower, lower)
-                } else if (upper === "many") {
-                    return builders.repeat(content, lower, undefined)
-                } else {
-                    return builders.repeat(content, lower, upper)
-                }
-            }),
-        many: r =>
-            lineOrBlock<any, Expression>(
-                seq(kw.many, _, kw.of),
-                r.expression,
-                r.expressionSequence
-            ).map(({ content }: BlockResult<any, Expression>) => builders.manyOf(content)),
-        maybe: r =>
-            lineOrBlock<any, Expression>(kw.maybe, r.expression, r.expressionSequence).map(
-                ({ content }) => builders.maybe(content)
-            ),
-        ...groups,
-        alternative: r =>
-            lineOrBlock(
-                kw.either,
-                sepBy(r.expression, seq(_, kw.or, _)).map((exps: Expression[]) =>
-                    builders.alternative(...exps)
-                ),
-                sepBy(r.expressionSequence, seq(statementSeperator, kw.or, statementSeperator)).map(
-                    (exps: Expression[]) => builders.alternative(...exps)
-                )
-            ).map(({ content }) => content),
-        charRange: r =>
-            //@ts-ignore
-            seqObj(["lower", r.rawLiteral], _, kw.to, _, ["upper", r.rawLiteral]).map(
-                (obj: any) => [obj.lower, obj.upper]
-            ),
-        charClassList: r =>
-            sepBy(
-                alt(r.charRange, r.rawLiteral, r.variable),
-                regex(/ *, */).desc("list_separator")
-            ),
-        charClassHeader: () => seq(kw.any, opt(seq(_, kw.except)), _, kw.of),
-        charClassListMultiline: r =>
-            sepBy(r.charClassList, statementSeperator.notFollowedBy(alt(kw.except, kw.end))).map(
-                x => {
-                    return x.flat()
-                }
-            ),
-        charClass: r =>
-            lineOrBlock(
-                r.charClassHeader,
-                seq(
-                    r.charClassList,
-                    opt(seq(_, kw.except, _, kw.of, _, r.charClassList).map(x => x[x.length - 1]))
-                ),
-                seq(
-                    r.charClassListMultiline,
-                    opt(
-                        seq(
-                            statementSeperator,
-                            kw.except,
-                            _,
-                            kw.of,
-                            statementSeperator,
-                            r.charClassListMultiline
-                        ).map(x => x[x.length - 1])
-                    )
-                )
-            ).map(({ content, header }) => {
-                const [anyOf, except] = content
-                let result
-                if (header.join("").includes("except")) {
-                    result = builders.anyExcept(...anyOf)
-                } else {
-                    result = builders.anyOf(...anyOf)
-                }
-
-                if (except) {
-                    result = result.exceptOf(...except)
-                }
-
-                return result
-            }),
-        notBut: r =>
-            seq(
-                line(kw.not, r.expression).skip(_),
-                lineOrBlock(kw.but, r.expression, r.expressionSequence)
-            ).map(x => {
-                const [not, but] = x
-                return builders.notBut(not.content, but.content)
-            }),
+function parseMacros(variables: any): Rule {
+    return {
         variableDefinition: r =>
             lineOrBlock(
                 kw.define.then(_).then(r.identifier).skip(_).skip(kw.as),
@@ -258,7 +148,73 @@ export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
                 "keyword cannot be used in variable names"
             ),
         identifierName: () => regex(/[a-zA-Z]\w*/),
-        number: () => regex(/[0-9]+/).map(Number),
+    }
+}
+
+const any: Rule = {
+    any: () => kw.any.map(builders.any),
+}
+
+const literal: Rule = {
+    rawLiteral: () => regex(/[^"]+/).wrap(QUOTE, QUOTE),
+    literal: r => r.rawLiteral.map(builders.literal),
+}
+
+const comment: Rule = {
+    comment: () => seq(string("#"), regex(/.*/)).result(DUMMY),
+}
+
+// TODO is there a better type for variables
+// it was Record<string, Expression>
+// but now it is Record<Record<string, Expression>> with varying levels of depth
+export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
+    const dslParser: Language = createLanguage({
+        dslScript: r =>
+            seq(opt(r.preamble.skip(statementSeperator)), r.script).trim(
+                optionalStatementSeperator
+            ),
+        preamble: () => preamble,
+        script: r => r.expressionSequence,
+        expressionSequence: r =>
+            sepBy(r.expressionWithTrailingComment, statementSeperator)
+                .map((expr: Expression[]) => {
+                    expr = expr.filter(e => e.type !== ExpressionType.DUMMY)
+
+                    if (expr.length === 1) {
+                        return expr[0]
+                    } else {
+                        return builders.sequence(...expr)
+                    }
+                })
+                .desc("expression sequence"),
+        expressionWithTrailingComment: r => r.expression.skip(opt(seq(_, r.comment))),
+        expression: r =>
+            alt(
+                r.comment,
+                r.literal,
+                r.rangeTimes,
+                r.many,
+                r.maybe,
+                r.alternative,
+                r.group,
+                r.variableDefinition,
+                r.charClass,
+                r.notBut,
+                r.any,
+                r.blockFunctionCall,
+                r.functionCall,
+                r.variable,
+                r.backreference
+            ).desc("expression"),
+        ...comment,
+        ...any,
+        ...literal,
+        ...quantifiers,
+        ...alternative,
+        ...characterClass,
+        ...notBut,
+        ...parseMacros(variables),
+        ...groups,
     })
 
     return dslParser.dslScript.map(([settings, expression]) => {

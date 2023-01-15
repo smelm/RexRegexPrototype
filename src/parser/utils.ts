@@ -31,3 +31,7 @@ export function lineOrBlock<T, U>(
 ): Parser<BlockResult<T, U>> {
     return alt(block(header, contentSequence), line(header, content))
 }
+
+export function opt<T>(p: Parser<T>): Parser<T> {
+    return p.atMost(1).map(x => x[0])
+}
