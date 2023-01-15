@@ -57,7 +57,7 @@ export class CharacterClass extends Expression {
     }
 
     escapeChar(char: string) {
-        if ("[]^\\".includes(char)) {
+        if ("[]^\\-".includes(char)) {
             return `\\${char}`
         } else {
             return char
