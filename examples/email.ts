@@ -1,8 +1,6 @@
 import { RexRegex } from "../src"
 import { readFileSync } from "fs"
 
-// https://www.emailregex.com/
-
 const valid = [
     "email@example.com",
     "firstname.lastname@example.com",
@@ -67,5 +65,4 @@ runTests(
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 )
 
-console.log(pattern.toRegex())
 runTests(new RegExp(pattern.toRegex()))

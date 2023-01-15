@@ -1,5 +1,14 @@
 import { Expression, ExpressionType } from "../ast/Expression"
-import { alternative, any, anyOf, literal, manyOf, repeat, sequence } from "../ast/astBuilders"
+import {
+    alternative,
+    any,
+    anyOf,
+    digit,
+    literal,
+    manyOf,
+    repeat,
+    sequence,
+} from "../ast/astBuilders"
 import { RandomSeed } from "random-seed"
 
 class NegativeLookAhead extends Expression {
@@ -63,8 +72,7 @@ export function numberBetween(
 
     for (let [l, u] of zip(lowerDigits, upperDigits)) {
         const paddingLength = upperDigits.length - upperPrefix.length - 1
-        const padding =
-            paddingLength > 0 ? [repeat(anyOf(["0", "9"]), paddingLength, paddingLength)] : []
+        const padding = paddingLength > 0 ? [repeat(digit(), paddingLength, paddingLength)] : []
 
         if (lowerPrefix === upperPrefix) {
             if (u - l >= 2) {
@@ -116,6 +124,37 @@ export function separatedBy(sep: string, optional: string = ""): (exp: Expressio
     }
 }
 
+function wrappedIn(
+    begin: string | Expression,
+    end: string | Expression
+): (exp: Expression) => Expression {
+    return (e: Expression) => wrapIn(begin, end ? end : begin, e) as any
+}
+
+export function wrapIn(
+    begin: string | Expression,
+    end: string | Expression,
+    exp?: Expression
+): Expression | ((e: Expression) => Expression) {
+    if (!exp) {
+        exp = end as Expression
+        end = begin
+    }
+
+    if (typeof begin === "string") {
+        begin = literal(begin)
+    }
+
+    if (typeof end === "string") {
+        end = literal(end)
+    }
+
+    const result = sequence(begin, exp, end)
+    return result
+}
+
 export const stdLib = {
     separatedBy,
+    wrapIn,
+    wrappedIn,
 }

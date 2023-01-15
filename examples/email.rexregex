@@ -18,26 +18,19 @@ either
         many of legalChar
     end
 or
-    DOUBLE_QUOTE
-    many of any
-    DOUBLE_QUOTE
+    begin wrappedIn(DOUBLE_QUOTE)
+        many of any
+    end
 end
 
 "@"
 
-
 either
-    "["
-    ipAddress
-    "]"
+    wrapIn("[", "]", ipAddress)
 or
     many of
         many of
-            any of
-                LETTER.EN
-                DIGIT
-                "-"
-            end
+            any of LETTER.EN, DIGIT, "-"
         end
         "."
     end

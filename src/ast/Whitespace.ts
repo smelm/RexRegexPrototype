@@ -3,7 +3,7 @@ import { CharRange } from "./CharRange"
 
 export class Whitespace extends CharacterClass {
     constructor() {
-        super([CharRange.fromChar(" "), CharRange.fromChar("\n")], false, true)
+        super([CharRange.fromChar(" ")], false, true)
     }
 
     toString(): string {

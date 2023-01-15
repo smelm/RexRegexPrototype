@@ -1,0 +1,13 @@
+define logLevel as
+    either "DEBUG" or "ERROR" or "INFO"
+end
+
+define logLine as
+    timestamp("YYYY-MM-DD HH:m:s")
+    " ["
+    logLevel
+    "] "
+    many of LETTER.EN
+end
+
+logLine
