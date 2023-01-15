@@ -1,7 +1,7 @@
 import { RandomGenerator } from "../RandomGenerator"
+import { sequence, literal } from "./astBuilders"
 import { CharacterClass } from "./CharacterClass"
 import { Expression, ExpressionType } from "./Expression"
-import { Group } from "./Group"
 import { WrappingExpression } from "./WrappingExpression"
 
 // TODO support "0 to many"
@@ -28,41 +28,46 @@ export class Repeat extends WrappingExpression {
         return this.upper || rng.intBetween(this.lower, this.lower + 5)
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        const childStrings: string[] = this.child.generateValid(tree, rng)
+    private repeatChild(tree: Expression, rng: RandomGenerator, times: number): Expression {
+        return sequence(
+            ...new Array(times)
+                .fill(undefined)
+                .map(() => CharacterClass.fromMemberList(this.child.generateValid(tree, rng)))
+        )
+    }
 
+    private repeatChildValid(tree: Expression, rng: RandomGenerator, times: number): string[] {
+        return this.repeatChild(tree, rng, times).generateValid(tree, rng)
+    }
+
+    private repeatChildInvalid(tree: Expression, rng: RandomGenerator, times: number): string[] {
+        return this.repeatChild(tree, rng, times).generateInvalid(tree, rng)
+    }
+
+    generateValid(tree: Expression, rng: RandomGenerator): string[] {
         if (this.lower === this.upper) {
-            return childStrings.map(s => s.repeat(this.lower))
+            return this.repeatChildValid(tree, rng, this.lower)
         } else {
-            return childStrings
-                .map(s => [s.repeat(this.lower), s.repeat(this.generateUpper(rng))])
-                .flat()
+            return [
+                ...this.repeatChildValid(tree, rng, this.lower),
+                ...this.repeatChildValid(tree, rng, this.generateUpper(rng)),
+            ]
         }
     }
 
     generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        const validChildStr: string[] = this.child.generateValid(tree, rng)
-        const invalidChildStr: string[] = this.child.generateInvalid(tree, rng)
-
         let result: string[] = []
 
         if (this.lower !== 0) {
-            const validStringRepeatedTooFew = validChildStr.map(s => s.repeat(this.lower - 1))
-            const invalidStringRepeatedCorrectlyLower = invalidChildStr.map(s =>
-                s.repeat(this.lower)
-            )
-
-            result.push(...invalidStringRepeatedCorrectlyLower)
-            result.push(...validStringRepeatedTooFew)
+            result.push(...this.repeatChildValid(tree, rng, this.lower - 1))
+            result.push(...this.repeatChildInvalid(tree, rng, this.lower))
         }
 
         if (this.upper != null) {
-            const validStringRepeatedTooMany = validChildStr.map(s => s.repeat(this.upper! + 1))
-            result.push(...validStringRepeatedTooMany)
+            result.push(...this.repeatChildValid(tree, rng, this.upper! + 1))
         }
 
-        const invalidStringRepeatedCorrectlyUpper = invalidChildStr.map(s => s.repeat(this.upper!))
-        result.push(...invalidStringRepeatedCorrectlyUpper)
+        result.push(...this.repeatChildInvalid(tree, rng, this.generateUpper(rng)))
 
         return result
     }

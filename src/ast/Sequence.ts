@@ -28,6 +28,10 @@ export class Sequence extends WrappingExpression {
     }
 
     private combinations(examplesPerElement: string[][]): string[] {
+        if (examplesPerElement.length === 0) {
+            return []
+        }
+
         const MAX_LENGTH = Math.max(...examplesPerElement.map(arr => arr.length))
 
         return Array(MAX_LENGTH)
