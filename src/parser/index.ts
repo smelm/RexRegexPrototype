@@ -1,4 +1,4 @@
-import { backreference, Expression, ExpressionType, group } from "./ast"
+import { backreference, Expression, ExpressionType, group } from "../ast"
 import {
     alt,
     Parser,
@@ -13,10 +13,11 @@ import {
     sepBy,
     sepBy1,
 } from "parsimmon"
-import * as builders from "./ast/astBuilders"
-import { DSLScript, PositionInInput, ScriptSettings } from "./ast/DSLScript"
-import { RandomGenerator } from "./RandomGenerator"
-import { stdLib } from "./lib"
+import * as builders from "../ast/astBuilders"
+import { DSLScript } from "../ast/DSLScript"
+import { stdLib } from "../lib"
+import { DUMMY } from "./Dummy"
+import { preamble } from "./preamble"
 
 const kw = Object.fromEntries(
     [
@@ -81,52 +82,18 @@ function lineOrBlock<T, U>(
 
 type RepeatBounds = { lower: number; upper: number | "many" | "lower"; exp: Expression }
 
-class Dummy extends Expression {
-    constructor() {
-        super(ExpressionType.DUMMY)
-    }
-
-    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
-        throw new Error("Method not implemented.")
-    }
-
-    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
-        throw new Error("Method not implemented.")
-    }
-
-    toRegex(): string {
-        throw new Error("Method not implemented.")
-    }
-
-    toString(): string {
-        throw new Error("Method not implemented.")
-    }
-
-    toDSL(level: number): string {
-        throw new Error("Method not implemented.")
-    }
-}
-
-const DUMMY = new Dummy()
-
 // TODO is there a better type for variables
 // it was Record<string, Expression>
 // but now it is Record<Record<string, Expression>> with varying levels of depth
 export function makeDSLParser(variables: any = {}): Parser<DSLScript> {
     const QUOTE: Parser<string> = string('"')
-    const letter: Parser<string> = regex(/[a-zA-Z]/)
 
     const dslParser: Language = createLanguage({
         dslScript: r =>
-            seq(opt(r.preamble.skip(statementSeperator)), r.script)
-                .trim(optionalStatementSeperator)
-                .map(([preamble, script]) => [preamble, script]),
-        preamble: () =>
-            alt(
-                string("at beginning of input").map(() => PositionInInput.BEGINNING),
-                string("at end of input").map(() => PositionInInput.END),
-                string("somewhere in input").map(() => PositionInInput.WITHIN)
-            ).map(position => new ScriptSettings(position)),
+            seq(opt(r.preamble.skip(statementSeperator)), r.script).trim(
+                optionalStatementSeperator
+            ),
+        preamble: () => preamble,
         script: r => r.expressionSequence,
         expressionSequence: r =>
             sepBy(r.expressionWithTrailingComment, statementSeperator)
