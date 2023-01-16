@@ -1,6 +1,7 @@
 export enum EngineType {
     NODE_JS = "nodejs",
     PYTHON = "python",
+    JAVA = "java",
 }
 
 export interface MatchResult {

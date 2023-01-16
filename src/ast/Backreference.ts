@@ -48,10 +48,11 @@ export class Backreference extends Expression {
 
     toRegex(engine: RegexEngine): string {
         switch (engine.type) {
-            case EngineType.NODE_JS:
-                return `\\k<${this.groupName}>`
             case EngineType.PYTHON:
                 return `(?P=${this.groupName})`
+            case EngineType.NODE_JS:
+            default:
+                return `\\k<${this.groupName}>`
         }
     }
 

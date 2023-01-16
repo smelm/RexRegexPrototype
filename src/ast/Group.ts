@@ -16,6 +16,7 @@ export class Group extends WrappingExpression {
             case EngineType.PYTHON:
                 return `(?P<${this.name}>${this.child.toRegex(engine)})`
             case EngineType.NODE_JS:
+            default:
                 return `(?<${this.name}>${this.child.toRegex(engine)})`
         }
     }
