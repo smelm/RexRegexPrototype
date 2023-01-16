@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { EngineType, RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression } from "./Expression"
 import { ExpressionType } from "./Expression"
@@ -11,8 +11,8 @@ export class Group extends WrappingExpression {
         super(ExpressionType.GROUP)
     }
 
-    toRegex(engine: EngineType): string {
-        switch (engine) {
+    toRegex(engine: RegexEngine): string {
+        switch (engine.type) {
             case EngineType.PYTHON:
                 return `(?P<${this.name}>${this.child.toRegex(engine)})`
             case EngineType.NODE_JS:

@@ -11,12 +11,12 @@ export interface MatchResult {
 }
 
 export interface RegexEngine {
-    name: EngineType
+    type: EngineType
     match: (regex: string, input: string) => MatchResult
 }
 
 export class NodeJSEngine implements RegexEngine {
-    name: EngineType = EngineType.NODE_JS
+    type: EngineType = EngineType.NODE_JS
 
     match(regex: string, input: string): MatchResult {
         const expr = new RegExp(regex)
@@ -27,7 +27,7 @@ export class NodeJSEngine implements RegexEngine {
 }
 
 export class PythonEngine implements RegexEngine {
-    name: EngineType = EngineType.PYTHON
+    type: EngineType = EngineType.PYTHON
 
     match(regex: string, input: string): MatchResult {
         const { status, stdout } = runProcess(

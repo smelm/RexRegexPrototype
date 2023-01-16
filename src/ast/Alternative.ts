@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { EngineType, NodeJSEngine, RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { Group } from "./Group"
@@ -16,11 +16,11 @@ export class Alternative extends WrappingExpression {
         })
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         return `(?:${this.contentToRegex(engine)})`
     }
 
-    contentToRegex(engine: EngineType): string {
+    contentToRegex(engine: RegexEngine): string {
         return this.children.map((e: Expression) => e.toRegex(engine)).join("|")
     }
 
@@ -30,7 +30,7 @@ export class Alternative extends WrappingExpression {
 
     private matchedByAlternative(input: string): boolean {
         for (let alt of this.children) {
-            if (new RegExp(alt.toRegex(EngineType.NODE_JS)).test(input)) {
+            if (new RegExp(alt.toRegex(new NodeJSEngine())).test(input)) {
                 return true
             }
         }

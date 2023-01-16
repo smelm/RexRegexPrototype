@@ -1,5 +1,5 @@
 import { Expression, ExpressionType } from "../ast"
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 
 class Dummy extends Expression {
@@ -15,7 +15,7 @@ class Dummy extends Expression {
         throw new Error("Method not implemented.")
     }
 
-    toRegex(_engine: EngineType): string {
+    toRegex(_engine: RegexEngine): string {
         throw new Error("Method not implemented.")
     }
 

@@ -3,7 +3,7 @@ import shuffle from "shuffle-array"
 
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 
 export class Sequence extends WrappingExpression {
     public readonly children: Expression[]
@@ -82,7 +82,7 @@ export class Sequence extends WrappingExpression {
         return result
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         return `(?:${this.children.map((c: Expression) => c.toRegex(engine)).join("")})`
     }
 

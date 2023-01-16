@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
@@ -35,7 +35,7 @@ export class DSLScript extends WrappingExpression {
         return this.child.negativeTestCases(tree, rng)
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         const pattern = this.child.toRegex(engine)
 
         let [prefix, suffix] = (() => {

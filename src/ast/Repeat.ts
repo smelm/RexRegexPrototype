@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { sequence } from "./astBuilders"
 import { CharacterClass } from "./CharacterClass"
@@ -115,7 +115,7 @@ export class Repeat extends WrappingExpression {
         }
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         return `${this.child.toRegex(engine)}${this.compileRepeatOperator()}`
     }
 

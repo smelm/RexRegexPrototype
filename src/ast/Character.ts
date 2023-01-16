@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 
 import { Expression, ExpressionType } from "./Expression"
@@ -27,7 +27,7 @@ export class Character extends WrappingExpression {
         return [char]
     }
 
-    toRegex(_engine: EngineType): string {
+    toRegex(_engine: RegexEngine): string {
         if (this.mustBeEscaped()) {
             return `\\${this.value}`
         }

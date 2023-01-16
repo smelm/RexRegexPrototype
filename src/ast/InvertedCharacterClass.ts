@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { CharacterClass } from "./CharacterClass"
 import { CharRange } from "./CharRange"
@@ -10,7 +10,7 @@ export class InvertedCharacterClass extends CharacterClass {
         super(ranges, true, false, numSamplesToGenerate)
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         return `[^${this.contentToRegex(engine)}]`
     }
 

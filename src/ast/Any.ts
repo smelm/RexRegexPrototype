@@ -2,7 +2,7 @@ import { RandomGenerator } from "../RandomGenerator"
 
 import { Expression, ExpressionType } from "./Expression"
 import { randomCharacter } from "./Character"
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 
 export class Any extends Expression {
     constructor() {
@@ -22,7 +22,7 @@ export class Any extends Expression {
         return []
     }
 
-    toRegex(_engine: EngineType): string {
+    toRegex(_engine: RegexEngine): string {
         return "."
     }
 

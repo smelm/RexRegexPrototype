@@ -20,7 +20,7 @@ import { newRandomGenerator } from "../src/RandomGenerator"
 import { NodeJSEngine, PythonEngine, RegexEngine } from "../src/engines"
 
 const ENGINES: [string, RegexEngine][] = [new NodeJSEngine(), new PythonEngine()].map(e => [
-    e.name,
+    e.type,
     e,
 ])
 
@@ -85,7 +85,7 @@ function makeTestCases(engine: RegexEngine): TestCase[] {
                     matches: matches,
                     ast,
                     groups: matches ? groups : undefined,
-                    pattern: ast.toRegex(engine.name),
+                    pattern: ast.toRegex(engine),
                 })
             }
         }
@@ -115,20 +115,20 @@ describe.each(ENGINES)("%s special cases", (_engineName, engine) => {
     )
 
     test("matching backreference", () => {
-        const pattern = expressionWithBackreference.toRegex(engine.name)
+        const pattern = expressionWithBackreference.toRegex(engine)
         const result = engine.match(pattern, "#foo#")
         expect(result.matches).toEqual(true)
     })
 
     test("not matching backreference", () => {
-        const pattern = expressionWithBackreference.toRegex(engine.name)
+        const pattern = expressionWithBackreference.toRegex(engine)
         const result = engine.match(pattern, "#foo+")
         expect(result.matches).toEqual(false)
     })
 
     test("alternative matches longest possible", () => {
         const pattern = RexRegex.fromCode(alternative(literal("hell"), literal("hello"))).toRegex(
-            engine.name
+            engine
         )
         const match = new RegExp(pattern).exec("hello")
 

@@ -1,4 +1,4 @@
-import { EngineType } from "../engines"
+import { EngineType, RegexEngine } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { randomIntBetween } from "../utils"
 import { Expression, ExpressionType } from "./Expression"
@@ -46,8 +46,8 @@ export class Backreference extends Expression {
         }
     }
 
-    toRegex(engine: EngineType): string {
-        switch (engine) {
+    toRegex(engine: RegexEngine): string {
+        switch (engine.type) {
             case EngineType.NODE_JS:
                 return `\\k<${this.groupName}>`
             case EngineType.PYTHON:

@@ -10,7 +10,7 @@ import {
     sequence,
 } from "../ast/astBuilders"
 import { RandomSeed } from "random-seed"
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 
 class NegativeLookAhead extends Expression {
     constructor(private child: Expression) {
@@ -25,7 +25,7 @@ class NegativeLookAhead extends Expression {
         throw new Error("Method not implemented.")
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         return `(?!${this.child.toRegex(engine)})`
     }
 

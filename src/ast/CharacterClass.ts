@@ -5,7 +5,7 @@ import { CharRange } from "./CharRange"
 import { RawClassMember } from "./types"
 import { Character } from "./Character"
 import { Sequence } from "./Sequence"
-import { EngineType } from "../engines"
+import { RegexEngine } from "../engines"
 
 export class CharacterClass extends Expression {
     public readonly ranges: RangeList
@@ -38,11 +38,11 @@ export class CharacterClass extends Expression {
         return this.ranges.invert().sample(this.numSamplesToGenerate, rng)
     }
 
-    toRegex(engine: EngineType): string {
+    toRegex(engine: RegexEngine): string {
         return `[${this.contentToRegex(engine)}]`
     }
 
-    protected contentToRegex(_engine: EngineType): string {
+    protected contentToRegex(_engine: RegexEngine): string {
         return this.ranges
             .map(range => {
                 const lower = this.escapeChar(String.fromCharCode(range.lower))
