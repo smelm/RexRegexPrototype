@@ -23,14 +23,14 @@ export class JavaEngine implements RegexEngine {
             throw new Error("java process failed")
         }
 
-        let [matchesStr, ...groupsStrs] = stdout.split("\n")
+        let [matchesStr, ...groupsStrs] = stdout.trim().split("\n")
 
         let matches: boolean = JSON.parse(matchesStr)
 
         let groups = undefined
 
-        if (groupsStrs.length === 0) {
-            Object.fromEntries(groupsStrs.map(s => s.split(":", 1)))
+        if (groupsStrs.length !== 0) {
+            groups = Object.fromEntries(groupsStrs.map(s => s.split(":", 2)))
         }
 
         return { matches, groups }
