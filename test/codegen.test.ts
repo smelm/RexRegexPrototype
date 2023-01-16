@@ -16,30 +16,10 @@ import {
     notBut,
     anyExcept,
 } from "../src"
-import { spawnSync } from "child_process"
 import { newRandomGenerator } from "../src/RandomGenerator"
+import { NodeJSEngine, RegexEngine } from "../src/engines"
 
-interface MatchResult {
-    matches: boolean
-    groups?: Record<string, string>
-}
-
-interface RegexEngine {
-    name: string
-    match: (regex: string, input: string) => MatchResult
-}
-
-const NODEJS: RegexEngine = {
-    name: "nodejs",
-    match: (regex: string, input: string) => {
-        const expr = new RegExp(regex)
-        const result = expr.exec(input)
-
-        return { matches: !!result, groups: result?.groups }
-    },
-}
-
-const ENGINES: [string, RegexEngine][] = [/*PYTHON, PERL,*/ NODEJS].map(e => [e.name, e])
+const ENGINES: [string, RegexEngine][] = [new NodeJSEngine()].map(e => [e.name, e])
 
 interface TestCase {
     ast: Expression
@@ -123,7 +103,7 @@ describe.each(ENGINES)("%s regex", (_engineName, engine) => {
     })
 })
 
-describe("special cases", () => {
+describe.each(ENGINES)("%s special cases", (_engineName, engine) => {
     const expressionWithBackreference = sequence(
         group("symbol", anyOf("+", "#", "|")),
         literal("foo"),
@@ -132,13 +112,13 @@ describe("special cases", () => {
 
     test("matching backreference", () => {
         const pattern = expressionWithBackreference.toRegex()
-        const result = NODEJS.match(pattern, "#foo#")
+        const result = engine.match(pattern, "#foo#")
         expect(result.matches).toEqual(true)
     })
 
     test("not matching backreference", () => {
         const pattern = expressionWithBackreference.toRegex()
-        const result = NODEJS.match(pattern, "#foo+")
+        const result = engine.match(pattern, "#foo+")
         expect(result.matches).toEqual(false)
     })
 
@@ -149,15 +129,3 @@ describe("special cases", () => {
         expect(match[0]).toEqual("hello")
     })
 })
-
-function runProcess(command: string, args: string[], regex: string, input: string): boolean {
-    const { status, stdout } = spawnSync(command, args, {
-        input: `${regex}SEP${input}`,
-    })
-
-    if (status !== 0) {
-        throw new Error("process crashed")
-    }
-
-    return parseInt(stdout.toString().trim()) === 1
-}
