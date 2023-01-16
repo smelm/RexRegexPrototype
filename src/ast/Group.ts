@@ -12,7 +12,12 @@ export class Group extends WrappingExpression {
     }
 
     toRegex(engine: EngineType): string {
-        return `(?<${this.name}>${this.child.toRegex(engine)})`
+        switch (engine) {
+            case EngineType.PYTHON:
+                return `(?P<${this.name}>${this.child.toRegex(engine)})`
+            case EngineType.NODE_JS:
+                return `(?<${this.name}>${this.child.toRegex(engine)})`
+        }
     }
 
     contentToString(): string {
