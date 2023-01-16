@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
@@ -26,16 +27,16 @@ export class DSLScript extends WrappingExpression {
         return this.child.toString()
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.child.generateValid(tree, rng)
+    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        return this.child.positiveTestCases(tree, rng)
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.child.generateInvalid(tree, rng)
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        return this.child.negativeTestCases(tree, rng)
     }
 
-    toRegex(): string {
-        const pattern = this.child.toRegex()
+    toRegex(engine: EngineType): string {
+        const pattern = this.child.toRegex(engine)
 
         let [prefix, suffix] = (() => {
             switch (this.settings.positionInInput) {

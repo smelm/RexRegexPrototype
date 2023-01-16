@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 
 import { Expression, ExpressionType } from "./Expression"
@@ -12,11 +13,11 @@ export class Character extends WrappingExpression {
         return this.value
     }
 
-    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
+    positiveTestCases(_tree: Expression, _rng: RandomGenerator): string[] {
         return [this.value]
     }
 
-    generateInvalid(_tree: Expression, rng: RandomGenerator): string[] {
+    negativeTestCases(_tree: Expression, rng: RandomGenerator): string[] {
         let char
 
         do {
@@ -26,7 +27,7 @@ export class Character extends WrappingExpression {
         return [char]
     }
 
-    toRegex(): string {
+    toRegex(_engine: EngineType): string {
         if (this.mustBeEscaped()) {
             return `\\${this.value}`
         }

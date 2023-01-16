@@ -10,22 +10,23 @@ import {
     sequence,
 } from "../ast/astBuilders"
 import { RandomSeed } from "random-seed"
+import { EngineType } from "../engines"
 
 class NegativeLookAhead extends Expression {
     constructor(private child: Expression) {
         super(ExpressionType.CUSTOM)
     }
 
-    generateValid(_ast: Expression, _rng: RandomSeed): string[] {
+    positiveTestCases(_ast: Expression, _rng: RandomSeed): string[] {
         throw new Error("Method not implemented.")
     }
 
-    generateInvalid(_ast: Expression, _rng: RandomSeed): string[] {
+    negativeTestCases(_ast: Expression, _rng: RandomSeed): string[] {
         throw new Error("Method not implemented.")
     }
 
-    toRegex(): string {
-        return `(?!${this.child.toRegex()})`
+    toRegex(engine: EngineType): string {
+        return `(?!${this.child.toRegex(engine)})`
     }
 
     toString(): string {

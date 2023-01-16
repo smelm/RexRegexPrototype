@@ -2,6 +2,7 @@ import { RandomGenerator } from "../RandomGenerator"
 
 import { Expression, ExpressionType } from "./Expression"
 import { randomCharacter } from "./Character"
+import { EngineType } from "../engines"
 
 export class Any extends Expression {
     constructor() {
@@ -12,16 +13,16 @@ export class Any extends Expression {
         return this.type.toString()
     }
 
-    generateValid(_tree: Expression, rng: RandomGenerator): string[] {
+    positiveTestCases(_tree: Expression, rng: RandomGenerator): string[] {
         return [randomCharacter(rng)]
     }
 
-    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
+    negativeTestCases(_tree: Expression, _rng: RandomGenerator): string[] {
         //TODO: handle dotall mode here
         return []
     }
 
-    toRegex(): string {
+    toRegex(_engine: EngineType): string {
         return "."
     }
 

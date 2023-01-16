@@ -3,6 +3,7 @@ import shuffle from "shuffle-array"
 
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
+import { EngineType } from "../engines"
 
 export class Sequence extends WrappingExpression {
     public readonly children: Expression[]
@@ -47,17 +48,19 @@ export class Sequence extends WrappingExpression {
         rng: RandomGenerator
     ): string[][] {
         return this.children.map((child: Expression) => {
-            let examples = valid ? child.generateValid(tree, rng) : child.generateInvalid(tree, rng)
+            let examples = valid
+                ? child.positiveTestCases(tree, rng)
+                : child.negativeTestCases(tree, rng)
             shuffle(examples, { rng: rng.random })
             return examples
         })
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
         return this.combinations(this.examplesFromChildren(tree, true, rng))
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
         const validExamples = this.examplesFromChildren(tree, true, rng)
         const invalidExamples = this.examplesFromChildren(tree, false, rng)
 
@@ -79,8 +82,8 @@ export class Sequence extends WrappingExpression {
         return result
     }
 
-    toRegex(): string {
-        return `(?:${this.children.map((c: Expression) => c.toRegex()).join("")})`
+    toRegex(engine: EngineType): string {
+        return `(?:${this.children.map((c: Expression) => c.toRegex(engine)).join("")})`
     }
 
     toDSL(indentLevel: number): string {

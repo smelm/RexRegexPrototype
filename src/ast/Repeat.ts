@@ -1,5 +1,6 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
-import { sequence, literal } from "./astBuilders"
+import { sequence } from "./astBuilders"
 import { CharacterClass } from "./CharacterClass"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
@@ -32,19 +33,19 @@ export class Repeat extends WrappingExpression {
         return sequence(
             ...new Array(times)
                 .fill(undefined)
-                .map(() => CharacterClass.fromMemberList(this.child.generateValid(tree, rng)))
+                .map(() => CharacterClass.fromMemberList(this.child.positiveTestCases(tree, rng)))
         )
     }
 
     private repeatChildValid(tree: Expression, rng: RandomGenerator, times: number): string[] {
-        return this.repeatChild(tree, rng, times).generateValid(tree, rng)
+        return this.repeatChild(tree, rng, times).positiveTestCases(tree, rng)
     }
 
     private repeatChildInvalid(tree: Expression, rng: RandomGenerator, times: number): string[] {
-        return this.repeatChild(tree, rng, times).generateInvalid(tree, rng)
+        return this.repeatChild(tree, rng, times).negativeTestCases(tree, rng)
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
+    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
         if (this.lower === this.upper) {
             return this.repeatChildValid(tree, rng, this.lower)
         } else {
@@ -55,7 +56,7 @@ export class Repeat extends WrappingExpression {
         }
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
         let result: string[] = []
 
         if (this.lower !== 0) {
@@ -114,8 +115,8 @@ export class Repeat extends WrappingExpression {
         }
     }
 
-    toRegex(): string {
-        return `${this.child.toRegex()}${this.compileRepeatOperator()}`
+    toRegex(engine: EngineType): string {
+        return `${this.child.toRegex(engine)}${this.compileRepeatOperator()}`
     }
 
     toDSL(indentLevel: number): string {

@@ -12,6 +12,3 @@ match = re.search(inp["regex"], inp["input"])
 output = json.dumps({ "matches": bool(match) })
 
 print(output)
-with open("output.txt", "w") as f:
-    f.write(output)
-

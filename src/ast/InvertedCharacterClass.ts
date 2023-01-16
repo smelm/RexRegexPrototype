@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { CharacterClass } from "./CharacterClass"
 import { CharRange } from "./CharRange"
@@ -9,16 +10,16 @@ export class InvertedCharacterClass extends CharacterClass {
         super(ranges, true, false, numSamplesToGenerate)
     }
 
-    toRegex(): string {
-        return `[^${this.contentToRegex()}]`
+    toRegex(engine: EngineType): string {
+        return `[^${this.contentToRegex(engine)}]`
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        return super.generateInvalid(tree, rng)
+    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        return super.negativeTestCases(tree, rng)
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        return super.generateValid(tree, rng)
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        return super.positiveTestCases(tree, rng)
     }
 
     static fromMemberList(members: RawClassMember[]): CharacterClass {

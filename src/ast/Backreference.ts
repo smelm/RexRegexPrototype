@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { randomIntBetween } from "../utils"
 import { Expression, ExpressionType } from "./Expression"
@@ -25,17 +26,17 @@ export class Backreference extends Expression {
         }
     }
 
-    generateValid(tree: Expression, _rng: RandomGenerator): string[] {
+    positiveTestCases(tree: Expression, _rng: RandomGenerator): string[] {
         const group = this.findCorrespondingGroup(tree)
         return group.context.valid
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
         const group = this.findCorrespondingGroup(tree)
         const valid = group.context.valid
 
         if (valid.length < 2) {
-            return group.generateInvalid(tree, rng)
+            return group.negativeTestCases(tree, rng)
         } else {
             // this is the simplest possible derangement (permutation without trivial cycles)
             // this assumes that that there are no duplicate elements
@@ -45,7 +46,7 @@ export class Backreference extends Expression {
         }
     }
 
-    toRegex(): string {
+    toRegex(engine: EngineType): string {
         return `\\k<${this.groupName}>`
     }
 

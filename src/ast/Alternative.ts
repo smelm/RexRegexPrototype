@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { Group } from "./Group"
@@ -15,12 +16,12 @@ export class Alternative extends WrappingExpression {
         })
     }
 
-    toRegex(): string {
-        return `(?:${this.contentToRegex()})`
+    toRegex(engine: EngineType): string {
+        return `(?:${this.contentToRegex(engine)})`
     }
 
-    contentToRegex(): string {
-        return this.children.map((e: Expression) => e.toRegex()).join("|")
+    contentToRegex(engine: EngineType): string {
+        return this.children.map((e: Expression) => e.toRegex(engine)).join("|")
     }
 
     contentToString(): string {
@@ -29,7 +30,7 @@ export class Alternative extends WrappingExpression {
 
     private matchedByAlternative(input: string): boolean {
         for (let alt of this.children) {
-            if (new RegExp(alt.toRegex()).test(input)) {
+            if (new RegExp(alt.toRegex(EngineType.NODE_JS)).test(input)) {
                 return true
             }
         }
@@ -37,13 +38,13 @@ export class Alternative extends WrappingExpression {
         return false
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        return this.children.flatMap((e: Expression) => e.generateValid(tree, rng))
+    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        return this.children.flatMap((e: Expression) => e.positiveTestCases(tree, rng))
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
         return this.children.flatMap((e: Expression) => {
-            const invalidSamples = e.generateInvalid(tree, rng)
+            const invalidSamples = e.negativeTestCases(tree, rng)
 
             let wronglyValidIndices: number[] = []
             for (let num = 0; num < 3; num++) {
@@ -57,7 +58,7 @@ export class Alternative extends WrappingExpression {
                     return invalidSamples
                 }
 
-                const newInvalid = e.generateInvalid(tree, rng)
+                const newInvalid = e.negativeTestCases(tree, rng)
                 for (let idx of wronglyValidIndices) {
                     invalidSamples[idx] = newInvalid[idx]
                 }

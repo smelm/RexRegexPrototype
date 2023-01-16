@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 
 export enum ExpressionType {
@@ -18,9 +19,9 @@ export enum ExpressionType {
 export abstract class Expression {
     constructor(public type: ExpressionType) {}
 
-    abstract generateValid(ast: Expression, rng: RandomGenerator): string[]
-    abstract generateInvalid(ast: Expression, rng: RandomGenerator): string[]
-    abstract toRegex(): string
+    abstract positiveTestCases(ast: Expression, rng: RandomGenerator): string[]
+    abstract negativeTestCases(ast: Expression, rng: RandomGenerator): string[]
+    abstract toRegex(engine: EngineType): string
     abstract toString(): string
     abstract toDSL(identLevel: number): string
 

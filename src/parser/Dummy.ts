@@ -1,4 +1,5 @@
 import { Expression, ExpressionType } from "../ast"
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 
 class Dummy extends Expression {
@@ -6,15 +7,15 @@ class Dummy extends Expression {
         super(ExpressionType.DUMMY)
     }
 
-    generateValid(_tree: Expression, _rng: RandomGenerator): string[] {
+    positiveTestCases(_tree: Expression, _rng: RandomGenerator): string[] {
         throw new Error("Method not implemented.")
     }
 
-    generateInvalid(_tree: Expression, _rng: RandomGenerator): string[] {
+    negativeTestCases(_tree: Expression, _rng: RandomGenerator): string[] {
         throw new Error("Method not implemented.")
     }
 
-    toRegex(): string {
+    toRegex(_engine: EngineType): string {
         throw new Error("Method not implemented.")
     }
 

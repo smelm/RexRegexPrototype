@@ -5,6 +5,7 @@ import { CharRange } from "./CharRange"
 import { RawClassMember } from "./types"
 import { Character } from "./Character"
 import { Sequence } from "./Sequence"
+import { EngineType } from "../engines"
 
 export class CharacterClass extends Expression {
     public readonly ranges: RangeList
@@ -29,19 +30,19 @@ export class CharacterClass extends Expression {
         return `anyOf(${rangesString})`
     }
 
-    generateValid(_tree: Expression, rng: RandomGenerator): string[] {
+    positiveTestCases(_tree: Expression, rng: RandomGenerator): string[] {
         return this.ranges.sample(this.numSamplesToGenerate, rng)
     }
 
-    generateInvalid(_tree: Expression, rng: RandomGenerator): string[] {
+    negativeTestCases(_tree: Expression, rng: RandomGenerator): string[] {
         return this.ranges.invert().sample(this.numSamplesToGenerate, rng)
     }
 
-    toRegex(): string {
-        return `[${this.contentToRegex()}]`
+    toRegex(engine: EngineType): string {
+        return `[${this.contentToRegex(engine)}]`
     }
 
-    protected contentToRegex(): string {
+    protected contentToRegex(_engine: EngineType): string {
         return this.ranges
             .map(range => {
                 const lower = this.escapeChar(String.fromCharCode(range.lower))

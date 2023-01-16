@@ -1,3 +1,4 @@
+import { EngineType } from "../engines"
 import { RandomGenerator } from "../RandomGenerator"
 import { Expression } from "./Expression"
 import { ExpressionType } from "./Expression"
@@ -10,22 +11,22 @@ export class Group extends WrappingExpression {
         super(ExpressionType.GROUP)
     }
 
-    toRegex(): string {
-        return `(?<${this.name}>${this.child.toRegex()})`
+    toRegex(engine: EngineType): string {
+        return `(?<${this.name}>${this.child.toRegex(engine)})`
     }
 
     contentToString(): string {
         return `${this.name}, ${this.child.toString()}`
     }
 
-    generateValid(tree: Expression, rng: RandomGenerator): string[] {
-        let valid = this.child.generateValid(tree, rng)
+    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        let valid = this.child.positiveTestCases(tree, rng)
         this.context["valid"] = valid
         return valid
     }
 
-    generateInvalid(tree: Expression, rng: RandomGenerator): string[] {
-        let invalid = this.child.generateInvalid(tree, rng)
+    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
+        let invalid = this.child.negativeTestCases(tree, rng)
         this.context["invalid"] = invalid
         return invalid
     }

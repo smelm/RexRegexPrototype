@@ -1,4 +1,5 @@
 import { RandomSeed } from "random-seed"
+import { EngineType } from "../engines"
 import { Expression, ExpressionType } from "./Expression"
 
 export class NotBut extends Expression {
@@ -6,18 +7,21 @@ export class NotBut extends Expression {
         super(ExpressionType.CUSTOM)
     }
 
-    generateValid(ast: Expression, rng: RandomSeed): string[] {
-        const exceptPattern = new RegExp(this.exception.toRegex())
-        return this.child.generateValid(ast, rng).filter(sample => !exceptPattern.test(sample))
+    positiveTestCases(ast: Expression, rng: RandomSeed): string[] {
+        const exceptPattern = new RegExp(this.exception.toRegex(EngineType.NODE_JS))
+        return this.child.positiveTestCases(ast, rng).filter(sample => !exceptPattern.test(sample))
     }
 
-    generateInvalid(ast: Expression, rng: RandomSeed): string[] {
-        return [...this.child.generateInvalid(ast, rng), ...this.exception.generateValid(ast, rng)]
+    negativeTestCases(ast: Expression, rng: RandomSeed): string[] {
+        return [
+            ...this.child.negativeTestCases(ast, rng),
+            ...this.exception.positiveTestCases(ast, rng),
+        ]
     }
 
-    toRegex(): string {
-        // use negative look-ahead
-        return `(?:(?!${this.exception.toRegex()})${this.child.toRegex()})`
+    toRegex(engine: EngineType): string {
+        // TODO use negative look-ahead instead of look-behind?
+        return `(?:(?!${this.exception.toRegex(engine)})${this.child.toRegex(engine)})`
     }
 
     toString(): string {

@@ -19,7 +19,7 @@ import {
 import { newRandomGenerator } from "../src/RandomGenerator"
 import { NodeJSEngine, PythonEngine, RegexEngine } from "../src/engines"
 
-const ENGINES: [string, RegexEngine][] = [/*new NodeJSEngine(), */ new PythonEngine()].map(e => [
+const ENGINES: [string, RegexEngine][] = [new NodeJSEngine(), new PythonEngine()].map(e => [
     e.name,
     e,
 ])
@@ -75,8 +75,8 @@ function makeTestCases(): TestCase[] {
         ast = RexRegex.fromCode(ast as Expression)
         for (let matches of [true, false]) {
             let strs = matches
-                ? ast.generateValid(ast, generator)
-                : ast.generateInvalid(ast, generator)
+                ? ast.positiveTestCases(ast, generator)
+                : ast.negativeTestCases(ast, generator)
 
             for (let str of strs) {
                 cases.push({
