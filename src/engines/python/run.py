@@ -9,6 +9,9 @@ assert len(inp) == 1
 inp = json.loads(inp[0].strip())
 match = re.search(inp["regex"], inp["input"])
 
-output = json.dumps({ "matches": bool(match) })
+if not match:
+    output = json.dumps({ "matches": False})
+else:
+    output = json.dumps({ "matches": bool(match), "groups": match.groupdict()})
 
 print(output)

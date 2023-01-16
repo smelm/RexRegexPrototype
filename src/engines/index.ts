@@ -39,7 +39,13 @@ export class PythonEngine implements RegexEngine {
             throw new Error("python process failed")
         }
 
-        return JSON.parse(stdout)
+        const result = JSON.parse(stdout)
+
+        if (!result.groups || Object.keys(result.groups).length === 0) {
+            return { ...result, groups: undefined }
+        } else {
+            return { ...result }
+        }
     }
 }
 
