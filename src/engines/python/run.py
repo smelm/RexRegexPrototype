@@ -1,16 +1,17 @@
 
 import re
 import sys
+import json
 
 inp = list(sys.stdin)
-
 assert len(inp) == 1
 
-regex, input = inp[0].split("SEP")
+inp = json.loads(inp[0].strip())
+match = re.search(inp["regex"], inp["input"])
 
-match = re.search(regex, input)
+output = json.dumps({ "matches": bool(match) })
 
-if match:
-    print(1)
-else:
-    print(0)
+print(output)
+with open("output.txt", "w") as f:
+    f.write(output)
+

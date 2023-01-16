@@ -26,14 +26,32 @@ export class NodeJSEngine implements RegexEngine {
     }
 }
 
-function runProcess(command: string, args: string[], regex: string, input: string): boolean {
+export class PythonEngine implements RegexEngine {
+    name: EngineType = EngineType.PYTHON
+
+    match(regex: string, input: string): MatchResult {
+        const { status, stdout } = runProcess(
+            "python",
+            [`${__dirname}/python/run.py`],
+            JSON.stringify({ regex, input })
+        )
+        if (status !== 0) {
+            throw new Error("python process failed")
+        }
+
+        return JSON.parse(stdout)
+    }
+}
+
+interface ProcessResult {
+    stdout: string
+    status: number
+}
+
+function runProcess(command: string, args: string[], stdin: string): ProcessResult {
     const { status, stdout } = spawnSync(command, args, {
-        input: `${regex}SEP${input}`,
+        input: stdin,
     })
 
-    if (status !== 0) {
-        throw new Error("process crashed")
-    }
-
-    return parseInt(stdout.toString().trim()) === 1
+    return { status: status || 0, stdout: stdout.toString() }
 }

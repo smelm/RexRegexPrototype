@@ -17,9 +17,12 @@ import {
     anyExcept,
 } from "../src"
 import { newRandomGenerator } from "../src/RandomGenerator"
-import { NodeJSEngine, RegexEngine } from "../src/engines"
+import { NodeJSEngine, PythonEngine, RegexEngine } from "../src/engines"
 
-const ENGINES: [string, RegexEngine][] = [new NodeJSEngine()].map(e => [e.name, e])
+const ENGINES: [string, RegexEngine][] = [/*new NodeJSEngine(), */ new PythonEngine()].map(e => [
+    e.name,
+    e,
+])
 
 interface TestCase {
     ast: Expression
