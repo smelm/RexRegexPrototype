@@ -1,17 +1,22 @@
 import { spawnSync } from "child_process"
 
+export enum EngineType {
+    NODE_JS = "nodejs",
+    PYTHON = "python",
+}
+
 export interface MatchResult {
     matches: boolean
     groups?: Record<string, string>
 }
 
 export interface RegexEngine {
-    name: string
+    name: EngineType
     match: (regex: string, input: string) => MatchResult
 }
 
 export class NodeJSEngine implements RegexEngine {
-    name: string = "nodejs"
+    name: EngineType = EngineType.NODE_JS
 
     match(regex: string, input: string): MatchResult {
         const expr = new RegExp(regex)
