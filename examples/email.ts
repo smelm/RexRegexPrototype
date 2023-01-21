@@ -1,5 +1,6 @@
 import { RexRegex } from "../src"
 import { readFileSync } from "fs"
+import { NodeJSEngine } from "../src/engines"
 
 const valid = [
     "email@example.com",
@@ -65,4 +66,6 @@ runTests(
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 )
 
-runTests(new RegExp(pattern.toRegex()))
+runTests(new RegExp(pattern.toRegex(new NodeJSEngine())))
+
+console.log(JSON.stringify({ regex: pattern.toRegex(new NodeJSEngine()), ...pattern.testCases()}))

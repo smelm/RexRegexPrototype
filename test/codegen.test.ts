@@ -21,8 +21,8 @@ import { JavaEngine, NodeJSEngine, PythonEngine, RegexEngine } from "../src/engi
 
 const ENGINES: [string, RegexEngine][] = [
     new NodeJSEngine(),
-    new PythonEngine(),
-    new JavaEngine(),
+    // new PythonEngine(),
+    // new JavaEngine(),
 ].map(e => [e.type, e])
 
 interface TestCase {

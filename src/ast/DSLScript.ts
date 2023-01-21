@@ -1,5 +1,5 @@
 import { RegexEngine } from "../engines"
-import { RandomGenerator } from "../RandomGenerator"
+import { newRandomGenerator, RandomGenerator } from "../RandomGenerator"
 import { Expression, ExpressionType } from "./Expression"
 import { WrappingExpression } from "./WrappingExpression"
 
@@ -27,12 +27,19 @@ export class DSLScript extends WrappingExpression {
         return this.child.toString()
     }
 
-    positiveTestCases(tree: Expression, rng: RandomGenerator): string[] {
-        return this.child.positiveTestCases(tree, rng)
+    testCases(): { positive: string[], negative: string[] } {
+        return { 
+            positive: this.positiveTestCases(this, newRandomGenerator()),
+            negative: this.negativeTestCases(this, newRandomGenerator())
+        }
+     }
+
+    positiveTestCases(_tree: Expression, rng: RandomGenerator): string[] {
+        return this.child.positiveTestCases(this, rng)
     }
 
-    negativeTestCases(tree: Expression, rng: RandomGenerator): string[] {
-        return this.child.negativeTestCases(tree, rng)
+    negativeTestCases(_tree: Expression, rng: RandomGenerator): string[] {
+        return this.child.negativeTestCases(this, rng)
     }
 
     toRegex(engine: RegexEngine): string {

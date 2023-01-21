@@ -33,7 +33,10 @@ export class Repeat extends WrappingExpression {
         return sequence(
             ...new Array(times)
                 .fill(undefined)
-                .map(() => CharacterClass.fromMemberList(this.child.positiveTestCases(tree, rng)))
+                .map(() => {
+                    let cases = this.child.positiveTestCases(tree, rng).flatMap(s => s.split(""))
+                    return CharacterClass.fromMemberList(cases)
+                })
         )
     }
 

@@ -17,7 +17,5 @@ export function newRandomGenerator(seed: string = ""): RandomGenerator {
         seed = generateRandomSeed()
     }
 
-    console.log("random seed", seed)
-
     return gen.create(seed)
 }

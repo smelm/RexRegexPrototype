@@ -72,7 +72,7 @@ export class RangeList {
 
     invert(): RangeList {
         //TODO: use actual unicode maximum
-        const maxValidCharacter = 2000
+        const maxValidCharacter = 200
         const minValidCharacter = 0
 
         const invertedRanges: CharRange[] = []
@@ -86,7 +86,9 @@ export class RangeList {
         }
         const [lastRange] = this.ranges.slice(-1)
         const maxOfCharClass = lastRange.upper
-        invertedRanges.push(new CharRange(maxOfCharClass + 1, maxValidCharacter))
+        if (maxOfCharClass < maxValidCharacter) {
+            invertedRanges.push(new CharRange(maxOfCharClass + 1, maxValidCharacter))            
+        }
 
         return new RangeList(invertedRanges)
     }

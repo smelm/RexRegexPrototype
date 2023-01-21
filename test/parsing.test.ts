@@ -20,6 +20,7 @@ import { CharacterClass } from "../src/ast/CharacterClass"
 import { PositionInInput } from "../src/ast/DSLScript"
 import { makeDSL } from "../src/parser"
 import { RexRegex } from "../src"
+import { NodeJSEngine } from "../src/engines"
 
 const parser = makeDSL()
 
@@ -188,13 +189,13 @@ describe("macros", () => {
 })
 
 describe("standard library", () => {
-    test.todo("number between")
-    test.todo("surround with")
+    // test.todo("number between")
+    // test.todo("surround with")
 
     test("separated by", () => {
         let pattern = RexRegex.fromString(
             'begin separatedBy(".")\nany of "a", "b", "c"\nend'
-        ).toRegex()
+        ).toRegex(new NodeJSEngine())
 
         expect(new RegExp(pattern).test("a.b.c")).toEqual(true)
         expect(new RegExp(pattern).test("a.b.")).toEqual(false)
