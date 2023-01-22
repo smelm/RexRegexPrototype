@@ -1,6 +1,15 @@
 import { RexRegex } from "../src"
 import { readFileSync } from "fs"
 import { NodeJSEngine } from "../src/engines"
+import shuffle from "shuffle-array"
+
+function banner(title: string) {
+    console.log()
+    console.log("########################################")
+    console.log(title)
+    console.log("########################################")
+    console.log()
+}
 
 const valid = [
     "email@example.com",
@@ -45,27 +54,57 @@ const invalid = [
     'this is"really"notallowed@example.com',
 ]
 
-function runTests(pattern: RegExp) {
-    for (const sample of valid) {
-        if (!pattern.test(sample)) {
-            console.log(sample, "should match")
-        }
-    }
+const dslString: string = readFileSync(`${__dirname}/email.rexregex`).toString()
+const dslScript = RexRegex.fromString(dslString)
+const dslRegex = new RegExp(dslScript.toRegex(new NodeJSEngine()))
+const originalPattern =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-    for (const sample of invalid) {
-        if (pattern.test(sample)) {
-            console.log(sample, "should not match")
-        }
-    }
+banner("DSL")
+
+console.log(dslString)
+
+banner("Regex")
+
+console.log("original regex")
+console.log(originalPattern.toString().slice(1, originalPattern.toString().length - 1))
+
+console.log()
+
+console.log("compiled regex")
+console.log(dslRegex.toString().slice(1, dslRegex.toString().length - 1))
+
+const fail = "\x1b[31m✗\x1b[0m"
+const success = "\x1b[32m✓\x1b[0m"
+
+banner("Valid email addresses")
+
+for (const sample of valid) {
+    console.log(sample, dslRegex.test(sample) === originalPattern.test(sample) ? success : fail)
 }
 
-const dslScript: string = readFileSync(`${__dirname}/email.rexregex`).toString()
-const pattern = RexRegex.fromString(dslScript)
+banner("Invalid email addresses")
 
-runTests(
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+for (const sample of valid) {
+    console.log(sample, dslRegex.test(sample) === originalPattern.test(sample) ? success : fail)
+}
+
+const { positive, negative } = dslScript.testCases()
+
+shuffle(positive)
+shuffle(negative)
+
+banner("Test Samples")
+
+console.log(
+    positive
+        .slice(0, 10)
+        .map(s => `${success} ${s}`)
+        .join("\n")
 )
-
-runTests(new RegExp(pattern.toRegex(new NodeJSEngine())))
-
-console.log(JSON.stringify({ regex: pattern.toRegex(new NodeJSEngine()), ...pattern.testCases()}))
+console.log(
+    negative
+        .slice(0, 10)
+        .map(s => `${fail} ${s}`)
+        .join("\n")
+)
