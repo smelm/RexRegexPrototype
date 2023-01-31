@@ -22,13 +22,4 @@ function timestamp() {
 const dslScript: string = readFileSync(`${__dirname}/logline.rexregex`).toString()
 const pattern = RexRegex.fromString(dslScript, { timestamp })
 
-console.log(
-    JSON.stringify(
-        {
-            positive: pattern.generateValid(pattern, newRandomGenerator()),
-            negative: pattern.generateInvalid(pattern, newRandomGenerator()),
-        },
-        undefined,
-        4
-    )
-)
+console.log(JSON.stringify(pattern.testCases(), undefined, 4))

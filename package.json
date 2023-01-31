@@ -4,9 +4,10 @@
   "description": "DSL for expressive regex",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "copyfiles **/*.java dist && copyfiles **/*.py dist && copyfiles **/*.rexregex dist",
     "test": "npm run build && jest",
-    "todo": "ag todo"
+    "demo": "npm run build && node dist/examples/email.js"
   },
   "repository": {
     "type": "git",
@@ -19,11 +20,10 @@
   },
   "homepage": "https://github.com/smelm/ExRegEx#readme",
   "dependencies": {
-    "jest": "^28.1.0",
+    "copyfiles": "^2.4.1",
     "parsimmon": "^1.18.1",
     "random-seed": "^0.3.0",
-    "shuffle-array": "^1.0.1",
-    "typescript": "^4.6.4"
+    "shuffle-array": "^1.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.17.12",
@@ -32,6 +32,8 @@
     "@types/parsimmon": "^1.10.6",
     "@types/random-seed": "^0.3.3",
     "@types/shuffle-array": "^1.0.2",
-    "ts-jest": "^28.0.2"
+    "jest": "^28.1.0",
+    "ts-jest": "^28.0.2",
+    "typescript": "^4.9.5"
   }
 }
