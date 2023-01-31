@@ -5,9 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "copyfiles **/*.java dist && copyfiles **/*.py dist && copyfiles **/*.rexregex dist",
+    "copy-assets": "copyfiles src/**/*.java dist && copyfiles src/**/*.py dist && copyfiles **/*.rexregex dist && copyfiles src/generated.json dist/",
     "test": "npm run build && jest",
-    "demo": "npm run build && node dist/examples/email.js"
+    "demo": "npm run build && node dist/examples/email.js",
+    "from-infer": "npm run build && node dist/examples/inference.js"
   },
   "repository": {
     "type": "git",
